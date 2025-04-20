@@ -1,6 +1,8 @@
 #pragma once
 #include"Singleton.h"
-#define SCREEN_WIDTH 480
-#define SCREEN_HEIDHT 800
+extern int SCREEN_WIDTH;
+extern int SCREEN_HEIDHT;
 #define LIMIT_FPS 60
+
+void InitDisplaySize();
 

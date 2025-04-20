@@ -23,8 +23,9 @@ bool Renderer::Init()
 	{
 		printf("Warning: Linear texture filtering not enabled!");
 	}
+
 	//Create window
-	gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIDHT, SDL_WINDOW_SHOWN);
+	gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOW_FULLSCREEN, SDL_WINDOW_FULLSCREEN, SCREEN_WIDTH, SCREEN_HEIDHT, SDL_WINDOW_FULLSCREEN_DESKTOP);
 	if (gWindow == NULL)
 	{
 		printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
@@ -41,6 +42,7 @@ bool Renderer::Init()
 		}
 		else
 		{
+			InitDisplaySize();
 			//Initialize renderer color
 			SDL_SetRenderDrawColor(Renderer::GetInstance()->GetRenderer(), 0xFF, 0xFF, 0xFF, 0xFF);
 		}
