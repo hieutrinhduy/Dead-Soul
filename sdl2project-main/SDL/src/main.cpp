@@ -1,5 +1,7 @@
 #include"Game.h"
 #include <stdio.h>
+#include "TileMap.h"
+
 int main(int argc, char* args[])
 {
 	//Start up SDL and create window
