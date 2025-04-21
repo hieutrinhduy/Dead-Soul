@@ -61,8 +61,12 @@ void GSPlay::Init()
 
 	m_KeyPress = 0;
 
-	/*m_tileMap->LoadMap("D:/SLD2Project/LEAP2025/sdl2project-main/SDL/x64/Debug/Map/map4.txt");*/
-	m_tileMap->LoadMap("Data/Map/map4.txt");
+	m_tileMap->LoadMap("Data/Map/map1.txt");
+	//if (!m_tileMapLoaded)
+	//{
+	//	m_tileMap->LoadTiles(Renderer::GetInstance()->GetRenderer(), "Data/Map/tiles", 32);
+	//	m_tileMapLoaded = true;
+	//}
 }
 
 void GSPlay::Exit()
@@ -87,10 +91,10 @@ void GSPlay::HandleKeyEvents(SDL_Event& e)
 	{
 		switch (e.key.keysym.sym)
 		{
-		case SDLK_LEFT:  m_KeyPress |= 1; break;
-		case SDLK_DOWN:  m_KeyPress |= 1 << 1; break;
-		case SDLK_RIGHT: m_KeyPress |= 1 << 2; break;
-		case SDLK_UP:    m_KeyPress |= 1 << 3; break;
+		case SDLK_a: m_KeyPress |= 1; break;         
+		case SDLK_s: m_KeyPress |= 1 << 1; break;    
+		case SDLK_d: m_KeyPress |= 1 << 2; break;    
+		case SDLK_w: m_KeyPress |= 1 << 3; break;    
 		default: break;
 		}
 	}
@@ -98,10 +102,10 @@ void GSPlay::HandleKeyEvents(SDL_Event& e)
 	{
 		switch (e.key.keysym.sym)
 		{
-		case SDLK_LEFT:  m_KeyPress ^= 1; break;
-		case SDLK_DOWN:  m_KeyPress ^= 1 << 1; break;
-		case SDLK_RIGHT: m_KeyPress ^= 1 << 2; break;
-		case SDLK_UP:    m_KeyPress ^= 1 << 3; break;
+		case SDLK_a: m_KeyPress &= ~1; break;
+		case SDLK_s: m_KeyPress &= ~(1 << 1); break;
+		case SDLK_d: m_KeyPress &= ~(1 << 2); break;
+		case SDLK_w: m_KeyPress &= ~(1 << 3); break;
 		default: break;
 		}
 	}
@@ -124,11 +128,16 @@ void GSPlay::HandleMouseMoveEvents(int x, int y)
 
 void GSPlay::Update(float deltaTime)
 {
-	switch (m_KeyPress)
-	{
-	default:
-		break;
-	}
+	const float speed = 200.0f; // pixel per second
+
+	Vector2 pos = obj->Get2DPosition();
+
+	if (m_KeyPress & 1)         pos.x -= speed * deltaTime; // A
+	if (m_KeyPress & (1 << 1))  pos.y += speed * deltaTime; // S
+	if (m_KeyPress & (1 << 2))  pos.x += speed * deltaTime; // D
+	if (m_KeyPress & (1 << 3))  pos.y -= speed * deltaTime; // W
+
+	obj->Set2DPosition(pos.x, pos.y);
 
 	for (auto& it : m_listButton)
 		it->Update(deltaTime);
@@ -136,6 +145,7 @@ void GSPlay::Update(float deltaTime)
 	for (auto& it : m_listAnimation)
 		it->Update(deltaTime);
 }
+
 
 void GSPlay::Draw(SDL_Renderer* renderer)
 {
@@ -145,17 +155,10 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 		bg->Draw(renderer);
 	}
 
-
 	// Vẽ tilemap
 	if (m_tileMap)
 	{
 		m_tileMap->DrawMap(renderer);
-	}
-	if (!m_tileMapLoaded)
-	{
-		/*m_tileMap->LoadTiles(renderer, "D://SLD2Project//LEAP2025//sdl2project-main//SDL//x64//Debug//Map//tiles", 32);*/
-		m_tileMap->LoadTiles(renderer, "Data/Map/tiles", 32);
-		m_tileMapLoaded = true;
 	}
 
 	// Vẽ nút
@@ -169,5 +172,4 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 	{
 		it->Draw(renderer);
 	}
-
 }
