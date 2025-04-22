@@ -5,7 +5,6 @@
 #include <SDL_image.h>
 #include <iostream>
 
-
 TileMap::TileMap()
 {
     m_tileSize = 32;
@@ -32,7 +31,6 @@ void TileMap::LoadMap(const std::string& filePath)
 
     std::string line;
     while (std::getline(file, line)) {
-        std::cout << "Dòng đọc được: " << line << "\n";
 
         std::stringstream ss(line);
         int tile;
@@ -43,17 +41,12 @@ void TileMap::LoadMap(const std::string& filePath)
         }
 
         if (!row.empty()) {
-            std::cout << "➡️ Thêm dòng vào map: ";
             for (int t : row) std::cout << t << " ";
-            std::cout << "\n";
-
             m_mapData.push_back(row);
         }
     }
 
-    std::cout << "Tổng dòng map: " << m_mapData.size() << "\n";
 }
-
 
 void TileMap::LoadTiles(SDL_Renderer* renderer, const std::string& tilesFolder, int tileSize)
 {
@@ -76,30 +69,36 @@ void TileMap::LoadTiles(SDL_Renderer* renderer, const std::string& tilesFolder, 
         if (texture)
         {
             m_tileTextures[i] = texture;
-            printf("LoadTile Success\n");
         }
     }
 }
 
-void TileMap::DrawMap(SDL_Renderer* renderer)
+void TileMap::DrawMap(SDL_Renderer* renderer, float cameraX, float cameraY, int screenWidth, int screenHeight)
 {
-    for (int row = 0; row < m_mapData.size(); ++row)
+    int startCol = cameraX / m_tileSize;
+    int startRow = cameraY / m_tileSize;
+    int endCol = (cameraX + screenWidth) / m_tileSize + 1;
+    int endRow = (cameraY + screenHeight) / m_tileSize + 1;
+
+    for (int row = startRow; row < endRow && row < m_mapData.size(); ++row)
     {
-        for (int col = 0; col < m_mapData[row].size(); ++col)
+        for (int col = startCol; col < endCol && col < m_mapData[row].size(); ++col)
         {
             int tileID = m_mapData[row][col];
-
             if (m_tileTextures.count(tileID) == 0) continue;
 
             SDL_Rect dstRect = {
-                col * m_tileSize,
-                row * m_tileSize,
+                col * m_tileSize - cameraX,
+                row * m_tileSize - cameraY,
                 m_tileSize,
                 m_tileSize
             };
 
             SDL_RenderCopy(renderer, m_tileTextures[tileID], nullptr, &dstRect);
-            std::cout << "Rendering tileID: " << tileID << " at (" << col * m_tileSize << ", " << row * m_tileSize << ")\n";
         }
     }
 }
+
+int TileMap::GetWidth() { return m_mapData.empty() ? 0 : m_mapData[0].size(); }
+int TileMap::GetHeight() { return m_mapData.size(); }
+int TileMap::GetTileSize() { return m_tileSize; }

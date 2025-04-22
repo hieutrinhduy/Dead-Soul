@@ -24,7 +24,7 @@ public:
 	void	HandleTouchEvents(SDL_Event& e) override;
 	void	HandleMouseMoveEvents(int x, int y) override;
 	void	Update(float deltaTime) override;
-	void	Draw(SDL_Renderer* renderer) override;
+	void	Draw(SDL_Renderer* renderer);
 	int m_KeyPress;
 
 private:
@@ -33,6 +33,7 @@ private:
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;
 	std::list<std::shared_ptr<SpriteAnimation>>	m_listAnimation;
 	std::shared_ptr<SpriteAnimation> obj;
+	std::shared_ptr<SpriteAnimation> enemy;
 	std::shared_ptr<MouseButton> button;
 	std::shared_ptr<TileMap> m_tileMap;
 	bool m_tileMapLoaded = false;

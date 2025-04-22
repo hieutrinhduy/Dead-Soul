@@ -10,7 +10,7 @@ Vector2 Camera::GetPosition()
 	return m_Position;
 }
 
-void Camera::SetTarget(std::shared_ptr<BaseObject> target) // Settarget for player (-> Set origin position)
+void Camera::SetTarget(std::shared_ptr<BaseObject> target) 
 {
 	m_target = target;
 }
