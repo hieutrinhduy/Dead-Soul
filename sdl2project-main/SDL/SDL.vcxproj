@@ -171,6 +171,7 @@
     <ClCompile Include="src\GameManager\ResourceManagers.cpp" />
     <ClCompile Include="src\GameObject\Camera.cpp" />
     <ClCompile Include="src\GameObject\CMath.cpp" />
+    <ClCompile Include="src\GameObject\EnemyController.cpp" />
     <ClCompile Include="src\GameObject\MouseButton.cpp" />
     <ClCompile Include="src\GameObject\PlayerController.cpp" />
     <ClCompile Include="src\GameObject\Renderer.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="src\GameObject\Camera.h" />
     <ClInclude Include="src\GameObject\CMath.h" />
     <ClInclude Include="src\GameObject\Define.h" />
+    <ClInclude Include="src\GameObject\EnemyController.h" />
     <ClInclude Include="src\GameObject\KeyState.h" />
     <ClInclude Include="src\GameObject\MouseButton.h" />
     <ClInclude Include="src\GameObject\Renderer.h" />

@@ -2,6 +2,7 @@
 #include "SpriteAnimation.h"
 #include <memory>
 #include <SDL.h>
+#include <functional> 
 
 class PlayerController
 {
@@ -18,6 +19,12 @@ public:
     void SetGroundCollider(SDL_Rect* ground);
     void SetEnemyCollider(SDL_Rect* enemy);
 
+    void TakeDamage(int damage);
+    void Die();
+
+    const SDL_Rect& GetCollider() const { return m_playerCollider; }
+    bool IsDead() const { return m_isDead; }
+    void SetOnHitEnemyCallback(std::function<void(int damage)> callback) { m_onHitEnemy = callback; }
 private:
     std::shared_ptr<SpriteAnimation> m_player;
     SDL_Rect m_playerCollider;
@@ -52,6 +59,13 @@ private:
     SDL_Rect* m_groundCollider;
     SDL_Rect* m_enemyCollider;
 
+    // HP và trạng thái chiến đấu
+    int m_maxHP = 5;
+    int m_currentHP = 5;
+    bool m_isDead = false;
+    bool m_isHit = false;
+    float m_hitTimer = 0.0f;
+
     // Texture Manager
     std::shared_ptr<TextureManager> idleTexture;
     std::shared_ptr<TextureManager> runTexture;
@@ -61,6 +75,11 @@ private:
     std::shared_ptr<TextureManager> rollTexture;
     std::shared_ptr<TextureManager> attackTexture;
     std::shared_ptr<TextureManager> attack2Texture;
+    std::shared_ptr<TextureManager> hurtTexture;
+    std::shared_ptr<TextureManager> deadTexture; 
+    std::function<void(int damage)> m_onHitEnemy;
+
+    bool m_canDealDamage;
 
 private:
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);

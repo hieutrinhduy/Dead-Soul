@@ -9,6 +9,7 @@
 #include "TileMap.h"
 #include "PlayerController.h" // Thêm dòng này
 #include <iostream>
+#include "EnemyController.h"
 
 SDL_Rect groundCollider;
 SDL_Rect enemyCollider;
@@ -69,8 +70,22 @@ void GSPlay::Init()
 
     // Khởi tạo PlayerController
     m_playerController->Init();
+
+    m_enemyController = std::make_shared<EnemyController>();
+    m_enemyController->Init(200, 800); // Enemy patrol từ X=200 tới X=800
+
     m_playerController->SetGroundCollider(&groundCollider);
-}
+    m_enemyController->SetGroundCollider(&groundCollider);
+    m_enemyController->SetPlayerCollider(&m_playerController->GetCollider());
+
+    m_enemyController->SetOnHitPlayerCallback([this](int damage) {
+        m_playerController->TakeDamage(damage);
+    });
+
+    m_playerController->SetOnHitEnemyCallback([&](int damage) {
+        m_enemyController->TakeDamage(damage);
+        });
+} 
 
 void GSPlay::Exit()
 {
@@ -109,6 +124,7 @@ void GSPlay::Update(float deltaTime)
     for (auto& it : m_listButton) it->Update(deltaTime);
 
     m_playerController->Update(deltaTime);
+    m_enemyController->Update(deltaTime);
 
     Camera::GetInstance()->Update(deltaTime);
 }
@@ -145,6 +161,8 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
     // Vẽ player
     m_playerController->Draw(renderer);
+
+    m_enemyController->Draw(renderer);
 
     // Vẽ enemy
     if (enemy)
