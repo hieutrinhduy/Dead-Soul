@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GameStateBase.h"
 #include "TileMap.h"
 
@@ -6,8 +6,8 @@ class Sprite2D;
 class SpriteAnimation;
 class MouseButton;
 class Sound;
-class GSPlay :
-	public GameStateBase
+
+class GSPlay : public GameStateBase
 {
 public:
 	GSPlay();
@@ -25,6 +25,7 @@ public:
 	void	HandleMouseMoveEvents(int x, int y) override;
 	void	Update(float deltaTime) override;
 	void	Draw(SDL_Renderer* renderer);
+
 	int m_KeyPress;
 
 private:
@@ -40,5 +41,11 @@ private:
 
 	float time = 0.0f;
 	float m_Velocity = 10.0f;
-};
 
+	// === Thêm 5 hàm private mới cho quản lý Update ===
+	void UpdateAttackTimer(float deltaTime);
+	void UpdateMovement(float deltaTime);
+	void UpdateGravity(float deltaTime);
+	void UpdateGroundCheck();
+	void UpdateAnimation(float deltaTime);
+};

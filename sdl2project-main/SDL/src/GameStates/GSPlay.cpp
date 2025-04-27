@@ -37,6 +37,10 @@ const float attackDuration = 0.3f;
 float lastAttackTime = -999.0f;
 bool justDidAttack2 = false;
 
+bool isRolling = false;
+float rollTimer = 0.0f;
+const float rollDuration = 0.35f;
+const float rollSpeed = 900.0f;
 
 bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b) {
     return SDL_HasIntersection(&a, &b);
@@ -118,7 +122,7 @@ void GSPlay::HandleKeyEvents(SDL_Event& e) {
         case SDLK_d: m_KeyPress |= 1 << 2; break;
         case SDLK_w: m_KeyPress |= 1 << 3; break;
         case SDLK_SPACE:
-            if (!isAttacking && jumpCount < maxJump) {
+            if (!isAttacking && jumpCount < maxJump && !isRolling) {
                 velocityY = jumpForce;
                 if (jumpCount == 1) {
                     airTime = 0.0f;
@@ -143,6 +147,25 @@ void GSPlay::HandleKeyEvents(SDL_Event& e) {
                 isGrounded = false;
             }
             break;
+        case SDLK_LSHIFT:
+            if (!isAttacking && !isRolling && isGrounded) {
+                auto currentPos = obj->Get2DPosition();
+                obj = std::make_shared<SpriteAnimation>(
+                    ResourceManagers::GetInstance()->GetTexture("_Roll.png"),
+                    1, 12, 1, 0.03f
+                );
+                obj->SetSize(360, 240);
+                obj->Set2DPosition(currentPos.x, currentPos.y);
+                obj->SetFlip(playerFlip);
+
+                m_listAnimation.clear();
+                m_listAnimation.push_back(obj);
+                Camera::GetInstance()->SetTarget(obj);
+
+                isRolling = true;
+                rollTimer = rollDuration;
+            }
+            break;
         }
     }
     else if (e.type == SDL_KEYUP) {
@@ -155,7 +178,7 @@ void GSPlay::HandleKeyEvents(SDL_Event& e) {
     }
     else if (e.type == SDL_MOUSEBUTTONDOWN) {
         if (e.button.button == SDL_BUTTON_LEFT) {
-            if (!isAttacking && isGrounded) {
+            if (!isAttacking && isGrounded && !isRolling) {
                 float now = SDL_GetTicks() / 1000.0f;
                 auto currentPos = obj->Get2DPosition();
 
@@ -230,6 +253,35 @@ void GSPlay::Update(float deltaTime) {
         }
     }
 
+    if (isRolling) {
+        rollTimer -= deltaTime;
+        float moveDir = (playerFlip == SDL_FLIP_NONE) ? 1.0f : -1.0f;
+        float moveAmount = moveDir * rollSpeed * deltaTime;
+
+        Vector2 pos = obj->Get2DPosition();
+        pos.x += moveAmount;
+        obj->Set2DPosition(pos.x, pos.y);
+        playerCollider.x = (int)pos.x;
+
+        if (rollTimer <= 0.0f) {
+            isRolling = false;
+
+            auto currentPos = obj->Get2DPosition();
+            obj = std::make_shared<SpriteAnimation>(
+                ResourceManagers::GetInstance()->GetTexture("_Idle.png"),
+                1, 10, 1, 0.05f
+            );
+            obj->SetSize(360, 240);
+            obj->Set2DPosition(currentPos.x, currentPos.y);
+            obj->SetFlip(playerFlip);
+
+            m_listAnimation.clear();
+            m_listAnimation.push_back(obj);
+            Camera::GetInstance()->SetTarget(obj);
+        }
+    }
+
+
 
     speed = 500.0f;
 
@@ -237,7 +289,7 @@ void GSPlay::Update(float deltaTime) {
     Vector2 newPos = oldPos;
     Vector2 velocity = { 0, 0 };
 
-    if (!isAttacking) { // đang attack thì không di chuyển
+    if (!isAttacking && !isRolling) {  // đang attack thì không di chuyển
         if (m_KeyPress & 1) velocity.x -= 1.0f;
         if (m_KeyPress & (1 << 2)) velocity.x += 1.0f;
     }
@@ -287,7 +339,7 @@ void GSPlay::Update(float deltaTime) {
     }
 
     // === Animation Control ===
-    if (!forceJumpAnimation && !isAttacking) { // Đang attack thì giữ nguyên anim attack
+    if (!forceJumpAnimation && !isAttacking && !isRolling) { // Đang attack thì giữ nguyên anim attack
         auto currentPos = obj->Get2DPosition();
 
         if (!wasGrounded && isGrounded) {
