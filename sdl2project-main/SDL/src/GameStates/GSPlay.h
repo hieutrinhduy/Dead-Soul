@@ -28,7 +28,7 @@ public:
 	int m_KeyPress;
 
 private:
-	std::list<std::shared_ptr<Sprite2D>> m_backgroundList;
+	std::vector<std::shared_ptr<Sprite2D>> m_backgroundList;
 	std::shared_ptr<Sprite2D>	m_background;
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;
 	std::list<std::shared_ptr<SpriteAnimation>>	m_listAnimation;

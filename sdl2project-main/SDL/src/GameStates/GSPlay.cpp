@@ -1,5 +1,4 @@
-﻿// === GSPlay.cpp (Camera follow fix applied) ===
-#include "GSPlay.h"
+﻿#include "GSPlay.h"
 #include "ResourceManagers.h"
 #include "GameObject/MouseButton.h"
 #include "GameObject/Sprite2D.h"
@@ -10,70 +9,56 @@
 #include "TileMap.h"
 #include <iostream>
 
-GSPlay::GSPlay()
-{
+SDL_Rect playerCollider;
+SDL_Rect enemyCollider;
+SDL_Rect groundCollider;
+
+float gravityForce = 150.0f;
+float jumpForce = -500.0f;
+float velocityY = 0.0f;
+float speed = 500.0f;
+static float airTime = 0.0f;
+
+int jumpCount = 0;
+const int maxJump = 2;
+bool isGrounded = false;
+
+bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b) {
+    return SDL_HasIntersection(&a, &b);
+}
+
+bool GroundCheck() {
+    return CheckCollision(playerCollider, groundCollider);
+}
+
+GSPlay::GSPlay() {
     m_tileMap = std::make_shared<TileMap>();
     m_tileMapLoaded = false;
 }
 
 GSPlay::~GSPlay() {}
 
-
-//player collider section
-SDL_Rect playerCollider;
-bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b) {
-    return SDL_HasIntersection(&a, &b);
-}
-bool isGrounded = false;
-
-//Player physics
-float gravityForce = 150;
-float jumpForce = -200.0f;
-float velocityY = 0.0f;
-float speed = 500.0f;
-
-SDL_Rect enemyCollider;
-SDL_Rect groundCollider;
-
-bool GroundCheck() {
-    if (CheckCollision(playerCollider, groundCollider)) {
-        std::cout << "Is Grounded" << std::endl;
-        return true;
-    } 
-    std::cout << "Is not Grounded" << std::endl;
-    return false;
-}
-
-void GSPlay::Init()
-{
+void GSPlay::Init() {
     auto tex1 = ResourceManagers::GetInstance()->GetTexture("background_layer_1.png");
-    auto bg1 = std::make_shared<Sprite2D>(tex1, SDL_FLIP_NONE);
-    bg1->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
-    bg1->Set2DPosition(0, 0);
-    m_backgroundList.push_back(bg1);
-
     auto tex2 = ResourceManagers::GetInstance()->GetTexture("background_layer_2.png");
-    auto bg2 = std::make_shared<Sprite2D>(tex2, SDL_FLIP_NONE);
-    bg2->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
-    bg2->Set2DPosition(0, 0);
-    m_backgroundList.push_back(bg2);
-
     auto tex3 = ResourceManagers::GetInstance()->GetTexture("background_layer_3.png");
-    auto bg3 = std::make_shared<Sprite2D>(tex3, SDL_FLIP_NONE);
-    bg3->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
-    bg3->Set2DPosition(0, 0);
-    m_backgroundList.push_back(bg3);
+
+    m_backgroundList.push_back(std::make_shared<Sprite2D>(tex1, SDL_FLIP_NONE));
+    m_backgroundList.push_back(std::make_shared<Sprite2D>(tex2, SDL_FLIP_NONE));
+    m_backgroundList.push_back(std::make_shared<Sprite2D>(tex3, SDL_FLIP_NONE));
+
+    for (auto& bg : m_backgroundList) {
+        bg->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+        bg->Set2DPosition(0, 0);
+    }
 
     auto texture = ResourceManagers::GetInstance()->GetTexture("btn_close.tga");
     button = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
     button->SetSize(50, 50);
     button->Set2DPosition(SCREEN_WIDTH - 50, 10);
-    button->SetOnClick([this]() {
-        GameStateMachine::GetInstance()->PopState();
-        });
+    button->SetOnClick([this]() { GameStateMachine::GetInstance()->PopState(); });
     m_listButton.push_back(button);
 
-    //Spawn Player
     texture = ResourceManagers::GetInstance()->GetTexture("Actor1_2.tga");
     obj = std::make_shared<SpriteAnimation>(texture, 2, 9, 6, 0.2f);
     obj->SetFlip(SDL_FLIP_HORIZONTAL);
@@ -83,21 +68,17 @@ void GSPlay::Init()
     playerCollider = { (int)obj->GetPosition().x, (int)obj->GetPosition().y, obj->GetWidth(), obj->GetHeight() };
     Camera::GetInstance()->SetTarget(obj);
 
-    //Spawn Enemy
-    texture = ResourceManagers::GetInstance()->GetTexture("Actor1_2.tga");
     enemy = std::make_shared<SpriteAnimation>(texture, 2, 9, 6, 0.2f);
     enemy->SetFlip(SDL_FLIP_HORIZONTAL);
     enemy->SetSize(100, 100);
     enemy->Set2DPosition(400, 400);
     enemyCollider = { (int)enemy->GetPosition().x, (int)enemy->GetPosition().y, enemy->GetWidth(), enemy->GetHeight() };
 
-    //Spawn GroundCollider
-    groundCollider = { 0, 500,10000, 200 };
+    groundCollider = { 0, 1000, 10000, 200 };
 
     m_KeyPress = 0;
     m_tileMap->LoadMap("Data/Map/map6.txt");
-    if (!m_tileMapLoaded)
-    {
+    if (!m_tileMapLoaded) {
         m_tileMap->LoadTiles(Renderer::GetInstance()->GetRenderer(), "Data/Map/tiles", 32);
         m_tileMapLoaded = true;
     }
@@ -111,57 +92,43 @@ void GSPlay::Init()
 void GSPlay::Exit() {}
 void GSPlay::Pause() {}
 void GSPlay::Resume() {}
-
 void GSPlay::HandleEvents() {}
 
-void GSPlay::HandleKeyEvents(SDL_Event& e)
-{
-    if (e.type == SDL_KEYDOWN)
-    {
-        switch (e.key.keysym.sym)
-        {
+void GSPlay::HandleKeyEvents(SDL_Event& e) {
+    if (e.type == SDL_KEYDOWN) {
+        switch (e.key.keysym.sym) {
         case SDLK_a: m_KeyPress |= 1; break;
         case SDLK_s: m_KeyPress |= 1 << 1; break;
         case SDLK_d: m_KeyPress |= 1 << 2; break;
         case SDLK_w: m_KeyPress |= 1 << 3; break;
         case SDLK_SPACE:
-            if (isGrounded) {
+            if (jumpCount < maxJump) {
                 velocityY = jumpForce;
+                if (jumpCount == 1) airTime = 0.0f;
+                jumpCount++;
                 isGrounded = false;
             }
             break;
         }
     }
-    else if (e.type == SDL_KEYUP)
-    {
-        switch (e.key.keysym.sym)
-        {
+    else if (e.type == SDL_KEYUP) {
+        switch (e.key.keysym.sym) {
         case SDLK_a: m_KeyPress &= ~1; break;
         case SDLK_s: m_KeyPress &= ~(1 << 1); break;
         case SDLK_d: m_KeyPress &= ~(1 << 2); break;
         case SDLK_w: m_KeyPress &= ~(1 << 3); break;
         }
     }
-
 }
 
-void GSPlay::HandleTouchEvents(SDL_Event& e)
-{
+void GSPlay::HandleTouchEvents(SDL_Event& e) {
     for (auto& button : m_listButton)
-    {
         if (button->HandleTouchEvent(&e)) break;
-    }
 }
 
 void GSPlay::HandleMouseMoveEvents(int x, int y) {}
 
-void PlayerMovement() {
-
-}
-
-void GSPlay::Update(float deltaTime)
-{
-    //PlayerMovement
+void GSPlay::Update(float deltaTime) {
     speed = 500.0f;
 
     Vector2 oldPos = obj->Get2DPosition();
@@ -176,68 +143,90 @@ void GSPlay::Update(float deltaTime)
         obj->SetFlip(SDL_FLIP_HORIZONTAL);
     }
 
-    //Check Collision
     SDL_Rect newCollider = { (int)newPos.x, (int)newPos.y, obj->GetWidth(), obj->GetHeight() };
-
     if (!CheckCollision(newCollider, enemyCollider)) {
         obj->Set2DPosition(newPos.x, newPos.y);
         playerCollider = newCollider;
     }
 
-    //PlayerPhysic
-    velocityY += gravityForce * deltaTime; // Trọng lực
+    if (!isGrounded) airTime += deltaTime;
+    else airTime = 0.0f;
+
+    velocityY += gravityForce * (1.0f + airTime * 15.0f) * deltaTime;
+    if (velocityY > 800) velocityY = 800;
 
     float posX = obj->Get2DPosition().x;
     float posY = obj->Get2DPosition().y + velocityY * deltaTime;
 
     playerCollider = { (int)posX, (int)posY, obj->GetWidth(), obj->GetHeight() };
-
     isGrounded = GroundCheck();
 
     if (isGrounded) {
         velocityY = 0;
-        posY = groundCollider.y - obj->GetHeight() +2;
+        posY = groundCollider.y - obj->GetHeight() + 2;
+        jumpCount = 0;
     }
 
     obj->Set2DPosition(posX, posY);
     playerCollider.y = (int)posY;
 
-
     for (auto& it : m_listButton) it->Update(deltaTime);
     for (auto& it : m_listAnimation) it->Update(deltaTime);
-
     Camera::GetInstance()->Update(deltaTime);
 }
 
-
 void GSPlay::Draw(SDL_Renderer* renderer)
 {
-    for (auto& bg : m_backgroundList) bg->Draw(renderer);
+    Vector2 camPos = Camera::GetInstance()->GetPosition();
+    std::vector<float> parallaxFactors = { 0.2f, 0.5f, 0.8f };
+
+    for (size_t i = 0; i < m_backgroundList.size(); ++i)
+    {
+        auto& bg = m_backgroundList[i];
+        float factor = parallaxFactors[i];
+
+        float bgWidth = SCREEN_WIDTH;
+        float bgHeight = SCREEN_HEIDHT;
+
+        float bgX = fmod(-camPos.x * factor, bgWidth);
+        if (bgX > 0) bgX -= bgWidth;
+
+        float bgY = 0.0f;
+
+        for (int x = 0; x <= SCREEN_WIDTH / bgWidth + 1; ++x)
+        {
+            bg->Set2DPosition(bgX + x * bgWidth, bgY);
+            bg->Draw(renderer);
+        }
+    }
+
 
     if (m_tileMap)
-    {
-        Vector2 camPos = Camera::GetInstance()->GetPosition();
         m_tileMap->DrawMap(Renderer::GetInstance()->GetRenderer(), camPos.x, camPos.y, SCREEN_WIDTH, SCREEN_HEIDHT);
-    }
 
     for (auto& it : m_listButton) it->Draw(renderer);
     for (auto& it : m_listAnimation) it->Draw(renderer);
 
     enemy->Draw(renderer);
 
+    auto ConvertToCameraView = [](SDL_Rect objCollider, Vector2 camPos) -> SDL_Rect {
+        SDL_Rect out = objCollider;
+        out.x -= camPos.x;
+        out.y -= camPos.y;
+        return out;
+        };
+
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_RenderDrawRect(renderer, &ConvertToCameraView(playerCollider, camPos));
+
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_Rect renderPlayerCollider = playerCollider;
-    Vector2 camPos = Camera::GetInstance()->GetPosition();
-    renderPlayerCollider.x -= camPos.x;
-    renderPlayerCollider.y -= camPos.y;
-    SDL_RenderDrawRect(renderer, &renderPlayerCollider);
+    SDL_RenderDrawRect(renderer, &ConvertToCameraView(enemyCollider, camPos));
 
-    SDL_Rect renderEnemyCollider = enemyCollider;
-    renderEnemyCollider.x -= camPos.x;
-    renderEnemyCollider.y -= camPos.y;
-    SDL_RenderDrawRect(renderer, &renderEnemyCollider);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    SDL_RenderDrawRect(renderer, &ConvertToCameraView(groundCollider, camPos));
 
-    SDL_Rect renderGroundCollider = groundCollider;
-    SDL_RenderDrawRect(renderer, &renderGroundCollider);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 }
+
+
 
