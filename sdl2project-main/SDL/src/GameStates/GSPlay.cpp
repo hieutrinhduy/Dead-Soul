@@ -25,11 +25,18 @@ bool isGrounded = false;
 
 bool forceJumpAnimation = false;
 float forceJumpTimer = 0.0f;
-const float forceJumpDuration = 0.15f; // 150ms giữ nguyên anim jump double
+const float forceJumpDuration = 0.15f;
 
 SDL_RendererFlip playerFlip = SDL_FLIP_NONE;
 
 float lastMoveX = 0.0;
+
+bool isAttacking = false;
+float attackTimer = 0.0f;
+const float attackDuration = 0.3f;
+float lastAttackTime = -999.0f;
+bool justDidAttack2 = false;
+
 
 bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b) {
     return SDL_HasIntersection(&a, &b);
@@ -111,7 +118,7 @@ void GSPlay::HandleKeyEvents(SDL_Event& e) {
         case SDLK_d: m_KeyPress |= 1 << 2; break;
         case SDLK_w: m_KeyPress |= 1 << 3; break;
         case SDLK_SPACE:
-            if (jumpCount < maxJump) {
+            if (!isAttacking && jumpCount < maxJump) {
                 velocityY = jumpForce;
                 if (jumpCount == 1) {
                     airTime = 0.0f;
@@ -146,6 +153,42 @@ void GSPlay::HandleKeyEvents(SDL_Event& e) {
         case SDLK_w: m_KeyPress &= ~(1 << 3); break;
         }
     }
+    else if (e.type == SDL_MOUSEBUTTONDOWN) {
+        if (e.button.button == SDL_BUTTON_LEFT) {
+            if (!isAttacking && isGrounded) {
+                float now = SDL_GetTicks() / 1000.0f;
+                auto currentPos = obj->Get2DPosition();
+
+                if (!justDidAttack2 && (now - lastAttackTime <= 1.0f)) {
+                    obj = std::make_shared<SpriteAnimation>(
+                        ResourceManagers::GetInstance()->GetTexture("_Attack2.png"),
+                        1, 6, 1, 0.08f
+                    );
+                    justDidAttack2 = true; // ghi nhớ đã Attack2
+                }
+                else {
+                    obj = std::make_shared<SpriteAnimation>(
+                        ResourceManagers::GetInstance()->GetTexture("_Attack.png"),
+                        1, 4, 1, 0.08f
+                    );
+                    justDidAttack2 = false; // reset sau Attack1
+                }
+
+                obj->SetSize(360, 240);
+                obj->Set2DPosition(currentPos.x, currentPos.y);
+                obj->SetFlip(playerFlip);
+
+                m_listAnimation.clear();
+                m_listAnimation.push_back(obj);
+                Camera::GetInstance()->SetTarget(obj);
+
+                isAttacking = true;
+                attackTimer = attackDuration;
+                lastAttackTime = now;
+            }
+        }
+    }
+
 }
 
 void GSPlay::HandleTouchEvents(SDL_Event& e) {
@@ -166,18 +209,42 @@ void GSPlay::Update(float deltaTime) {
     static bool wasGrounded = true;
     static bool wasJumpingUp = false;
 
+    if (isAttacking) {
+        attackTimer -= deltaTime;
+        if (attackTimer <= 0.0f) {
+            isAttacking = false;
+
+            // === Force đổi về Idle ngay lập tức sau khi attack xong ===
+            auto currentPos = obj->Get2DPosition();
+            obj = std::make_shared<SpriteAnimation>(
+                ResourceManagers::GetInstance()->GetTexture("_Idle.png"),
+                1, 10, 1, 0.05f
+            );
+            obj->SetSize(360, 240);
+            obj->Set2DPosition(currentPos.x, currentPos.y);
+            obj->SetFlip(playerFlip);
+
+            m_listAnimation.clear();
+            m_listAnimation.push_back(obj);
+            Camera::GetInstance()->SetTarget(obj);
+        }
+    }
+
+
     speed = 500.0f;
 
     Vector2 oldPos = obj->Get2DPosition();
     Vector2 newPos = oldPos;
     Vector2 velocity = { 0, 0 };
 
-    if (m_KeyPress & 1) velocity.x -= 1.0f;
-    if (m_KeyPress & (1 << 2)) velocity.x += 1.0f;
+    if (!isAttacking) { // đang attack thì không di chuyển
+        if (m_KeyPress & 1) velocity.x -= 1.0f;
+        if (m_KeyPress & (1 << 2)) velocity.x += 1.0f;
+    }
 
     newPos.x += velocity.x * speed * deltaTime;
 
-    if (velocity.x != 0) {
+    if (velocity.x != 0 && !isAttacking) { // chỉ flip khi không attack
         playerFlip = (velocity.x > 0) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
     }
 
@@ -220,7 +287,7 @@ void GSPlay::Update(float deltaTime) {
     }
 
     // === Animation Control ===
-    if (!forceJumpAnimation) {
+    if (!forceJumpAnimation && !isAttacking) { // Đang attack thì giữ nguyên anim attack
         auto currentPos = obj->Get2DPosition();
 
         if (!wasGrounded && isGrounded) {
@@ -263,7 +330,6 @@ void GSPlay::Update(float deltaTime) {
         Camera::GetInstance()->SetTarget(obj);
     }
 
-
     wasRunning = isRunning;
     wasGrounded = isGrounded;
     wasJumpingUp = isJumpingUp;
@@ -272,6 +338,7 @@ void GSPlay::Update(float deltaTime) {
     for (auto& it : m_listAnimation) it->Update(deltaTime);
     Camera::GetInstance()->Update(deltaTime);
 }
+
 
 
 void GSPlay::Draw(SDL_Renderer* renderer)
