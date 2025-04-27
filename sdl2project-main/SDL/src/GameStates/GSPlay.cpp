@@ -23,6 +23,14 @@ int jumpCount = 0;
 const int maxJump = 2;
 bool isGrounded = false;
 
+bool forceJumpAnimation = false;
+float forceJumpTimer = 0.0f;
+const float forceJumpDuration = 0.15f; // 150ms giữ nguyên anim jump double
+
+SDL_RendererFlip playerFlip = SDL_FLIP_NONE;
+
+float lastMoveX = 0.0;
+
 bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b) {
     return SDL_HasIntersection(&a, &b);
 }
@@ -59,17 +67,18 @@ void GSPlay::Init() {
     button->SetOnClick([this]() { GameStateMachine::GetInstance()->PopState(); });
     m_listButton.push_back(button);
 
-    texture = ResourceManagers::GetInstance()->GetTexture("Actor1_2.tga");
-    obj = std::make_shared<SpriteAnimation>(texture, 2, 9, 6, 0.2f);
-    obj->SetFlip(SDL_FLIP_HORIZONTAL);
-    obj->SetSize(80, 100);
+    texture = ResourceManagers::GetInstance()->GetTexture("_Idle.png");
+    //texture = ResourceManagers::GetInstance()->GetTexture("_Run.png");
+    obj = std::make_shared<SpriteAnimation>(texture, 1, 10, 1, 0.05f);
+    obj->SetFlip(SDL_FLIP_NONE);
+    obj->SetSize(360, 240);
     obj->Set2DPosition(240, 0);
     m_listAnimation.push_back(obj);
     playerCollider = { (int)obj->GetPosition().x, (int)obj->GetPosition().y, obj->GetWidth(), obj->GetHeight() };
     Camera::GetInstance()->SetTarget(obj);
 
     enemy = std::make_shared<SpriteAnimation>(texture, 2, 9, 6, 0.2f);
-    enemy->SetFlip(SDL_FLIP_HORIZONTAL);
+    enemy->SetFlip(SDL_FLIP_NONE);
     enemy->SetSize(100, 100);
     enemy->Set2DPosition(400, 400);
     enemyCollider = { (int)enemy->GetPosition().x, (int)enemy->GetPosition().y, enemy->GetWidth(), enemy->GetHeight() };
@@ -104,7 +113,25 @@ void GSPlay::HandleKeyEvents(SDL_Event& e) {
         case SDLK_SPACE:
             if (jumpCount < maxJump) {
                 velocityY = jumpForce;
-                if (jumpCount == 1) airTime = 0.0f;
+                if (jumpCount == 1) {
+                    airTime = 0.0f;
+
+                    auto currentPos = obj->Get2DPosition();
+                    obj = std::make_shared<SpriteAnimation>(
+                        ResourceManagers::GetInstance()->GetTexture("_Jump.png"),
+                        1, 3, 1, 0.05f
+                    );
+                    obj->SetSize(360, 240);
+                    obj->Set2DPosition(currentPos.x, currentPos.y);
+                    obj->SetFlip(playerFlip);
+
+                    m_listAnimation.clear();
+                    m_listAnimation.push_back(obj);
+                    Camera::GetInstance()->SetTarget(obj);
+
+                    forceJumpAnimation = true;
+                    forceJumpTimer = forceJumpDuration;
+                }
                 jumpCount++;
                 isGrounded = false;
             }
@@ -129,18 +156,29 @@ void GSPlay::HandleTouchEvents(SDL_Event& e) {
 void GSPlay::HandleMouseMoveEvents(int x, int y) {}
 
 void GSPlay::Update(float deltaTime) {
+    static auto idleTexture = ResourceManagers::GetInstance()->GetTexture("_Idle.png");
+    static auto runTexture = ResourceManagers::GetInstance()->GetTexture("_Run.png");
+    static auto jumpTexture = ResourceManagers::GetInstance()->GetTexture("_Jump.png");
+    static auto jumpFallTexture = ResourceManagers::GetInstance()->GetTexture("_JumpFallInbetween.png");
+    static auto fallTexture = ResourceManagers::GetInstance()->GetTexture("_Fall.png");
+
+    static bool wasRunning = false;
+    static bool wasGrounded = true;
+    static bool wasJumpingUp = false;
+
     speed = 500.0f;
 
     Vector2 oldPos = obj->Get2DPosition();
     Vector2 newPos = oldPos;
+    Vector2 velocity = { 0, 0 };
 
-    if (m_KeyPress & 1) {
-        newPos.x -= speed * deltaTime;
-        obj->SetFlip(SDL_FLIP_NONE);
-    }
-    if (m_KeyPress & (1 << 2)) {
-        newPos.x += speed * deltaTime;
-        obj->SetFlip(SDL_FLIP_HORIZONTAL);
+    if (m_KeyPress & 1) velocity.x -= 1.0f;
+    if (m_KeyPress & (1 << 2)) velocity.x += 1.0f;
+
+    newPos.x += velocity.x * speed * deltaTime;
+
+    if (velocity.x != 0) {
+        playerFlip = (velocity.x > 0) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
     }
 
     SDL_Rect newCollider = { (int)newPos.x, (int)newPos.y, obj->GetWidth(), obj->GetHeight() };
@@ -170,10 +208,71 @@ void GSPlay::Update(float deltaTime) {
     obj->Set2DPosition(posX, posY);
     playerCollider.y = (int)posY;
 
+    bool isRunning = (velocity.x != 0);
+    bool isJumpingUp = (!isGrounded && velocityY < 0);
+    bool isFallingDown = (!isGrounded && velocityY >= 0);
+
+    if (forceJumpAnimation) {
+        forceJumpTimer -= deltaTime;
+        if (forceJumpTimer <= 0.0f) {
+            forceJumpAnimation = false;
+        }
+    }
+
+    // === Animation Control ===
+    if (!forceJumpAnimation) {
+        auto currentPos = obj->Get2DPosition();
+
+        if (!wasGrounded && isGrounded) {
+            if (isRunning) {
+                obj = std::make_shared<SpriteAnimation>(runTexture, 1, 10, 1, 0.05f);
+            }
+            else {
+                obj = std::make_shared<SpriteAnimation>(idleTexture, 1, 10, 1, 0.05f);
+            }
+        }
+        else if (wasGrounded && !isGrounded) {
+            obj = std::make_shared<SpriteAnimation>(jumpTexture, 1, 3, 1, 0.05f);
+        }
+        else if (!isGrounded) {
+            if (isJumpingUp && !wasJumpingUp) {
+                obj = std::make_shared<SpriteAnimation>(jumpFallTexture, 1, 2, 1, 0.05f);
+            }
+            else if (isFallingDown && wasJumpingUp) {
+                obj = std::make_shared<SpriteAnimation>(fallTexture, 1, 3, 1, 0.05f);
+            }
+        }
+        else if (isGrounded) {
+            if (isRunning != wasRunning) {
+                if (isRunning) {
+                    obj = std::make_shared<SpriteAnimation>(runTexture, 1, 10, 1, 0.05f);
+                }
+                else {
+                    obj = std::make_shared<SpriteAnimation>(idleTexture, 1, 10, 1, 0.05f);
+                }
+            }
+        }
+
+        obj->SetSize(360, 240);
+        obj->Set2DPosition(currentPos.x, currentPos.y);
+        obj->SetFlip(playerFlip);
+
+        m_listAnimation.clear();
+        m_listAnimation.push_back(obj);
+
+        Camera::GetInstance()->SetTarget(obj);
+    }
+
+
+    wasRunning = isRunning;
+    wasGrounded = isGrounded;
+    wasJumpingUp = isJumpingUp;
+
     for (auto& it : m_listButton) it->Update(deltaTime);
     for (auto& it : m_listAnimation) it->Update(deltaTime);
     Camera::GetInstance()->Update(deltaTime);
 }
+
 
 void GSPlay::Draw(SDL_Renderer* renderer)
 {
