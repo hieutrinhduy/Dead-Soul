@@ -172,6 +172,7 @@
     <ClCompile Include="src\GameObject\Camera.cpp" />
     <ClCompile Include="src\GameObject\CMath.cpp" />
     <ClCompile Include="src\GameObject\MouseButton.cpp" />
+    <ClCompile Include="src\GameObject\PlayerController.cpp" />
     <ClCompile Include="src\GameObject\Renderer.cpp" />
     <ClCompile Include="src\GameObject\Sound.cpp" />
     <ClCompile Include="src\GameObject\Sprite2D.cpp" />

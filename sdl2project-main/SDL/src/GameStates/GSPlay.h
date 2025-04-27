@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "GameStateBase.h"
 #include "TileMap.h"
+#include "PlayerController.h" 
 
 class Sprite2D;
 class SpriteAnimation;
@@ -29,6 +30,7 @@ public:
 	int m_KeyPress;
 
 private:
+	std::shared_ptr<PlayerController> m_playerController;
 	std::vector<std::shared_ptr<Sprite2D>> m_backgroundList;
 	std::shared_ptr<Sprite2D>	m_background;
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;
