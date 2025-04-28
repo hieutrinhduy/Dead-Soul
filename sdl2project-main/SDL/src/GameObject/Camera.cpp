@@ -15,6 +15,13 @@ void Camera::SetTarget(std::shared_ptr<BaseObject> target)
 	m_target = target;
 }
 
+void Camera::Shake(float duration, float magnitude)
+{
+	m_shakeTimer = duration;
+	m_shakeMagnitude = magnitude;
+	m_originalPosition = m_Position;
+}
+
 void Camera::Update(float deltaTime)
 {
 	if (m_target != nullptr)
@@ -41,6 +48,24 @@ void Camera::Update(float deltaTime)
 			m_ViewBox.y = (GetLevelHeight() - m_ViewBox.h);
 		}
 		m_Position = Vector2(m_ViewBox.x, m_ViewBox.y);
+	}
+
+	if (m_shakeTimer > 0)
+	{
+		float offsetX = (rand() % 1000 / 1000.0f * 2.0f - 1.0f) * m_shakeMagnitude;
+		float offsetY = (rand() % 1000 / 1000.0f * 2.0f - 1.0f) * m_shakeMagnitude;
+
+		m_Position.x += offsetX;
+		m_Position.y += offsetY;
+
+		m_shakeTimer -= deltaTime;
+
+		if (m_shakeTimer <= 0.0f)
+		{
+			m_Position = m_originalPosition;
+			m_shakeTimer = 0.0f;
+			m_shakeMagnitude = 0.0f;
+		}
 	}
 }
 

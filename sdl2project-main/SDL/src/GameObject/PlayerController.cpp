@@ -42,15 +42,23 @@ void PlayerController::Init()
 
     m_player = std::make_shared<SpriteAnimation>(idleTexture, 1, 10, 1, 0.05f);
     m_player->SetSize(360, 240);
-    m_player->Set2DPosition(500, 0);
-    m_playerCollider = { (int)m_player->GetPosition().x, (int)m_player->GetPosition().y, m_player->GetWidth(), m_player->GetHeight() };
+    m_player->Set2DPosition(500, -500);
+    m_playerCollider = { (int)m_player->GetPosition().x, (int)m_player->GetPosition().y, m_player->GetWidth()/2, m_player->GetHeight()/2 };
+
+    auto  pos = m_player->Get2DPosition();
+    m_playerCollider = {
+        (int)(pos.x + 125),
+        (int)(pos.y + m_player-> GetHeight() / 2),
+        m_player->GetWidth() - 280,
+        m_player->GetHeight()/2 
+    };
 
     Camera::GetInstance()->SetTarget(m_player);
 }
 
 void PlayerController::TakeDamage(int damage)
 {
-    if (m_isDead || m_isHit) return;
+    if (m_isDead || m_isHit || m_isRolling) return;
 
     m_currentHP -= damage;
     if (m_currentHP <= 0)
@@ -69,8 +77,8 @@ void PlayerController::TakeDamage(int damage)
 void PlayerController::Die()
 {
     m_isDead = true;
-    m_deadTimer = 0.3f;   // Bắt đầu đếm 0.3 giây
-    m_finishDead = false; // Chưa kết thúc dead ngay
+    m_deadTimer = 0.3f;
+    m_finishDead = false;
     ChangeAnimation(deadTexture, 10, 0.05f);
 }
 
@@ -81,7 +89,7 @@ void PlayerController::Update(float deltaTime)
         if (!m_finishDead) {
             m_deadTimer -= deltaTime;
             if (m_deadTimer <= 0.0f) {
-                m_finishDead = true; // Sau 0.3s thì đánh dấu đã chết hoàn toàn
+                m_finishDead = true;
             }
         }
         m_player->Update(deltaTime);
@@ -149,11 +157,22 @@ void PlayerController::Update(float deltaTime)
 
     m_player->SetFlip(m_playerFlip);
 
-    SDL_Rect newCollider = { (int)newPos.x, (int)newPos.y, m_player->GetWidth(), m_player->GetHeight() };
-    if (!m_enemyCollider || !CheckCollision(newCollider, *m_enemyCollider)) {
-        m_player->Set2DPosition(newPos.x, oldPos.y);
-        m_playerCollider.x = (int)newPos.x;
+    SDL_Rect newCollider;
+    if (m_playerFlip == SDL_FLIP_NONE) {
+        newCollider = { (int)newPos.x + 125, (int)newPos.y + m_player->GetHeight() / 2, m_player->GetWidth()- 280, m_player->GetHeight()/2};
     }
+    else
+    {
+        newCollider = { (int)newPos.x + 150, (int)newPos.y + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+    }
+
+    //if (!m_enemyCollider || !CheckCollision(newCollider, *m_enemyCollider)) {
+    //    m_player->Set2DPosition(newPos.x, oldPos.y);
+    //    m_playerCollider.x = (int)newPos.x;
+    //}
+
+    m_player->Set2DPosition(newPos.x, oldPos.y);
+    m_playerCollider.x = (int)newPos.x;
 
     if (!m_isGrounded) m_airTime += deltaTime;
     else m_airTime = 0.0f;
@@ -164,7 +183,16 @@ void PlayerController::Update(float deltaTime)
     float posX = m_player->Get2DPosition().x;
     float posY = m_player->Get2DPosition().y + m_velocityY * deltaTime;
 
-    m_playerCollider = { (int)posX, (int)posY, m_player->GetWidth(), m_player->GetHeight() };
+    //m_playerCollider = { (int)posX + 125, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight()/2};
+
+    if (m_playerFlip == SDL_FLIP_NONE) {
+        m_playerCollider = { (int)posX + 125, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+    }
+    else
+    {
+        m_playerCollider = { (int)posX + 150, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+    }
+
     m_isGrounded = GroundCheck();
 
     if (m_isGrounded) {
@@ -174,7 +202,14 @@ void PlayerController::Update(float deltaTime)
     }
 
     m_player->Set2DPosition(posX, posY);
-    m_playerCollider.y = (int)posY;
+
+    if (m_playerFlip == SDL_FLIP_NONE) {
+        m_playerCollider = { (int)posX + 125, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+    }
+    else
+    {
+        m_playerCollider = { (int)posX + 150, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+    }
 
     static bool wasRunning = false;
     static bool wasGrounded = true;
@@ -184,7 +219,6 @@ void PlayerController::Update(float deltaTime)
     bool isJumpingUp = (!m_isGrounded && m_velocityY < 0);
     bool isFallingDown = (!m_isGrounded && m_velocityY >= 0);
 
-    // Giảm forceJumpTimer
     if (m_forceJumpAnimation) {
         m_forceJumpTimer -= deltaTime;
         if (m_forceJumpTimer <= 0.0f) {
@@ -224,16 +258,16 @@ void PlayerController::Update(float deltaTime)
     if (m_isAttacking && m_enemyCollider)
     {
         float elapsedAttackTime = m_attackDuration - m_attackTimer;
-        m_canDealDamage = false; // reset mỗi frame
+        m_canDealDamage = false;
 
-        if (!m_justDidAttack2) // Attack1
+        if (!m_justDidAttack2)
         {
-            if (elapsedAttackTime >= 0.15f && elapsedAttackTime <= 0.25f)
+            if (elapsedAttackTime >= 0.01f && elapsedAttackTime <= 0.02f)
                 m_canDealDamage = true;
         }
-        else // Attack2
+        else
         {
-            if (elapsedAttackTime >= 0.3f && elapsedAttackTime <= 0.4f)
+            if (elapsedAttackTime >= 0.01f && elapsedAttackTime <= 0.02f)
                 m_canDealDamage = true;
         }
     }
@@ -253,36 +287,62 @@ void PlayerController::Draw(SDL_Renderer* renderer)
     if (m_player)
         m_player->Draw(renderer);
 
-    // ✅ Debug Hitbox Attack
-    if (m_isAttacking)  // <-- chỉ cần check đang Attack thôi
+    Vector2 camPos = Camera::GetInstance()->GetPosition();
+
+    SDL_Rect drawCollider = m_playerCollider;
+    drawCollider.x -= (int)camPos.x;
+    drawCollider.y -= (int)camPos.y;
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    SDL_RenderDrawRect(renderer, &drawCollider);
+
+    if (m_canDealDamage)
     {
         SDL_Rect attackBox;
         if (m_playerFlip == SDL_FLIP_NONE)
             attackBox.x = m_playerCollider.x + m_playerCollider.w * 0.6f;
         else
-            attackBox.x = m_playerCollider.x - 80;
+            attackBox.x = m_playerCollider.x - 125;
 
-        attackBox.y = m_playerCollider.y + m_playerCollider.h * 0.3f + 70;
-        attackBox.w = 80;
+        attackBox.y = m_playerCollider.y + m_playerCollider.h * 0.3f;
+        if (m_justDidAttack2) {
+            attackBox.w = 150;
+        }
+        else
+        {
+            attackBox.w = 180;
+        }
         attackBox.h = 60;
 
-        // ❗Trừ Camera
         Vector2 camPos = Camera::GetInstance()->GetPosition();
+
         attackBox.x -= (int)camPos.x;
         attackBox.y -= (int)camPos.y;
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderDrawRect(renderer, &attackBox);
 
-        if (m_enemyCollider && CheckCollision(attackBox, *m_enemyCollider))
+        if (m_enemyCollider)
         {
-            if (m_onHitEnemy)
+            SDL_Rect enemyColliderScreen = *m_enemyCollider;
+            enemyColliderScreen.x -= (int)camPos.x;
+            enemyColliderScreen.y -= (int)camPos.y;
+
+            if (CheckCollision(attackBox, enemyColliderScreen))
             {
-                m_onHitEnemy(25);
+                if (m_onHitEnemy)
+                {
+                    m_onHitEnemy(10);
+                }
+                if (m_onScreenShake)
+                {
+                    m_onScreenShake();
+                }
             }
         }
     }
 }
+
 
 
 void PlayerController::ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime)

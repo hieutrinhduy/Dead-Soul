@@ -36,8 +36,8 @@ void EnemyController::Init(float pointA, float pointB)
 
     m_enemy = std::make_shared<SpriteAnimation>(runTexture, 1, 10, 1, 0.05f);
     m_enemy->SetSize(96 * 2, 64 * 2);
-    m_enemy->Set2DPosition(pointA, 0);
-    m_enemyCollider = { (int)m_enemy->GetPosition().x, (int)m_enemy->GetPosition().y, m_enemy->GetWidth(), m_enemy->GetHeight() };
+    m_enemy->Set2DPosition(pointA, -500);
+    m_enemyCollider = { (int)m_enemy->GetPosition().x + 50, (int)m_enemy->GetPosition().y, m_enemy->GetWidth()/2, m_enemy->GetHeight() };
 
     m_pointA = pointA;
     m_pointB = pointB;
@@ -62,7 +62,6 @@ void EnemyController::TakeDamage(int damage)
 {
     if (m_isDead) return;
 
-    std::cout << "Take Damage" << std::endl;
     m_currentHP -= damage;
 
     if (m_currentHP <= 0)
@@ -73,25 +72,38 @@ void EnemyController::TakeDamage(int damage)
     else
     {
         m_isHit = true;
-        m_hitTimer = 0.5f;
-        ChangeAnimation(hitTexture, 5, 0.1f);
+        m_hitTimer = 0.25f;
+        ChangeAnimation(hitTexture, 5, 0.05);
     }
 }
 
 void EnemyController::Die()
 {
+    std::cout << "Die" << std::endl;
     m_isDead = true;
-    ChangeAnimation(deadTexture, 10, 0.1f);
+    m_deadTimer = 1.3f;
+    m_finishDead = false;
+    ChangeAnimation(deadTexture, 13, 0.1f);
 }
 
 void EnemyController::Update(float deltaTime)
 {
-    if (m_isDead) return;
+    if (m_isDead) {
+        if (!m_finishDead) {
+            m_deadTimer -= deltaTime;
+            if (m_deadTimer <= 0.0f) {
+                m_finishDead = true;
+            }
+        }
+        m_enemy->Update(deltaTime);
+        return;
+    }
 
     if (m_isHit) {
         m_hitTimer -= deltaTime;
         if (m_hitTimer <= 0.0f) {
             m_isHit = false;
+            std::cout << "Stop hit" << std::endl;
             ChangeAnimation(runTexture, 10, 0.05f);
         }
         m_enemy->Update(deltaTime);
@@ -244,7 +256,7 @@ void EnemyController::Update(float deltaTime)
     if (m_velocityY > 800) m_velocityY = 800;
 
     posY += m_velocityY * deltaTime;
-    m_enemyCollider = { (int)posX, (int)posY, m_enemy->GetWidth(), m_enemy->GetHeight() };
+    m_enemyCollider = { (int)posX + 50, (int)posY, m_enemy->GetWidth()/2, m_enemy->GetHeight() };
     m_isGrounded = GroundCheck();
 
     if (m_isGrounded) {
@@ -253,15 +265,26 @@ void EnemyController::Update(float deltaTime)
     }
 
     m_enemy->Set2DPosition(posX, posY);
-    m_enemyCollider.y = (int)posY;
+    m_enemyCollider = { (int)posX + 50, (int)posY, m_enemy->GetWidth() / 2, m_enemy->GetHeight() };
 
     m_enemy->Update(deltaTime);
 }
 
 void EnemyController::Draw(SDL_Renderer* renderer)
 {
+    if (m_isDead && m_finishDead) return;
+
     if (m_enemy)
         m_enemy->Draw(renderer);
+
+    Vector2 camPos = Camera::GetInstance()->GetPosition();
+
+    SDL_Rect drawCollider = m_enemyCollider;
+    drawCollider.x -= (int)camPos.x;
+    drawCollider.y -= (int)camPos.y;
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    SDL_RenderDrawRect(renderer, &drawCollider);
 
     // Debug Raycast
     if (m_drawRay) {

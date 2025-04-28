@@ -27,6 +27,7 @@ GSPlay::~GSPlay()
 
 void GSPlay::Init()
 {
+    groundCollider = { 0, 1440, 10000, 200 };
     auto tex1 = ResourceManagers::GetInstance()->GetTexture("background_layer_1.png");
     auto tex2 = ResourceManagers::GetInstance()->GetTexture("background_layer_2.png");
     auto tex3 = ResourceManagers::GetInstance()->GetTexture("background_layer_3.png");
@@ -46,16 +47,6 @@ void GSPlay::Init()
     button->Set2DPosition(SCREEN_WIDTH - 50, 10);
     button->SetOnClick([this]() { GameStateMachine::GetInstance()->PopState(); });
     m_listButton.push_back(button);
-
-    // Tạo enemy
-    texture = ResourceManagers::GetInstance()->GetTexture("_Idle.png");
-    enemy = std::make_shared<SpriteAnimation>(texture, 2, 9, 6, 0.2f);
-    enemy->SetFlip(SDL_FLIP_NONE);
-    enemy->SetSize(100, 100);
-    enemy->Set2DPosition(400, 400);
-    enemyCollider = { (int)enemy->GetPosition().x, (int)enemy->GetPosition().y, enemy->GetWidth(), enemy->GetHeight() };
-
-    groundCollider = { 0, 1500, 10000, 200 };
 
     m_tileMap->LoadMap("Data/Map/map6.txt");
     if (!m_tileMapLoaded) {
@@ -78,12 +69,19 @@ void GSPlay::Init()
     m_enemyController->SetGroundCollider(&groundCollider);
     m_enemyController->SetPlayerCollider(&m_playerController->GetCollider());
 
+    m_playerController->SetEnemyCollider(m_enemyController-> GetEnemyCollider());
+
     m_enemyController->SetOnHitPlayerCallback([this](int damage) {
         m_playerController->TakeDamage(damage);
     });
 
     m_playerController->SetOnHitEnemyCallback([&](int damage) {
         m_enemyController->TakeDamage(damage);
+        });
+
+    m_playerController->SetOnScreenShakeCallback([]() {
+        int randomMagnitude = 5 + rand() % 2;
+        Camera::GetInstance()->Shake(0.1f, randomMagnitude);
         });
 } 
 

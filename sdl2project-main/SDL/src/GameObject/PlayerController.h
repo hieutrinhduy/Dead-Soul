@@ -25,6 +25,8 @@ public:
     const SDL_Rect& GetCollider() const { return m_playerCollider; }
     bool IsDead() const { return m_isDead; }
     void SetOnHitEnemyCallback(std::function<void(int damage)> callback) { m_onHitEnemy = callback; }
+    void SetOnScreenShakeCallback(std::function<void()> callback) { m_onScreenShake = callback; }
+
 private:
     std::shared_ptr<SpriteAnimation> m_player;
     SDL_Rect m_playerCollider;
@@ -78,6 +80,8 @@ private:
     std::shared_ptr<TextureManager> hurtTexture;
     std::shared_ptr<TextureManager> deadTexture; 
     std::function<void(int damage)> m_onHitEnemy;
+    std::function<void()> m_onScreenShake;
+
 
     bool m_canDealDamage;
 

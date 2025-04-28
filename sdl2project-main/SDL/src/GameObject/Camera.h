@@ -16,6 +16,7 @@ public:
 	void SetLevelDimension(int width, int height);
 	int GetLevelWidth();
 	int GetLevelHeight();
+	void Shake(float duration, float magnitude);
 private:
 	std::shared_ptr<BaseObject> m_target;
 	Vector2 m_Position;
@@ -23,4 +24,8 @@ private:
 	float m_Smooth = 5.0f;
 	int m_levelWidth;
 	int m_levelHeight;
+
+	float m_shakeTimer = 0.0f;
+	float m_shakeMagnitude = 0.0f;
+	Vector2 m_originalPosition;
 };

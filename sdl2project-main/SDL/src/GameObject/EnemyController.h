@@ -79,6 +79,9 @@ private:
     Vector2 m_lastRayStart;
     Vector2 m_lastRayEnd;
 
+    float m_deadTimer;
+    bool m_finishDead;
+
 private:
     bool DetectPlayer();
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);
