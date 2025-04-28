@@ -113,7 +113,7 @@ void GSPlay::HandleTouchEvents(SDL_Event& e)
         if (button->HandleTouchEvent(&e)) break;
 }
 
-void GSPlay::HandleMouseMoveEvents(int x, int y)
+void GSPlay::HandleMouseMoveEvents(SDL_Event& e)
 {
 }
 

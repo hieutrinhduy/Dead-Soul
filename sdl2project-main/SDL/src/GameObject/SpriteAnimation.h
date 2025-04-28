@@ -2,7 +2,7 @@
 #include "BaseObject.h"
 #include <SDL_render.h>
 class TextureManager;
-class SpriteAnimation : public BaseObject{
+class SpriteAnimation : public BaseObject {
 protected:
 	int			m_iHeight;
 	int			m_iWidth;
@@ -18,7 +18,7 @@ protected:
 	int m_numAction; //start from 1,2,3...
 
 public:
-	
+
 	SpriteAnimation(std::shared_ptr<TextureManager> texture, int currentAction, int frameCount, int numAction, float  frameTime);
 	~SpriteAnimation();
 
@@ -28,11 +28,12 @@ public:
 
 	void		Set2DPosition(float x, float y);
 	void		SetRotation(double angle);
-	void SetFlip (SDL_RendererFlip flip);
+	void SetFlip(SDL_RendererFlip flip);
 	int GetCurrentAction();
 	void SetCurrentAction(int action);//action start from 1
 	Vector2		Get2DPosition();
 	void		SetSize(int width, int height);
 	int GetWidth();
 	int GetHeight();
+	int GetCurrentFrame();
 };

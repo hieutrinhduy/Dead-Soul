@@ -48,7 +48,7 @@ void GSIntro::HandleTouchEvents(SDL_Event& e)
 {
 }
 
-void GSIntro::HandleMouseMoveEvents(int x, int y)
+void GSIntro::HandleMouseMoveEvents(SDL_Event& e)
 {
 }
 
@@ -57,7 +57,7 @@ void GSIntro::Update(float deltaTime)
 	m_time += deltaTime;
 	if (m_time > INTRO_TIME)
 	{
-		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_MENU);
+		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_STORY);
 		m_time = 0;
 	}
 }

@@ -23,23 +23,23 @@ void SpriteAnimation::Init()
 
 }
 
-void SpriteAnimation::Draw(SDL_Renderer* renderer, SDL_Rect * clip)
+void SpriteAnimation::Draw(SDL_Renderer* renderer, SDL_Rect* clip)
 {
 	if (m_pTexture != nullptr)
 	{
-		float srcWidth =  m_pTexture->GetOriginalWidth() / m_frameCount;
+		float srcWidth = m_pTexture->GetOriginalWidth() / m_frameCount;
 		float srcHeight = m_pTexture->GetOriginalHeight() / m_numAction;
 		SDL_Rect srcRect = { srcWidth * m_currentFrame, srcHeight * (m_currentAction - 1), srcWidth, srcHeight }; //pointer to source rect(the area and position where you get the sprite on the texture).
 		SDL_Rect dstRect = { m_position.x - Camera::GetInstance()->GetPosition().x, m_position.y - Camera::GetInstance()->GetPosition().y, m_iWidth , m_iHeight }; // pointer to dest rect(the area and position on the renderer you are going to draw).
 		SDL_RenderCopyEx(Renderer::GetInstance()->GetRenderer(), m_pTexture->GetTextureObj(), &srcRect, &dstRect, m_angle, nullptr, m_flip);
-		
+
 	}
 }
 
 void SpriteAnimation::Update(float deltatime)
 {
 	m_currentTicks += deltatime;
-		if(m_currentTicks  >= m_frameTime) {
+	if (m_currentTicks >= m_frameTime) {
 		m_currentFrame++;
 		if (m_currentFrame >= m_frameCount) {
 			m_currentFrame = 0;
@@ -59,7 +59,7 @@ void SpriteAnimation::SetRotation(double angle)
 }
 
 void SpriteAnimation::SetFlip(SDL_RendererFlip flip)
-{ 
+{
 	m_flip = flip;
 }
 
@@ -93,5 +93,9 @@ int SpriteAnimation::GetCurrentAction()
 void SpriteAnimation::SetCurrentAction(int action)
 {
 	m_currentAction = action;
+}
+
+int SpriteAnimation::GetCurrentFrame() {
+	return m_currentFrame;
 }
 

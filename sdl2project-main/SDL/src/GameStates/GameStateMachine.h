@@ -5,10 +5,12 @@ class GameStateBase;
 enum class StateType
 {
 	STATE_INVALID = 0,
+	STATE_LOGO,
+	STATE_STORY,
 	STATE_INTRO,
 	STATE_MENU,
 	STATE_PLAY,
-	STATE_OPTION, 
+	STATE_OPTION,
 	STATE_CREDIT
 };
 class GameStateMachine : public CSingleton<GameStateMachine>

@@ -121,7 +121,7 @@ void GSMenu::HandleTouchEvents(SDL_Event& e)
 	}
 }
 
-void GSMenu::HandleMouseMoveEvents(int x, int y)
+void GSMenu::HandleMouseMoveEvents(SDL_Event& e)
 {
 }
 
