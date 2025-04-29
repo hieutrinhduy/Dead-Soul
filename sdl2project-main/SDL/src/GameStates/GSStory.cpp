@@ -8,8 +8,9 @@
 #include "Sound.h"
 
 #define SCENE_TIME 14.9f
+#define NARRATION_TEXT_HEIGHT 64
 
-GSStory::GSStory() : GameStateBase(StateType::STATE_STORY), m_textColor({ 255, 255, 255 }), m_time(0.0f), sentence1(true), sentence2(true)
+GSStory::GSStory() : GameStateBase(StateType::STATE_STORY), m_textColor({ 0, 0, 0 }), m_time(0.0f), sentence1(true), sentence2(true)
 {
 }
 
@@ -20,19 +21,17 @@ GSStory::~GSStory()
 
 void GSStory::Init()
 {
-	heightScaling = SCREEN_HEIDHT / 160.0f;
-
 	auto texture = ResourceManagers::GetInstance()->GetTexture("story.png");
 	projector = std::make_shared<SpriteAnimation>(texture, 1, 3, 1, 5.0f);
 	projector->SetFlip(SDL_FLIP_NONE);
-	projector->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT * 16 / 10);
-	projector->Set2DPosition(0, 0);
+	projector->SetSize(SCREEN_WIDTH, (SCREEN_HEIDHT - NARRATION_TEXT_HEIGHT) * 32 / 21.0f);
+	projector->Set2DPosition(0, -SCREEN_HEIDHT * 11 / 64.0f - NARRATION_TEXT_HEIGHT);
 
 	// set text
 	auto font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 48);
 	m_textGameName = std::make_shared<Text>("The war between humans and ghosts took place for thousands of years...", font, m_textColor);
-	m_textGameName->SetSize(SCREEN_WIDTH * 0.8f, 60);
-	m_textGameName->Set2DPosition((SCREEN_WIDTH - m_textGameName->GetWidth()) / 2, SCREEN_HEIDHT - 60);
+	m_textGameName->SetSize(SCREEN_WIDTH * 0.8f, NARRATION_TEXT_HEIGHT);
+	m_textGameName->Set2DPosition((SCREEN_WIDTH - m_textGameName->GetWidth()) / 2.0f, SCREEN_HEIDHT - NARRATION_TEXT_HEIGHT - 5);
 }
 
 void GSStory::Exit()
@@ -70,21 +69,22 @@ void GSStory::Update(float deltaTime)
 {
 	projector->Update(deltaTime);
 
-	if (projector->GetCurrentFrame() == 1 && sentence1 == sentence2) sentence2 = !sentence2;
+	/*if (projector->GetCurrentFrame() == 1 && sentence1 == sentence2) sentence2 = !sentence2;
 	if (projector->GetCurrentFrame() == 0 && sentence1 != sentence2) {
 		if (!sentence2) projector->SetCurrentAction(5);
 		else projector->SetCurrentAction(4);
 		sentence1 = sentence2;
-	}
+	}*/
 
-	/*if (sentence1 && projector->GetCurrentFrame() == 1) {
+	if (sentence1 && projector->GetCurrentFrame() == 1) {
 		m_textGameName->SetText("Wisdom and resilience give humans an advantage over the fierce monsters...");
 		sentence1 = false;
 	}
 	else if (sentence2 && projector->GetCurrentFrame() == 2) {
 		m_textGameName->SetText("But the relentless proliferation of countless monsters is gradually becoming a nightmare for us....");
+		m_textGameName->SetSize(SCREEN_WIDTH * 0.9f, NARRATION_TEXT_HEIGHT);
 		sentence2 = false;
-	}*/
+	}
 
 	m_time += deltaTime;
 	if (m_time > SCENE_TIME)

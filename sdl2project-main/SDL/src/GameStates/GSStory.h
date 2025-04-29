@@ -29,6 +29,5 @@ private:
 	std::shared_ptr<Text> m_textGameName;
 	SDL_Color m_textColor;
 	float	m_time;
-	float heightScaling;
 	bool sentence1, sentence2;
 };
