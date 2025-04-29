@@ -82,6 +82,8 @@ private:
     float m_deadTimer;
     bool m_finishDead;
 
+    SDL_Rect m_attackBox;
+
 private:
     bool DetectPlayer();
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);

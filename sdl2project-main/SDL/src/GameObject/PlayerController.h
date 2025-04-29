@@ -52,6 +52,7 @@ private:
     const float m_attackDuration;
     float m_lastAttackTime;
     bool m_justDidAttack2;
+    bool m_justDidAttack3;
 
     bool m_isRolling;
     float m_rollTimer;
@@ -72,11 +73,14 @@ private:
     std::shared_ptr<TextureManager> idleTexture;
     std::shared_ptr<TextureManager> runTexture;
     std::shared_ptr<TextureManager> jumpTexture;
+    std::shared_ptr<TextureManager> jumpOnAirTexture;
     std::shared_ptr<TextureManager> jumpFallTexture;
+    std::shared_ptr<TextureManager> landTexture;
     std::shared_ptr<TextureManager> fallTexture;
     std::shared_ptr<TextureManager> rollTexture;
     std::shared_ptr<TextureManager> attackTexture;
     std::shared_ptr<TextureManager> attack2Texture;
+    std::shared_ptr<TextureManager> attack3Texture;
     std::shared_ptr<TextureManager> hurtTexture;
     std::shared_ptr<TextureManager> deadTexture; 
     std::function<void(int damage)> m_onHitEnemy;
