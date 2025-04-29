@@ -2,7 +2,9 @@
 #include "ResourceManagers.h"
 #include "Define.h"
 #include "Sprite2D.h"
+
 #define INTRO_TIME 1.5f
+
 GSIntro::GSIntro() : GameStateBase(StateType::STATE_INTRO), m_time(0.0f)
 {
 }

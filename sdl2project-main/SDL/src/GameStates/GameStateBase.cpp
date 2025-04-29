@@ -1,4 +1,5 @@
 #include "GameStateBase.h"
+#include "GSLogo.h"
 #include "GSStory.h"
 #include "GSIntro.h"
 #include "GSMenu.h"
@@ -12,6 +13,11 @@ std::shared_ptr<GameStateBase> GameStateBase::CreateState(StateType stt)
 	switch (stt)
 	{
 	case StateType::STATE_INVALID:
+		break;
+
+	case StateType::STATE_LOGO:
+		gs = std::make_shared<GSLogo>();
+		//GSSTORY
 		break;
 
 	case StateType::STATE_STORY:

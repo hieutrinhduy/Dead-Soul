@@ -18,7 +18,7 @@ GSStory::~GSStory()
 void GSStory::Init()
 {
 	auto texture = ResourceManagers::GetInstance()->GetTexture("player.png");
-	projector = std::make_shared<SpriteAnimation>(texture, 4, 6, 5, 0.1f);
+	projector = std::make_shared<SpriteAnimation>(texture, 4,6, 5, 0.15f);
 	projector->SetFlip(SDL_FLIP_NONE);
 	projector->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT * 16 / 10);
 	projector->Set2DPosition(0, -SCREEN_HEIDHT * 3 / 10);
@@ -84,7 +84,7 @@ void GSStory::Update(float deltaTime)
 	m_time += deltaTime;
 	if (m_time > 14.5f)
 	{
-		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_MENU);
+		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_INTRO);
 		m_time = 0;
 	}
 }
