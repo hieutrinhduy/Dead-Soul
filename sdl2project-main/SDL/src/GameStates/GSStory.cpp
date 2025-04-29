@@ -17,8 +17,8 @@ GSStory::~GSStory()
 
 void GSStory::Init()
 {
-	auto texture = ResourceManagers::GetInstance()->GetTexture("story.png");
-	projector = std::make_shared<SpriteAnimation>(texture, 1, 3, 1, 5.0f);
+	auto texture = ResourceManagers::GetInstance()->GetTexture("player.png");
+	projector = std::make_shared<SpriteAnimation>(texture, 4, 6, 5, 0.1f);
 	projector->SetFlip(SDL_FLIP_NONE);
 	projector->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT * 16 / 10);
 	projector->Set2DPosition(0, -SCREEN_HEIDHT * 3 / 10);
@@ -65,14 +65,21 @@ void GSStory::Update(float deltaTime)
 {
 	projector->Update(deltaTime);
 
-	if (sentence1 && projector->GetCurrentFrame() == 1) {
+	if (projector->GetCurrentFrame() == 1 && sentence1 == sentence2) sentence2 = !sentence2;
+	if (projector->GetCurrentFrame() == 0 && sentence1 != sentence2) {
+		if (!sentence2) projector->SetCurrentAction(5);
+		else projector->SetCurrentAction(4);
+		sentence1 = sentence2;
+	}
+
+	/*if (sentence1 && projector->GetCurrentFrame() == 1) {
 		m_textGameName->SetText("Wisdom and resilience give humans an advantage over the fierce monsters...");
 		sentence1 = false;
 	}
 	else if (sentence2 && projector->GetCurrentFrame() == 2) {
 		m_textGameName->SetText("But the relentless proliferation of countless monsters is gradually becoming a nightmare for us....");
 		sentence2 = false;
-	}
+	}*/
 
 	m_time += deltaTime;
 	if (m_time > 14.5f)
