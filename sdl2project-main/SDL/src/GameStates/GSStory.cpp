@@ -6,6 +6,9 @@
 #include "GameObject/Camera.h"
 #include "KeyState.h"
 #include "Sound.h"
+
+#define SCENE_TIME 2.0f
+
 GSStory::GSStory() : GameStateBase(StateType::STATE_INTRO), m_textColor({ 255, 255, 255 }), m_time(0.0f), sentence1(true), sentence2(true)
 {
 }
@@ -82,7 +85,7 @@ void GSStory::Update(float deltaTime)
 	}*/
 
 	m_time += deltaTime;
-	if (m_time > 14.5f)
+	if (m_time > SCENE_TIME)
 	{
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_INTRO);
 		m_time = 0;

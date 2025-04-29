@@ -93,7 +93,7 @@
     <ClCompile Include="src\GameStates\GSStory.cpp">
       <Filter>Source Files\GameState</Filter>
     </ClCompile>
-    <ClCompile Include="GSLogo.cpp">
+    <ClCompile Include="src\GameStates\GSLogo.cpp">
       <Filter>Source Files\GameState</Filter>
     </ClCompile>
   </ItemGroup>
@@ -167,7 +167,7 @@
     <ClInclude Include="src\GameStates\GSStory.h">
       <Filter>Source Files\GameState</Filter>
     </ClInclude>
-    <ClInclude Include="GSLogo.h">
+    <ClInclude Include="src\GameStates\GSLogo.h">
       <Filter>Source Files\GameState</Filter>
     </ClInclude>
   </ItemGroup>

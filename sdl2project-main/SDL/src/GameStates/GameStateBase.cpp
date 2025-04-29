@@ -4,6 +4,7 @@
 #include "GSIntro.h"
 #include "GSMenu.h"
 #include "GSPlay.h"
+
 GameStateBase::GameStateBase(StateType stateType) : m_stateType(stateType)
 {}
 
