@@ -7,9 +7,9 @@
 #include "KeyState.h"
 #include "Sound.h"
 
-#define SCENE_TIME 2.0f
+#define SCENE_TIME 14.9f
 
-GSStory::GSStory() : GameStateBase(StateType::STATE_INTRO), m_textColor({ 255, 255, 255 }), m_time(0.0f), sentence1(true), sentence2(true)
+GSStory::GSStory() : GameStateBase(StateType::STATE_STORY), m_textColor({ 255, 255, 255 }), m_time(0.0f), sentence1(true), sentence2(true)
 {
 }
 
@@ -20,15 +20,17 @@ GSStory::~GSStory()
 
 void GSStory::Init()
 {
-	auto texture = ResourceManagers::GetInstance()->GetTexture("player.png");
-	projector = std::make_shared<SpriteAnimation>(texture, 4,6, 5, 0.15f);
+	heightScaling = SCREEN_HEIDHT / 160.0f;
+
+	auto texture = ResourceManagers::GetInstance()->GetTexture("story.png");
+	projector = std::make_shared<SpriteAnimation>(texture, 1, 3, 1, 5.0f);
 	projector->SetFlip(SDL_FLIP_NONE);
 	projector->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT * 16 / 10);
-	projector->Set2DPosition(0, -SCREEN_HEIDHT * 3 / 10);
+	projector->Set2DPosition(0, 0);
 
 	// set text
 	auto font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 48);
-	m_textGameName = std::make_shared<Text>("The war between humans and ghosts takes place for thousands year...", font, m_textColor);
+	m_textGameName = std::make_shared<Text>("The war between humans and ghosts took place for thousands of years...", font, m_textColor);
 	m_textGameName->SetSize(SCREEN_WIDTH * 0.8f, 60);
 	m_textGameName->Set2DPosition((SCREEN_WIDTH - m_textGameName->GetWidth()) / 2, SCREEN_HEIDHT - 60);
 }

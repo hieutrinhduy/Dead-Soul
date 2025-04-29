@@ -33,6 +33,16 @@ bool Renderer::Init()
 	}
 	else
 	{
+		// Set game's icon
+		SDL_Surface* icon = IMG_Load("Data/Textures/game_icon.png");
+		if (icon == NULL) {
+			printf("Unable to load icon! SDL Error: %s\n", SDL_GetError());
+		}
+		else {
+			SDL_SetWindowIcon(gWindow, icon);
+			SDL_FreeSurface(icon);
+		}
+
 		//Create renderer for window ( tao doi tuong renderer de co the render on window)
 		gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 		if (gRenderer == NULL)
