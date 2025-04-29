@@ -125,6 +125,7 @@ void GSPlay::Update(float deltaTime)
     m_enemyController->Update(deltaTime);
 
     Camera::GetInstance()->Update(deltaTime);
+
 }
 
 void GSPlay::Draw(SDL_Renderer* renderer)

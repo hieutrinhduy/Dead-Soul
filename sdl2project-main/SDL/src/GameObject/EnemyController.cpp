@@ -79,7 +79,6 @@ void EnemyController::TakeDamage(int damage)
 
 void EnemyController::Die()
 {
-    std::cout << "Die" << std::endl;
     m_isDead = true;
     m_deadTimer = 1.3f;
     m_finishDead = false;
@@ -151,8 +150,6 @@ void EnemyController::Update(float deltaTime)
     }
     break;
 
-
-
     case EnemyState::Chase:
     {
         if (DetectPlayer()) {
@@ -171,8 +168,17 @@ void EnemyController::Update(float deltaTime)
 
         if (m_playerCollider) {
             float distanceX = m_playerCollider->x - posX;
+            std::cout << distanceX << std::endl;
 
-            if (abs(distanceX) < 50.0f) {
+            int attackDistance = INT_MAX;
+            if (m_enemyFlip == SDL_FLIP_NONE) {
+                attackDistance = 150;
+            }
+            else
+            {
+                attackDistance = 50;
+            }
+            if (abs(distanceX) < attackDistance) {
                 m_currentState = EnemyState::Attack;
 
                 if (rand() % 2 == 0) {
@@ -208,8 +214,19 @@ void EnemyController::Update(float deltaTime)
         if (attackIndex == 1) {
             if (m_attackTimer <= 0.9f && m_attackTimer >= 0.8f) // (Tùy chỉnh lại nếu cần)
             {
-                if (m_playerCollider && CheckCollision(m_enemyCollider, *m_playerCollider))
-                {
+                int offsetX = 60;
+                if (m_enemyFlip == SDL_FLIP_HORIZONTAL) offsetX = -m_enemy->GetWidth() / 2;
+
+                m_attackBox = {
+                    m_enemyCollider.x + offsetX,
+                    m_enemyCollider.y + m_enemy->GetHeight() / 4,
+                    50,
+                    m_enemy->GetHeight() / 2
+                };
+
+                bool isHit = CheckCollision(m_attackBox, *m_playerCollider);
+
+                if (m_playerCollider && CheckCollision(m_attackBox, *m_playerCollider)) {
                     if (m_onHitPlayer) {
                         m_onHitPlayer(m_damage);
                     }
@@ -219,12 +236,26 @@ void EnemyController::Update(float deltaTime)
         else if (attackIndex == 2) {
             if (m_attackTimer <= 1.1f && m_attackTimer >= 1.0f) // (Tùy chỉnh lại nếu cần)
             {
-                if (m_playerCollider && CheckCollision(m_enemyCollider, *m_playerCollider))
-                {
+                int offsetX = 60;
+                if (m_enemyFlip == SDL_FLIP_HORIZONTAL) offsetX = -m_enemy->GetWidth() / 2;
+
+                m_attackBox = {
+                    m_enemyCollider.x + offsetX,
+                    m_enemyCollider.y + m_enemy->GetHeight() / 4,
+                    50,
+                    m_enemy->GetHeight() / 2
+                };
+
+                bool isHit = CheckCollision(m_attackBox, *m_playerCollider);
+                std::cout << "[DEBUG] CheckCollision result = " << (isHit ? "TRUE" : "FALSE") << std::endl;
+
+
+                if (m_playerCollider && CheckCollision(m_attackBox, *m_playerCollider)) {
                     if (m_onHitPlayer) {
                         m_onHitPlayer(m_damage);
                     }
                 }
+
             }
         }
 
@@ -286,6 +317,13 @@ void EnemyController::Draw(SDL_Renderer* renderer)
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     SDL_RenderDrawRect(renderer, &drawCollider);
 
+    SDL_Rect drawAttackBox = m_attackBox;
+    drawAttackBox.x -= (int)camPos.x;
+    drawAttackBox.y -= (int)camPos.y;
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderDrawRect(renderer, &drawAttackBox);
+
+
     // Debug Raycast
     if (m_drawRay) {
         SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Màu vàng
@@ -297,42 +335,23 @@ void EnemyController::Draw(SDL_Renderer* renderer)
             (int)(m_lastRayEnd.y - Camera::GetInstance()->GetPosition().y)
         );
     }
+
+
 }
 
 bool EnemyController::DetectPlayer()
 {
-    Vector2 temp = m_enemy->Get2DPosition();
-    SDL_FPoint startPos;
+    if (!m_playerCollider) return false;
 
-    if (m_enemyFlip == SDL_FLIP_NONE) {
-        startPos.x = temp.x + m_enemy->GetWidth() * 0.6f;
-    }
-    else {
-        startPos.x = temp.x + m_enemy->GetWidth() * 0.4f;
-    }
+    float enemyCenterX = m_enemyCollider.x + m_enemyCollider.w / 2.0f;
+    float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2.0f;
 
-    startPos.y = temp.y + m_enemy->GetHeight() * 0.4f;
+    float distance = std::abs(enemyCenterX - playerCenterX);
 
-    float rayLength = 500.0f;
-
-    float direction = (m_enemyFlip == SDL_FLIP_NONE) ? 1.0f : -1.0f;
-
-    SDL_FPoint endPos = { startPos.x + direction * rayLength, startPos.y };
-
-    SDL_Rect rayRect = {
-        (int)std::min(startPos.x, endPos.x),
-        (int)(startPos.y + m_enemy->GetHeight() * 0.4f),
-        (int)abs(endPos.x - startPos.x),
-        10
-    };
-
-    m_lastRayStart = { (float)rayRect.x, (float)rayRect.y };
-    m_lastRayEnd = { (float)(rayRect.x + rayRect.w), (float)rayRect.y };
-
-    m_drawRay = true;
-
-    return CheckCollision(rayRect, *m_playerCollider);
+    return distance < 500.0f;
 }
+
+
 
 
 

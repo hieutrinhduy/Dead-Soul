@@ -99,3 +99,4 @@ int SpriteAnimation::GetCurrentFrame() {
 	return m_currentFrame;
 }
 
+

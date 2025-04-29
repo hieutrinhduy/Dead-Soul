@@ -14,7 +14,7 @@ PlayerController::PlayerController()
     m_forceJumpAnimation(false), m_forceJumpTimer(0.0f), m_forceJumpDuration(0.15f),
     m_playerFlip(SDL_FLIP_NONE),
     m_KeyPress(0),
-    m_isAttacking(false), m_attackTimer(0.0f), m_attackDuration(0.3f), m_lastAttackTime(-999.0f), m_justDidAttack2(false),
+    m_isAttacking(false), m_attackTimer(0.0f), m_attackDuration(0.39f), m_lastAttackTime(-999.0f), m_justDidAttack2(false), m_justDidAttack3(false),
     m_isRolling(false), m_rollTimer(0.0f), m_rollDuration(0.35f), m_rollSpeed(900.0f),
     m_groundCollider(nullptr), m_enemyCollider(nullptr),
     m_maxHP(5), m_currentHP(5),
@@ -29,27 +29,30 @@ PlayerController::~PlayerController()
 
 void PlayerController::Init()
 {
-    idleTexture = ResourceManagers::GetInstance()->GetTexture("_Idle.png");
-    runTexture = ResourceManagers::GetInstance()->GetTexture("_Run.png");
-    jumpTexture = ResourceManagers::GetInstance()->GetTexture("_Jump.png");
+    idleTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerIdle.png");
+    runTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerRun.png");
+    jumpTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerJump2.png");
+    jumpOnAirTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerJumpOnAir.png");
     jumpFallTexture = ResourceManagers::GetInstance()->GetTexture("_JumpFallInbetween.png");
+    landTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerLand.png");
     fallTexture = ResourceManagers::GetInstance()->GetTexture("_Fall.png");
     rollTexture = ResourceManagers::GetInstance()->GetTexture("_Roll.png");
-    attackTexture = ResourceManagers::GetInstance()->GetTexture("_Attack.png");
-    attack2Texture = ResourceManagers::GetInstance()->GetTexture("_Attack2.png");
+    attackTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack1.png");
+    attack2Texture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack2.png");
+    attack3Texture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack3.png");
     hurtTexture = ResourceManagers::GetInstance()->GetTexture("_Hit.png");
     deadTexture = ResourceManagers::GetInstance()->GetTexture("_Death.png");
 
-    m_player = std::make_shared<SpriteAnimation>(idleTexture, 1, 10, 1, 0.05f);
-    m_player->SetSize(360, 240);
+    m_player = std::make_shared<SpriteAnimation>(idleTexture, 1, 2, 1, 0.5f);
+    m_player->SetSize(150, 150);
     m_player->Set2DPosition(500, -500);
     m_playerCollider = { (int)m_player->GetPosition().x, (int)m_player->GetPosition().y, m_player->GetWidth()/2, m_player->GetHeight()/2 };
 
     auto  pos = m_player->Get2DPosition();
     m_playerCollider = {
-        (int)(pos.x + 125),
+        (int)(pos.x + 40),
         (int)(pos.y + m_player-> GetHeight() / 2),
-        m_player->GetWidth() - 280,
+        m_player->GetWidth() - 100,
         m_player->GetHeight()/2 
     };
 
@@ -101,10 +104,10 @@ void PlayerController::Update(float deltaTime)
         if (m_hitTimer <= 0.0f) {
             m_isHit = false;
             if ((m_KeyPress & 1) || (m_KeyPress & (1 << 2))) {
-                ChangeAnimation(runTexture, 10, 0.05f);
+                ChangeAnimation(runTexture, 6, 0.07f);
             }
             else {
-                ChangeAnimation(idleTexture, 10, 0.05f);
+                ChangeAnimation(idleTexture, 2, 0.5f);
             }
         }
         m_player->Update(deltaTime);
@@ -115,7 +118,7 @@ void PlayerController::Update(float deltaTime)
         m_attackTimer -= deltaTime;
         if (m_attackTimer <= 0.0f) {
             m_isAttacking = false;
-            ChangeAnimation(idleTexture, 10, 0.05f);
+            ChangeAnimation(idleTexture, 2, 0.5f);
         }
     }
 
@@ -132,7 +135,7 @@ void PlayerController::Update(float deltaTime)
 
         if (m_rollTimer <= 0.0f) {
             m_isRolling = false;
-            ChangeAnimation(idleTexture, 10, 0.05f);
+            ChangeAnimation(idleTexture, 2, 0.5f);
         }
     }
 
@@ -159,11 +162,11 @@ void PlayerController::Update(float deltaTime)
 
     SDL_Rect newCollider;
     if (m_playerFlip == SDL_FLIP_NONE) {
-        newCollider = { (int)newPos.x + 125, (int)newPos.y + m_player->GetHeight() / 2, m_player->GetWidth()- 280, m_player->GetHeight()/2};
+        newCollider = { (int)newPos.x + 40, (int)newPos.y , m_player->GetWidth() - 100, m_player->GetHeight()};
     }
     else
     {
-        newCollider = { (int)newPos.x + 150, (int)newPos.y + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+        newCollider = { (int)newPos.x + 50, (int)newPos.y , m_player->GetWidth() - 100, m_player->GetHeight()};
     }
 
     //if (!m_enemyCollider || !CheckCollision(newCollider, *m_enemyCollider)) {
@@ -183,14 +186,12 @@ void PlayerController::Update(float deltaTime)
     float posX = m_player->Get2DPosition().x;
     float posY = m_player->Get2DPosition().y + m_velocityY * deltaTime;
 
-    //m_playerCollider = { (int)posX + 125, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight()/2};
-
     if (m_playerFlip == SDL_FLIP_NONE) {
-        m_playerCollider = { (int)posX + 125, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+        m_playerCollider = { (int)posX + 40, (int)posY /*+ m_player->GetHeight() / 2*/, m_player->GetWidth() - 100, m_player->GetHeight() };
     }
     else
     {
-        m_playerCollider = { (int)posX + 150, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+        m_playerCollider = { (int)posX + 50, (int)posY /*+ m_player->GetHeight() / 2*/, m_player->GetWidth() - 100, m_player->GetHeight() };
     }
 
     m_isGrounded = GroundCheck();
@@ -204,11 +205,11 @@ void PlayerController::Update(float deltaTime)
     m_player->Set2DPosition(posX, posY);
 
     if (m_playerFlip == SDL_FLIP_NONE) {
-        m_playerCollider = { (int)posX + 125, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+        m_playerCollider = { (int)posX + 40, (int)posY/* + m_player->GetHeight() / 2*/, m_player->GetWidth() - 100, m_player->GetHeight() };
     }
     else
     {
-        m_playerCollider = { (int)posX + 150, (int)posY + m_player->GetHeight() / 2, m_player->GetWidth() - 280, m_player->GetHeight() / 2 };
+        m_playerCollider = { (int)posX + 50, (int)posY /*+ m_player->GetHeight() / 2*/, m_player->GetWidth() - 100, m_player->GetHeight() };
     }
 
     static bool wasRunning = false;
@@ -229,24 +230,27 @@ void PlayerController::Update(float deltaTime)
     if (!m_forceJumpAnimation && !m_isAttacking && !m_isRolling) {
         if (!wasGrounded && m_isGrounded) {
             if (isRunning)
-                ChangeAnimation(runTexture, 10, 0.05f);
+                ChangeAnimation(runTexture, 6, 0.07f);
             else
-                ChangeAnimation(idleTexture, 10, 0.05f);
+                ChangeAnimation(idleTexture, 2, 0.5f);
         }
-        else if (wasGrounded && !m_isGrounded) {
-            ChangeAnimation(jumpTexture, 3, 0.05f);
+        else if (/*wasGrounded &&*/ !m_isGrounded) {
+            if (m_airTime > 0.19f) {
+                ChangeAnimation(jumpOnAirTexture, 1, 0.05f);
+            }
         }
-        else if (!m_isGrounded) {
-            if (isJumpingUp && !wasJumpingUp)
-                ChangeAnimation(jumpFallTexture, 2, 0.05f);
-            else if (isFallingDown && wasJumpingUp)
-                ChangeAnimation(fallTexture, 3, 0.05f);
-        }
+        //When falling
+        //else if (!m_isGrounded) {
+        //    if (isJumpingUp && !wasJumpingUp)
+        //        ChangeAnimation(jumpFallTexture, 2, 0.05f);
+        //    else if (isFallingDown && wasJumpingUp)
+        //        ChangeAnimation(fallTexture, 3, 0.05f);
+        //}
         else if (m_isGrounded && (wasRunning != isRunning)) {
             if (isRunning)
-                ChangeAnimation(runTexture, 10, 0.05f);
+                ChangeAnimation(runTexture, 6, 0.07f);
             else
-                ChangeAnimation(idleTexture, 10, 0.05f);
+                ChangeAnimation(idleTexture, 2, 0.5f);
         }
     }
 
@@ -260,14 +264,22 @@ void PlayerController::Update(float deltaTime)
         float elapsedAttackTime = m_attackDuration - m_attackTimer;
         m_canDealDamage = false;
 
-        if (!m_justDidAttack2)
+        //Attack1
+        if (!m_justDidAttack2 && !m_justDidAttack3)
         {
-            if (elapsedAttackTime >= 0.01f && elapsedAttackTime <= 0.02f)
+            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.21f)
                 m_canDealDamage = true;
         }
+        //Attack2
+        else if(!m_justDidAttack3)
+        {
+            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.21f)
+                m_canDealDamage = true;
+        }
+        //Attack3
         else
         {
-            if (elapsedAttackTime >= 0.01f && elapsedAttackTime <= 0.02f)
+            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.21f)
                 m_canDealDamage = true;
         }
     }
@@ -302,16 +314,10 @@ void PlayerController::Draw(SDL_Renderer* renderer)
         if (m_playerFlip == SDL_FLIP_NONE)
             attackBox.x = m_playerCollider.x + m_playerCollider.w * 0.6f;
         else
-            attackBox.x = m_playerCollider.x - 125;
+            attackBox.x = m_playerCollider.x - 210;
 
         attackBox.y = m_playerCollider.y + m_playerCollider.h * 0.3f;
-        if (m_justDidAttack2) {
-            attackBox.w = 150;
-        }
-        else
-        {
-            attackBox.w = 180;
-        }
+        attackBox.w = 150;
         attackBox.h = 60;
 
         Vector2 camPos = Camera::GetInstance()->GetPosition();
@@ -354,7 +360,7 @@ void PlayerController::ChangeAnimation(std::shared_ptr<TextureManager> texture, 
     pos.x = temp.x;
     pos.y = temp.y;
     m_player = std::make_shared<SpriteAnimation>(texture, 1, frameCount, 1, frameTime);
-    m_player->SetSize(360, 240);
+    m_player->SetSize(180, 180);
     m_player->Set2DPosition(pos.x, pos.y);
     m_player->SetFlip(m_playerFlip);
 
@@ -380,9 +386,9 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
         case SDLK_SPACE:
             if (!m_isAttacking && m_jumpCount < m_maxJump && !m_isRolling && !m_isHit) {
                 m_velocityY = m_jumpForce;
+                ChangeAnimation(jumpTexture, 2, 0.1f);
                 if (m_jumpCount == 1) {
                     m_airTime = 0.0f;
-                    ChangeAnimation(jumpTexture, 3, 0.05f);
                     m_forceJumpAnimation = true;
                     m_forceJumpTimer = m_forceJumpDuration;
                 }
@@ -412,13 +418,20 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
         if (e.button.button == SDL_BUTTON_LEFT) {
             if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit) {
                 float now = SDL_GetTicks() / 1000.0f;
-                if (!m_justDidAttack2 && (now - m_lastAttackTime <= 1.0f)) {
-                    ChangeAnimation(attack2Texture, 6, 0.08f);
+                if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
+                    ChangeAnimation(attack2Texture, 4, 0.1f);
                     m_justDidAttack2 = true;
+                    m_justDidAttack3 = false;
+                }
+                else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
+                    ChangeAnimation(attack3Texture, 4, 0.1f);
+                    m_justDidAttack3 = true;
+                    m_justDidAttack2 = false;
                 }
                 else {
-                    ChangeAnimation(attackTexture, 4, 0.08f);
+                    ChangeAnimation(attackTexture, 4, 0.1f);
                     m_justDidAttack2 = false;
+                    m_justDidAttack3 = false;
                 }
                 m_isAttacking = true;
                 m_attackTimer = m_attackDuration;
