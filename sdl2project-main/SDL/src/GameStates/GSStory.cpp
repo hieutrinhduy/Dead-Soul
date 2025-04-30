@@ -7,10 +7,34 @@
 #include "KeyState.h"
 #include "Sound.h"
 
-#define SCENE_TIME 14.9f
-#define NARRATION_TEXT_HEIGHT 64
+constexpr int SPRITE_COLS = 8;
+constexpr int SPRITE_ROWS = 12;
+constexpr int NARRATION_TEXT_HEIGHT = 60;
+constexpr const char* LINE_1 = "The war between humans and ghosts took place for thousands of years";
+#define LINE_1_SIZE  SCREEN_WIDTH * 0.75f, NARRATION_TEXT_HEIGHT
+constexpr const char* LINE_2 = "Wisdom and resilience give humans an advantage over the fierce monsters.";
+#define LINE_2_SIZE  SCREEN_WIDTH * 0.85f, NARRATION_TEXT_HEIGHT
+constexpr const char* LINE_3 = "But the monsters kept appearing more frequently...";
+#define LINE_3_SIZE  SCREEN_WIDTH * 0.6f, NARRATION_TEXT_HEIGHT
+constexpr const char* LINE_4 = "... their sheer numbers are slowly becoming a horrifying nightmare.";
+#define LINE_4_SIZE  SCREEN_WIDTH * 0.75f, NARRATION_TEXT_HEIGHT
+constexpr const char* LINE_5 = "They must be ELIMINATED at their very ROOT!";
+#define LINE_5_SIZE  SCREEN_WIDTH * 0.6f, NARRATION_TEXT_HEIGHT
+#define LINE_POSITION (SCREEN_WIDTH - narrationLine->GetWidth()) / 2.0f, SCREEN_HEIDHT - NARRATION_TEXT_HEIGHT - 5
 
-GSStory::GSStory() : GameStateBase(StateType::STATE_STORY), m_textColor({ 0, 0, 0 }), m_time(0.0f), sentence1(true), sentence2(true)
+/*	DETAILS OF STORY'S ANIMATION
+	The animation consists of (8 x 12) frames.
+	Frames 0 -> 19 (line 1): run at 20 FPS, frame 20: runs in 3s, frames 21->40: run at 20 FPS;
+	frame 41 (line 2): runs in 4s, frames 42 -> 47: run at 10 FPS;
+	frame 48 (line 3): runs in 3s;
+	frames 49 -> 55 (line 4): run at 15 FPS;
+	frame 56: runs in 4s;
+	frames 57 -> 94: run at 20 FPS, stop narrating at frame 80
+	frame 95 (line 5): runs in 3s
+*/
+
+GSStory::GSStory() : GameStateBase(StateType::STATE_STORY),
+	textColor({ 0, 0, 0 }), isNarrating(true), frameRateFlag(true), newRow(true)
 {
 }
 
@@ -19,19 +43,20 @@ GSStory::~GSStory()
 {
 }
 
+
 void GSStory::Init()
 {
 	auto texture = ResourceManagers::GetInstance()->GetTexture("story.png");
-	projector = std::make_shared<SpriteAnimation>(texture, 1, 3, 1, 5.0f);
+	projector = std::make_shared<SpriteAnimation>(texture, 1, SPRITE_COLS, SPRITE_ROWS, 0.05f);
 	projector->SetFlip(SDL_FLIP_NONE);
-	projector->SetSize(SCREEN_WIDTH, (SCREEN_HEIDHT - NARRATION_TEXT_HEIGHT) * 32 / 21.0f);
-	projector->Set2DPosition(0, -SCREEN_HEIDHT * 11 / 64.0f - NARRATION_TEXT_HEIGHT);
+	projector->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT - NARRATION_TEXT_HEIGHT);
+	projector->Set2DPosition(0, 0);
 
 	// set text
 	auto font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 48);
-	m_textGameName = std::make_shared<Text>("The war between humans and ghosts took place for thousands of years...", font, m_textColor);
-	m_textGameName->SetSize(SCREEN_WIDTH * 0.8f, NARRATION_TEXT_HEIGHT);
-	m_textGameName->Set2DPosition((SCREEN_WIDTH - m_textGameName->GetWidth()) / 2.0f, SCREEN_HEIDHT - NARRATION_TEXT_HEIGHT - 5);
+	narrationLine = std::make_shared<Text>(LINE_1, font, textColor);
+	narrationLine->SetSize(LINE_1_SIZE);
+	narrationLine->Set2DPosition(LINE_POSITION);
 }
 
 void GSStory::Exit()
@@ -69,33 +94,82 @@ void GSStory::Update(float deltaTime)
 {
 	projector->Update(deltaTime);
 
-	/*if (projector->GetCurrentFrame() == 1 && sentence1 == sentence2) sentence2 = !sentence2;
-	if (projector->GetCurrentFrame() == 0 && sentence1 != sentence2) {
-		if (!sentence2) projector->SetCurrentAction(5);
-		else projector->SetCurrentAction(4);
-		sentence1 = sentence2;
-	}*/
-
-	if (sentence1 && projector->GetCurrentFrame() == 1) {
-		m_textGameName->SetText("Wisdom and resilience give humans an advantage over the fierce monsters...");
-		sentence1 = false;
+	if (newRow && projector->GetCurrentFrame() == 0) {
+		projector->SetCurrentAction(projector->GetCurrentAction() + 1);
+		newRow = false;
 	}
-	else if (sentence2 && projector->GetCurrentFrame() == 2) {
-		m_textGameName->SetText("But the relentless proliferation of countless monsters is gradually becoming a nightmare for us....");
-		m_textGameName->SetSize(SCREEN_WIDTH * 0.9f, NARRATION_TEXT_HEIGHT);
-		sentence2 = false;
-	}
+	if (!newRow && projector->GetCurrentFrame() == 1) newRow = true;
 
-	m_time += deltaTime;
-	if (m_time > SCENE_TIME)
-	{
+	// frame 20
+	if (frameRateFlag && projector->GetCurrentFrame() == 4 && projector->GetCurrentAction() == 3) {
+		projector->SetFrameTime(3.0f);
+		frameRateFlag = false;
+	}
+	// frame 21
+	else if (!frameRateFlag && projector->GetCurrentFrame() == 5 && projector->GetCurrentAction() == 3) {
+		projector->SetFrameTime(0.05f);
+		frameRateFlag = true;
+	}
+	// frame 41
+	else if (frameRateFlag && projector->GetCurrentFrame() == 1 && projector->GetCurrentAction() == 6) {
+		projector->SetFrameTime(4.0f);
+		narrationLine->SetText(LINE_2);
+		narrationLine->SetSize(LINE_2_SIZE);
+		narrationLine->Set2DPosition(LINE_POSITION);
+		frameRateFlag = false;
+	}
+	// frame 42
+	else if (!frameRateFlag && projector->GetCurrentFrame() == 2 && projector->GetCurrentAction() == 6) {
+		projector->SetFrameTime(0.1f);
+		frameRateFlag = true;
+	}
+	// frame 48
+	else if (frameRateFlag && projector->GetCurrentFrame() == 0 && projector->GetCurrentAction() == 7) {
+		projector->SetFrameTime(5.0f);
+		narrationLine->SetText(LINE_3);
+		narrationLine->SetSize(LINE_3_SIZE);
+		narrationLine->Set2DPosition(LINE_POSITION);
+		frameRateFlag = false;
+	}
+	// frame 49
+	else if (!frameRateFlag && projector->GetCurrentFrame() == 1 && projector->GetCurrentAction() == 7) {
+		projector->SetFrameTime(1.0f / 15);
+		narrationLine->SetText(LINE_4);
+		narrationLine->SetSize(LINE_4_SIZE);
+		narrationLine->Set2DPosition(LINE_POSITION);
+		frameRateFlag = true;
+	}
+	// frame 56
+	else if (frameRateFlag && projector->GetCurrentFrame() == 0 && projector->GetCurrentAction() == 8) {
+		projector->SetFrameTime(4.0f);
+		frameRateFlag = false;
+	}
+	// frame 57
+	else if (!frameRateFlag && projector->GetCurrentFrame() == 1 && projector->GetCurrentAction() == 8) {
+		projector->SetFrameTime(0.05f);
+		frameRateFlag = true;
+	}
+	// frame 80
+	else if (isNarrating && frameRateFlag && projector->GetCurrentFrame() == 0 && projector->GetCurrentAction() == 11) {
+		isNarrating = false; // stop narrating
+	}
+	// frame 95
+	else if (frameRateFlag && projector->GetCurrentFrame() == 7 && projector->GetCurrentAction() == 12) {
+		projector->SetFrameTime(3.0f);
+		narrationLine->SetText(LINE_5);
+		narrationLine->SetSize(LINE_5_SIZE);
+		narrationLine->Set2DPosition(LINE_POSITION);
+		frameRateFlag = false;
+		isNarrating = true;
+	}
+	// if reach the last frame
+	else if (projector->GetCurrentAction() == 13) {
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_INTRO);
-		m_time = 0;
 	}
 }
 
 void GSStory::Draw(SDL_Renderer* renderer)
 {
 	projector->Draw(renderer);
-	m_textGameName->Draw(renderer);
+	if (isNarrating) narrationLine->Draw(renderer);
 }

@@ -68,13 +68,6 @@ Vector2 SpriteAnimation::Get2DPosition()
 	return Vector2(m_position.x, m_position.y);
 }
 
-void SpriteAnimation::SetSize(int width, int height)
-{
-	m_iWidth = width;
-	m_iHeight = height;
-	m_scale = Vector3((float)m_iWidth, (float)m_iHeight, 0.0f);
-}
-
 int SpriteAnimation::GetWidth()
 {
 	return m_iWidth;
@@ -90,13 +83,24 @@ int SpriteAnimation::GetCurrentAction()
 	return m_currentAction;
 }
 
+int SpriteAnimation::GetCurrentFrame() {
+	return m_currentFrame;
+}
+
+void SpriteAnimation::SetSize(int width, int height)
+{
+	m_iWidth = width;
+	m_iHeight = height;
+	m_scale = Vector3((float)m_iWidth, (float)m_iHeight, 0.0f);
+}
+
 void SpriteAnimation::SetCurrentAction(int action)
 {
 	m_currentAction = action;
 }
 
-int SpriteAnimation::GetCurrentFrame() {
-	return m_currentFrame;
+void SpriteAnimation::SetFrameTime(float frameTime) {
+	m_frameTime = frameTime;
 }
 
 

@@ -1,6 +1,9 @@
 #pragma once
+
 #include "GameStateBase.h"
-class Sprite2D;
+#include "Sprite2D.h"
+#include "SpriteAnimation.h"
+
 class GSLogo : public GameStateBase
 {
 public:
@@ -22,7 +25,7 @@ public:
 
 private:
 	//Uint32 callback(Uint32 interval, void*param);
-	std::shared_ptr<Sprite2D> m_logo;
-	float	m_time;
+	std::shared_ptr<Sprite2D> sceneBackground;
+	std::shared_ptr<SpriteAnimation> logoAnimation;
+	bool m_readyToChangeState, m_newRow, m_reduceFPS;
 };
-#pragma once

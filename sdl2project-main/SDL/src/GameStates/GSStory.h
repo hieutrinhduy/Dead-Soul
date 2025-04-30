@@ -26,8 +26,7 @@ public:
 
 private:
 	std::shared_ptr<SpriteAnimation> projector;
-	std::shared_ptr<Text> m_textGameName;
-	SDL_Color m_textColor;
-	float	m_time;
-	bool sentence1, sentence2;
+	std::shared_ptr<Text> narrationLine;
+	SDL_Color textColor;
+	bool isNarrating, frameRateFlag, newRow;
 };
