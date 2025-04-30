@@ -32,10 +32,6 @@ public:
 	void Draw(SDL_Renderer* renderer, SDL_Rect* clip = NULL) override;
 	void Update(float deltatime) override;
 
-	void Set2DPosition(float x, float y);
-	void SetRotation(double angle);
-	void SetFlip(SDL_RendererFlip flip);
-
 	// GETTER:
 	Vector2	Get2DPosition();
 	int GetCurrentAction();
@@ -44,6 +40,9 @@ public:
 	int GetCurrentFrame();
 
 	// SETTER:
+	void Set2DPosition(float x, float y);
+	void SetRotation(double angle);
+	void SetFlip(SDL_RendererFlip flip);
 	void SetSize(int width, int height);
 	void SetCurrentAction(int action);
 	void SetFrameTime(float time);
