@@ -1,6 +1,8 @@
 #pragma once
+
 #include "GameStateBase.h"
-class Sprite2D;
+#include "SpriteAnimation.h"
+
 class GSIntro : public GameStateBase
 {
 public:
@@ -22,6 +24,6 @@ public:
 
 private:
 	//Uint32 callback(Uint32 interval, void*param);
-	std::shared_ptr<Sprite2D> m_logo;
-	float	m_time;
+	std::shared_ptr<SpriteAnimation> intro;
+	bool newRow;
 };

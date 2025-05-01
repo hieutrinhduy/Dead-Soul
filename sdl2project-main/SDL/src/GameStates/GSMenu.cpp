@@ -1,6 +1,10 @@
 #include "GSMenu.h"
 #include "ResourceManagers.h"
 #include "MouseButton.h"
+
+#define BTN_PLAY_SIZE 150,75
+#define BTN_PLAY_POSITION (SCREEN_WIDTH - btnPlay->GetWidth())/2, SCREEN_HEIDHT - 100
+
 GSMenu::GSMenu() : GameStateBase(StateType::STATE_MENU),
 m_background(nullptr), m_listButton(std::list<std::shared_ptr<MouseButton>>{}), m_textGameName(nullptr)
 {
@@ -16,7 +20,7 @@ GSMenu::~GSMenu()
 void GSMenu::Init()
 {
 	//auto model = ResourceManagers::GetInstance()->GetModel("Sprite2D.nfg");
-	auto texture = ResourceManagers::GetInstance()->GetTexture("bg_main_menu.tga");
+	auto texture = ResourceManagers::GetInstance()->GetTexture("main_menu_bg.png");
 
 	// background
 	//auto shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
@@ -28,14 +32,14 @@ void GSMenu::Init()
 	texture = ResourceManagers::GetInstance()->GetTexture("btn_play.tga");
 	std::shared_ptr<MouseButton> btnPlay = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	
-	btnPlay->SetSize(150, 150);
-	btnPlay->Set2DPosition((SCREEN_WIDTH - btnPlay->GetWidth())/2, (SCREEN_HEIDHT - btnPlay->GetHeight()) / 2);
+	btnPlay->SetSize(BTN_PLAY_SIZE);
+	btnPlay->Set2DPosition(BTN_PLAY_POSITION);
 	btnPlay->SetOnClick([]() {
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_PLAY);
 		});
 	m_listButton.push_back(btnPlay);
 
-	// exit button
+	// EXIT button
 	texture = ResourceManagers::GetInstance()->GetTexture("btn_close.tga");
 	std::shared_ptr<MouseButton> btnClose = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	//btnClose = std::make_shared<MouseButton>(texture);
@@ -46,41 +50,31 @@ void GSMenu::Init()
 		});
 	m_listButton.push_back(btnClose);
 
-	//Setting game
-	texture = ResourceManagers::GetInstance()->GetTexture("btn_settings.tga");
+	// CREDIT button
+	/*texture = ResourceManagers::GetInstance()->GetTexture("btn_settings.tga");
 	std::shared_ptr<MouseButton> btnOption = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	btnOption->SetSize(100, 100);
 	btnOption->Set2DPosition((SCREEN_WIDTH - btnOption->GetWidth()) / 2, (SCREEN_HEIDHT / 3) *2 );
 	btnOption->SetOnClick([]() {
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_OPTION);
 		});
-	m_listButton.push_back(btnOption);
+	m_listButton.push_back(btnOption);*/
 
 	//CREDIT game
-	texture = ResourceManagers::GetInstance()->GetTexture("btn_help.tga");
+	/*texture = ResourceManagers::GetInstance()->GetTexture("btn_help.tga");
 	btnCredit = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	btnCredit->Set2DPosition((SCREEN_WIDTH - btnCredit->GetWidth()) / 2, SCREEN_HEIDHT / 6 *5);
 	btnCredit->SetSize(100, 100);
 	btnCredit->SetOnClick([]() {
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_CREDIT);
 		});
-	m_listButton.push_back(btnCredit);
-
-	// game title
-	///Set Font
-
-	m_textColor = { 255,0,0 };
-	auto font = ResourceManagers::GetInstance()->GetFont("Brightly Crush Shine.otf", 28);
-	m_textGameName = std::make_shared<Text>("Your Game",font,  m_textColor);
-	m_textGameName->SetSize(300, 150);
-	m_textGameName->Set2DPosition((SCREEN_WIDTH - m_textGameName->GetWidth())/2, SCREEN_HEIDHT / 2 - 300);
+	m_listButton.push_back(btnCredit);*/
 	
-	/// sound
-	
+
+	/// scene's SOUND
 	Sound::GetInstance()->LoadSound("Alarm01.wav");
-	Sound::GetInstance()->PlaySound("Alarm01.wav");
-	
-}
+	Sound::GetInstance()->PlaySound("Alarm01.wav");}
+
 
 void GSMenu::Exit()
 {
@@ -98,7 +92,6 @@ void GSMenu::Pause()
 
 void GSMenu::Resume()
 {
-	
 }
 
 
@@ -109,6 +102,7 @@ void GSMenu::HandleEvents()
 void GSMenu::HandleKeyEvents(SDL_Event& e)
 {
 }
+
 
 void GSMenu::HandleTouchEvents(SDL_Event& e)
 {
@@ -121,9 +115,11 @@ void GSMenu::HandleTouchEvents(SDL_Event& e)
 	}
 }
 
+
 void GSMenu::HandleMouseMoveEvents(SDL_Event& e)
 {
 }
+
 
 void GSMenu::Update(float deltaTime)
 {
@@ -134,6 +130,7 @@ void GSMenu::Update(float deltaTime)
 	}
 }
 
+
 void GSMenu::Draw(SDL_Renderer* renderer)
 {
 	m_background->Draw(renderer);
@@ -141,6 +138,4 @@ void GSMenu::Draw(SDL_Renderer* renderer)
 	{
 		it->Draw(renderer);
 	}
-	
-	m_textGameName->Draw(renderer);
 }

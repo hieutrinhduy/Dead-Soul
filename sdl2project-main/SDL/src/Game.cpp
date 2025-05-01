@@ -15,7 +15,7 @@ Game::Game()
 bool Game::Init()
 {
 	bool success = Renderer::GetInstance()->Init();
-	GameStateMachine::GetInstance()->PushState(StateType::STATE_LOGO);
+	GameStateMachine::GetInstance()->PushState(StateType::STATE_INTRO);
 	return success;
 }
 
@@ -71,11 +71,11 @@ void Game::Run()
 
 void Game::Update(float deltaTime)
 {
-	GameStateMachine::GetInstance()->PerformStateChange();
 	if (GameStateMachine::GetInstance()->HasState())
 	{
 		GameStateMachine::GetInstance()->CurrentState()->Update(deltaTime);
 	}
+	GameStateMachine::GetInstance()->PerformStateChange();
 }
 
 void Game::Render()

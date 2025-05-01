@@ -1,11 +1,10 @@
 #include "GSIntro.h"
 #include "ResourceManagers.h"
-#include "Define.h"
-#include "Sprite2D.h"
 
-#define INTRO_TIME 1.5f
+constexpr int SPRITE_COLS = 6;
+constexpr int SPRITE_ROWS = 3;
 
-GSIntro::GSIntro() : GameStateBase(StateType::STATE_INTRO), m_time(0.0f)
+GSIntro::GSIntro() : GameStateBase(StateType::STATE_INTRO), newRow(true)
 {
 }
 
@@ -14,14 +13,16 @@ GSIntro::~GSIntro()
 {
 }
 
+
 void GSIntro::Init()
 {
-	auto texture = ResourceManagers::GetInstance()->GetTexture("logo.tga");
-	m_logo = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
-	m_logo->SetSize(150, 150);
-	m_logo->Set2DPosition((float)(SCREEN_WIDTH - m_logo->GetWidth())/2 , (float)(SCREEN_HEIDHT - m_logo->GetHeight())/2);
-	
+	auto texture = ResourceManagers::GetInstance()->GetTexture("intro_1.png");
+	intro = std::make_shared<SpriteAnimation>(texture, 0, SPRITE_COLS, SPRITE_ROWS, 0.1f);
+	intro->SetFlip(SDL_FLIP_NONE);
+	intro->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	intro->Set2DPosition(0, 0);
 }
+
 
 void GSIntro::Exit()
 {
@@ -34,7 +35,6 @@ void GSIntro::Pause()
 
 void GSIntro::Resume()
 {
-
 }
 
 
@@ -56,15 +56,20 @@ void GSIntro::HandleMouseMoveEvents(SDL_Event& e)
 
 void GSIntro::Update(float deltaTime)
 {
-	m_time += deltaTime;
-	if (m_time > INTRO_TIME)
-	{
+	intro->Update(deltaTime);
+
+	if (newRow && intro->GetCurrentFrame() == 0) {
+		intro->SetCurrentAction(intro->GetCurrentAction() + 1);
+		newRow = false;
+	}
+	if (!newRow && intro->GetCurrentFrame() == 1) newRow = true;
+
+	if (intro->GetCurrentFrame() == SPRITE_COLS - 1 && intro->GetCurrentAction() == SPRITE_ROWS) {
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_MENU);
-		m_time = 0;
 	}
 }
 
 void GSIntro::Draw(SDL_Renderer* renderer)
 {
-	m_logo->Draw(renderer);
+	intro->Draw(renderer);
 }

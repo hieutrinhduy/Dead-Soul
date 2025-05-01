@@ -28,9 +28,9 @@ constexpr const char* LINE_5 = "They must be ELIMINATED at their very ROOT!";
 	frame 41 (line 2): runs in 4s, frames 42 -> 47: run at 10 FPS;
 	frame 48 (line 3): runs in 3s;
 	frames 49 -> 55 (line 4): run at 15 FPS;
-	frame 56: runs in 4s;
+	frame 56: runs in 2.5s;
 	frames 57 -> 94: run at 20 FPS, stop narrating at frame 80
-	frame 95 (line 5): runs in 3s
+	frame 95 (line 5): runs in 2s
 */
 
 GSStory::GSStory() : GameStateBase(StateType::STATE_STORY),
@@ -125,7 +125,7 @@ void GSStory::Update(float deltaTime)
 	}
 	// frame 48
 	else if (frameRateFlag && projector->GetCurrentFrame() == 0 && projector->GetCurrentAction() == 7) {
-		projector->SetFrameTime(5.0f);
+		projector->SetFrameTime(3.0f);
 		narrationLine->SetText(LINE_3);
 		narrationLine->SetSize(LINE_3_SIZE);
 		narrationLine->Set2DPosition(LINE_POSITION);
@@ -141,7 +141,7 @@ void GSStory::Update(float deltaTime)
 	}
 	// frame 56
 	else if (frameRateFlag && projector->GetCurrentFrame() == 0 && projector->GetCurrentAction() == 8) {
-		projector->SetFrameTime(4.0f);
+		projector->SetFrameTime(2.5f);
 		frameRateFlag = false;
 	}
 	// frame 57
@@ -155,7 +155,7 @@ void GSStory::Update(float deltaTime)
 	}
 	// frame 95
 	else if (frameRateFlag && projector->GetCurrentFrame() == 7 && projector->GetCurrentAction() == 12) {
-		projector->SetFrameTime(3.0f);
+		projector->SetFrameTime(2.0f);
 		narrationLine->SetText(LINE_5);
 		narrationLine->SetSize(LINE_5_SIZE);
 		narrationLine->Set2DPosition(LINE_POSITION);
