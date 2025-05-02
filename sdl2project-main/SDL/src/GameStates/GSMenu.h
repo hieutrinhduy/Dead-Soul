@@ -1,11 +1,13 @@
 #pragma once
-#include "GameStateBase.h"
 
-#include"GameObject/Text.h"
-#include "GameObject/Sound.h"
+#include "GameStateBase.h"
+#include "SpriteAnimation.h"
+#include "Camera.h"
+#include"Text.h"
+#include "Sound.h"
+
 class MouseButton;
-class GSMenu :
-	public GameStateBase
+class GSMenu : public GameStateBase
 {
 public:
 	GSMenu();
@@ -24,12 +26,17 @@ public:
 	void	Update(float deltaTime) override;
 	void	Draw(SDL_Renderer* renderer) override;
 
+
 private:
-	std::shared_ptr<Sprite2D>				m_background;
+	std::shared_ptr<SpriteAnimation> m_background;
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;
-	std::shared_ptr<Text>					m_textGameName;
-	SDL_Color m_textColor;
-	std::shared_ptr<MouseButton> btnCredit;
-	int score = 0;
+	std::shared_ptr<Text> m_textGameName;
+	std::shared_ptr<MouseButton> btnPlay, btnCredit, btnSettings, btnExit;
 	
+	float widthScaling, heightScaling;
+
+	int buttonIndex;
+	int btnPlayLeft, btnPlayRight, btnPlayTop, btnPlayBottom;
+	int btnCreditLeft, btnCreditRight, btnCreditTop, btnCreditBottom;
+	int btnSettingsLeft, btnSettingsRight, btnSettingsTop, btnSettingsBottom;
 };

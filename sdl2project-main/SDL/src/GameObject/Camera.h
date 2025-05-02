@@ -9,14 +9,22 @@ class Camera : public CSingleton<Camera>
 {
 public:
 	Camera() { m_ViewBox = { 0, 0, SCREEN_WIDTH, SCREEN_HEIDHT }; }
+
+	// GETTER:
 	SDL_Rect GetViewBox();
 	Vector2 GetPosition();
-	void SetTarget(std::shared_ptr<BaseObject> target);
-	void Update(float deltaTime);
-	void SetLevelDimension(int width, int height);
 	int GetLevelWidth();
 	int GetLevelHeight();
+
+	// SETTER:
+	void SetTarget(std::shared_ptr<BaseObject> target);
+	void SetLevelDimension(int width, int height);
+	void ResetCameraPosition();
+
+	void Update(float deltaTime);
 	void Shake(float duration, float magnitude);
+
+
 private:
 	std::shared_ptr<BaseObject> m_target;
 	Vector2 m_Position;

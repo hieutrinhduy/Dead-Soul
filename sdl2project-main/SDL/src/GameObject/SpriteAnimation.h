@@ -34,9 +34,9 @@ public:
 
 	// GETTER:
 	Vector2	Get2DPosition();
-	int GetCurrentAction();
 	int GetWidth();
 	int GetHeight();
+	int GetCurrentAction();
 	int GetCurrentFrame();
 
 	// SETTER:
@@ -45,5 +45,6 @@ public:
 	void SetFlip(SDL_RendererFlip flip);
 	void SetSize(int width, int height);
 	void SetCurrentAction(int action);
+	void SetCurrentFrame(int frame);
 	void SetFrameTime(float time);
 };

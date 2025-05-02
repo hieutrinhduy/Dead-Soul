@@ -32,7 +32,6 @@ void SpriteAnimation::Draw(SDL_Renderer* renderer, SDL_Rect* clip)
 		SDL_Rect srcRect = { srcWidth * m_currentFrame, srcHeight * (m_currentAction - 1), srcWidth, srcHeight }; //pointer to source rect(the area and position where you get the sprite on the texture).
 		SDL_Rect dstRect = { m_position.x - Camera::GetInstance()->GetPosition().x, m_position.y - Camera::GetInstance()->GetPosition().y, m_iWidth , m_iHeight }; // pointer to dest rect(the area and position on the renderer you are going to draw).
 		SDL_RenderCopyEx(Renderer::GetInstance()->GetRenderer(), m_pTexture->GetTextureObj(), &srcRect, &dstRect, m_angle, nullptr, m_flip);
-
 	}
 }
 
@@ -87,6 +86,9 @@ int SpriteAnimation::GetCurrentFrame() {
 	return m_currentFrame;
 }
 
+
+
+
 void SpriteAnimation::SetSize(int width, int height)
 {
 	m_iWidth = width;
@@ -94,10 +96,18 @@ void SpriteAnimation::SetSize(int width, int height)
 	m_scale = Vector3((float)m_iWidth, (float)m_iHeight, 0.0f);
 }
 
+
 void SpriteAnimation::SetCurrentAction(int action)
 {
 	m_currentAction = action;
 }
+
+
+void SpriteAnimation::SetCurrentFrame(int frame) {
+	m_currentFrame = frame;
+	m_currentTicks = 0;
+}
+
 
 void SpriteAnimation::SetFrameTime(float frameTime) {
 	m_frameTime = frameTime;
