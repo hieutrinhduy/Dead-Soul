@@ -5,6 +5,7 @@
 //Screen dimension constants
 #include"SDL_mixer.h"
 #include"KeyState.h"
+#include "DataSaver.h"
 #include "ResourceManagers.h"
 #include "Renderer.h"
 Game::Game()
@@ -15,7 +16,12 @@ Game::Game()
 bool Game::Init()
 {
 	bool success = Renderer::GetInstance()->Init();
-	GameStateMachine::GetInstance()->PushState(StateType::STATE_INTRO);
+	if (DataSaver::GetInstance()->LoadGame("save.dat").isWatchedStory) {
+		GameStateMachine::GetInstance()->PushState(StateType::STATE_INTRO);
+	}
+	else {
+		GameStateMachine::GetInstance()->PushState(StateType::STATE_LOGO);
+	}
 	return success;
 }
 

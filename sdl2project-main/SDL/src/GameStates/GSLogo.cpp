@@ -1,6 +1,9 @@
 #include "GSLogo.h"
+
 #include "ResourceManagers.h"
+
 #include "Define.h"
+
 
 #define LOGO_SIZE 800, 800
 constexpr int SPRITE_COLS = 7;
@@ -8,8 +11,8 @@ constexpr int SPRITE_ROWS = 4;
 
 /*	DETAILS OF LOGO'S ANIMATION
 	The animation consists of (7 x 4) frames.
-	The first 11 frames (0 -> 10) and the last 11 frames (17 -> 27): run at 20 FPS,
-	frames 11 -> 16: run at 2 FPS.
+	The first 11 frames (0 -> 10) and the last 11 frames (17 -> 27): run in 0.06s,
+	frames 11 -> 16: run in 0.7s.
 */
 
 GSLogo::GSLogo() : GameStateBase(StateType::STATE_LOGO), m_readyToChangeState(false), m_newRow(true), m_reduceFPS(true)

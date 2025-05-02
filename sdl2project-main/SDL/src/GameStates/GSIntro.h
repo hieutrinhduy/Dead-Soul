@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameStateBase.h"
+#include "Sprite2D.h"
 #include "SpriteAnimation.h"
 
 class GSIntro : public GameStateBase
@@ -8,6 +9,7 @@ class GSIntro : public GameStateBase
 public:
 	GSIntro();
 	~GSIntro();
+
 
 	void	Init() override;
 	void	Exit() override;
@@ -24,6 +26,8 @@ public:
 
 private:
 	//Uint32 callback(Uint32 interval, void*param);
-	std::shared_ptr<SpriteAnimation> intro;
-	bool newRow;
+	std::shared_ptr<Sprite2D> sceneBackground;
+	std::shared_ptr<SpriteAnimation> intro, logo;
+	int introType;
+	bool newRow1, newRow2, runIntro, runLogo, introFrameRateFlag, logoFrameRateFlag;
 };

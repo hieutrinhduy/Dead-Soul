@@ -96,6 +96,9 @@
     <ClCompile Include="src\GameStates\GSLogo.cpp">
       <Filter>Source Files\GameState</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameManager\DataSaver.cpp">
+      <Filter>Source Files\GameManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameObject\BaseObject.h">
@@ -169,6 +172,9 @@
     </ClInclude>
     <ClInclude Include="src\GameStates\GSLogo.h">
       <Filter>Source Files\GameState</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameManager\DataSaver.h">
+      <Filter>Source Files\GameManager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

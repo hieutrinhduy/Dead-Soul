@@ -43,7 +43,7 @@ void GSMenu::Init()
 
 	// background
 	//auto shader = ResourceManagers::GetInstance()->GetShader("TextureShader");
-	auto texture = ResourceManagers::GetInstance()->GetTexture("menu_bg.png");
+	auto texture = ResourceManagers::GetInstance()->GetTexture("bg_menu.png");
 	m_background = std::make_shared<SpriteAnimation>(texture, 1, BG_SPRITE_COLS, BG_SPRITE_ROWS, 0.25f);
 	m_background->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	m_background->Set2DPosition(0, 0);

@@ -1,11 +1,14 @@
 #include "GSStory.h"
+
 #include "ResourceManagers.h"
+
 #include "GameObject/MouseButton.h"
 #include "GameObject/Sprite2D.h"
 #include "GameObject/SpriteAnimation.h"
 #include "GameObject/Camera.h"
 #include "KeyState.h"
 #include "Sound.h"
+
 
 constexpr int SPRITE_COLS = 8;
 constexpr int SPRITE_ROWS = 12;
