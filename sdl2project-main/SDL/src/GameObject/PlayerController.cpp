@@ -16,7 +16,7 @@ PlayerController::PlayerController()
     m_KeyPress(0),
     m_isAttacking(false), m_attackTimer(0.0f), m_attackDuration(0.39f), m_lastAttackTime(-999.0f), m_justDidAttack2(false), m_justDidAttack3(false),
     m_isRolling(false), m_rollTimer(0.0f), m_rollDuration(0.35f), m_rollSpeed(900.0f),
-    m_groundCollider(nullptr), m_enemyCollider(nullptr),
+    m_groundCollider(nullptr),
     m_maxHP(5), m_currentHP(5),
     m_isDead(false),
     m_isHit(false), m_hitTimer(0.0f)
@@ -259,7 +259,7 @@ void PlayerController::Update(float deltaTime)
     wasJumpingUp = isJumpingUp;
 
     // Khi đang Attack
-    if (m_isAttacking && m_enemyCollider)
+    if (m_isAttacking && !m_enemyColliders.empty())
     {
         float elapsedAttackTime = m_attackDuration - m_attackTimer;
         m_canDealDamage = false;
@@ -294,7 +294,11 @@ void PlayerController::Update(float deltaTime)
 
 void PlayerController::Draw(SDL_Renderer* renderer)
 {
-    if (m_isDead && m_finishDead) return;
+    if (m_isDead && m_finishDead) 
+    {
+        DestroyPlayer();
+        return;
+    } 
 
     if (m_player)
         m_player->Draw(renderer);
@@ -328,24 +332,23 @@ void PlayerController::Draw(SDL_Renderer* renderer)
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderDrawRect(renderer, &attackBox);
 
-        if (m_enemyCollider)
+        for (size_t i = 0; i < m_enemyColliders.size(); ++i)
         {
-            SDL_Rect enemyColliderScreen = *m_enemyCollider;
-            enemyColliderScreen.x -= (int)camPos.x;
-            enemyColliderScreen.y -= (int)camPos.y;
+            SDL_Rect enemyScreen = *m_enemyColliders[i];
+            enemyScreen.x -= (int)camPos.x;
+            enemyScreen.y -= (int)camPos.y;
 
-            if (CheckCollision(attackBox, enemyColliderScreen))
+            if (CheckCollision(attackBox, enemyScreen))
             {
-                if (m_onHitEnemy)
-                {
-                    m_onHitEnemy(10);
-                }
+                if (i < m_onHitEnemyList.size() && m_onHitEnemyList[i])
+                    m_onHitEnemyList;
+
                 if (m_onScreenShake)
-                {
                     m_onScreenShake();
-                }
             }
         }
+
+
     }
 }
 
@@ -446,7 +449,22 @@ void PlayerController::SetGroundCollider(SDL_Rect* ground)
     m_groundCollider = ground;
 }
 
-void PlayerController::SetEnemyCollider(SDL_Rect* enemy)
+void PlayerController::SetEnemyColliders(const std::vector<SDL_Rect*>& enemies)
 {
-    m_enemyCollider = enemy;
+    m_enemyColliders = enemies;
+}
+
+
+void PlayerController::DestroyPlayer()
+{
+    m_playerCollider = { 0, 0, 0, 0 };
+
+    //m_player = nullptr;
+
+    //std::cout << "Player destroyed!\n";
+}
+
+void PlayerController::SetOnHitEnemyCallbacks(const std::vector<std::function<void(int)>>& callbacks)
+{
+    m_onHitEnemyList = callbacks;
 }

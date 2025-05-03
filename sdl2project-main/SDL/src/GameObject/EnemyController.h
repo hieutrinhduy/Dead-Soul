@@ -47,6 +47,7 @@ private:
     float m_airTime;
     int m_direction;
     SDL_RendererFlip m_enemyFlip;
+    SDL_RendererFlip m_attackFlip;
 
     bool m_isGrounded;
 
@@ -83,6 +84,7 @@ private:
     bool m_finishDead;
 
     SDL_Rect m_attackBox;
+    bool m_didDamage = false;
 
 private:
     bool DetectPlayer();
@@ -90,4 +92,5 @@ private:
     bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b);
     bool GroundCheck();
     void Die();
+    void DestroyEnemy();
 };

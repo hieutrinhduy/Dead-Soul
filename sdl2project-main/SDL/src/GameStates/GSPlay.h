@@ -33,6 +33,9 @@ public:
 private:
 	std::shared_ptr<PlayerController> m_playerController;
 	std::shared_ptr<EnemyController> m_enemyController;
+	std::shared_ptr<EnemyController> m_enemyController2;
+	std::shared_ptr<EnemyController> m_enemyController3;
+
 	std::vector<std::shared_ptr<Sprite2D>> m_backgroundList;
 	std::shared_ptr<Sprite2D>	m_background;
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;
