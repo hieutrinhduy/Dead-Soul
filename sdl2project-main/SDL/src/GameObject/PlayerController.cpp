@@ -294,7 +294,11 @@ void PlayerController::Update(float deltaTime)
 
 void PlayerController::Draw(SDL_Renderer* renderer)
 {
-    if (m_isDead && m_finishDead) return;
+    if (m_isDead && m_finishDead) 
+    {
+        DestroyPlayer();
+        return;
+    } 
 
     if (m_player)
         m_player->Draw(renderer);
@@ -449,4 +453,13 @@ void PlayerController::SetGroundCollider(SDL_Rect* ground)
 void PlayerController::SetEnemyCollider(SDL_Rect* enemy)
 {
     m_enemyCollider = enemy;
+}
+
+void PlayerController::DestroyPlayer()
+{
+    m_playerCollider = { 0, 0, 0, 0 };
+
+    //m_player = nullptr;
+
+    //std::cout << "Player destroyed!\n";
 }

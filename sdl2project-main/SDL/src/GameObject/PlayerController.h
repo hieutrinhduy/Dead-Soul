@@ -93,4 +93,6 @@ private:
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);
     bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b);
     bool GroundCheck();
+    void DestroyPlayer();
 };
+
