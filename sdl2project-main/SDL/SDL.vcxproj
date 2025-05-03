@@ -190,6 +190,7 @@
     <ClCompile Include="src\GameStates\GSLogo.cpp" />
     <ClCompile Include="src\GameStates\GSMenu.cpp" />
     <ClCompile Include="src\GameStates\GSPlay.cpp" />
+    <ClCompile Include="src\GameStates\GSSettings.cpp" />
     <ClCompile Include="src\GameStates\GSStory.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -219,6 +220,7 @@
     <ClInclude Include="src\GameStates\GSLogo.h" />
     <ClInclude Include="src\GameStates\GSMenu.h" />
     <ClInclude Include="src\GameStates\GSPlay.h" />
+    <ClInclude Include="src\GameStates\GSSettings.h" />
     <ClInclude Include="src\GameStates\GSStory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
