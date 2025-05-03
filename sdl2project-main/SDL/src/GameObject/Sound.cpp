@@ -74,7 +74,6 @@ void Sound::LoadSound(const std::string& name)
     if (Mix_PlayingMusic() > 0)
     {
         Mix_HaltMusic();
-        Mix_FreeMusic(m_Music);
     }
 
     //Load music
@@ -82,17 +81,18 @@ void Sound::LoadSound(const std::string& name)
     auto it = m_Sounds.find(name);
     if (it != m_Sounds.end())
     {
+        m_Music = it->second;
         return;
     }
-   m_Music = Mix_LoadMUS(pathFile.c_str());
-   if (m_Music != nullptr)
-   {
-       m_Sounds.insert(std::pair<const std::string&, Mix_Music*>(name, (m_Music)));
-   }
-   else
-   {
-       printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
-   }
+    m_Music = Mix_LoadMUS(pathFile.c_str());
+    if (m_Music != nullptr)
+    {
+        m_Sounds.insert(std::pair<const std::string&, Mix_Music*>(name, (m_Music)));
+    }
+    else
+    {
+        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
+    }
 }
 
 

@@ -99,6 +99,9 @@
     <ClCompile Include="src\GameManager\DataSaver.cpp">
       <Filter>Source Files\GameManager</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameStates\GSCredit.cpp">
+      <Filter>Source Files\GameState</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameObject\BaseObject.h">
@@ -175,6 +178,9 @@
     </ClInclude>
     <ClInclude Include="src\GameManager\DataSaver.h">
       <Filter>Source Files\GameManager</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameStates\GSCredit.h">
+      <Filter>Source Files\GameState</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

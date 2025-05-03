@@ -1,7 +1,7 @@
 
 #include "GameStateMachine.h"
 #include "GameStateBase.h"
-GameStateMachine::GameStateMachine() : m_running(true), m_pActiveState(nullptr), m_pNextState(nullptr), m_fullscreen(false)
+GameStateMachine::GameStateMachine() : m_running(true), m_pPrevState(nullptr), m_pActiveState(nullptr), m_pNextState(nullptr), m_fullscreen(false)
 {
 }
 
@@ -46,6 +46,7 @@ void GameStateMachine::PopState()
 {
 	// cleanup the current state
 	if (!m_StateStack.empty()) {
+		m_pPrevState = m_StateStack.back();
 		m_StateStack.back()->Exit();
 		m_StateStack.pop_back();
 	}

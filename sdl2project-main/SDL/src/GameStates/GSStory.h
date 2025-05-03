@@ -1,6 +1,8 @@
 #pragma once
+
 #include "GameStateBase.h"
 #include "GameObject/Text.h"
+
 class Sprite2D;
 class SpriteAnimation;
 class MouseButton;

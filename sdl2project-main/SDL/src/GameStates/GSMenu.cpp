@@ -83,7 +83,7 @@ void GSMenu::Init()
 	btnCredit->Set2DPosition(btnCreditLeft, btnCreditTop);
 	btnCredit->SetOnClick([]() {
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_CREDIT);
-		});
+	});
 	m_listButton.push_back(btnCredit);
 	
 
@@ -93,8 +93,8 @@ void GSMenu::Init()
 	btnSettings->SetSize(widthScaling * BTN_SETTINGS_WIDTH, heightScaling * BTN_SETTINGS_HEIGHT);
 	btnSettings->Set2DPosition(btnSettingsLeft, btnSettingsTop);
 	btnSettings->SetOnClick([]() {
-		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_OPTION);
-		});
+		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_SETTINGS);
+	});
 	m_listButton.push_back(btnSettings);
 
 
@@ -117,8 +117,11 @@ void GSMenu::Exit()
 
 void GSMenu::Pause()
 {
-	Mix_HaltMusic();
-	Mix_Pause(-1);
+	if (GameStateMachine::GetInstance()->NextState()->GetGameStateType() != StateType::STATE_CREDIT &&
+		GameStateMachine::GetInstance()->NextState()->GetGameStateType() != StateType::STATE_SETTINGS) {
+		Mix_HaltMusic();
+		Mix_Pause(-1);
+	}
 }
 
 
@@ -128,13 +131,15 @@ void GSMenu::Resume()
 	Camera::GetInstance()->ResetCameraPosition();
 	buttonIndex = 0;
 
+	if (GameStateMachine::GetInstance()->PrevState()->GetGameStateType() != StateType::STATE_CREDIT &&
+		GameStateMachine::GetInstance()->PrevState()->GetGameStateType() != StateType::STATE_SETTINGS) {
+		// Reload and Replay MUSIC:
+		Sound::GetInstance()->LoadSound("background_music.mp3");
+		Sound::GetInstance()->PlaySound("background_music.mp3");
 
-	// Reload and Replay MUSIC:
-	Sound::GetInstance()->LoadSound("background_music.mp3");
-	Sound::GetInstance()->PlaySound("background_music.mp3");
-
-	// Resume CHUNK:
-	Mix_Resume(-1);
+		// Resume CHUNK:
+		Mix_Resume(-1);
+	}
 }
 
 

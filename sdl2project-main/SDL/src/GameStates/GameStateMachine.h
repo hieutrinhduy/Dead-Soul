@@ -10,8 +10,8 @@ enum class StateType
 	STATE_INTRO,
 	STATE_MENU,
 	STATE_PLAY,
-	STATE_OPTION,
-	STATE_CREDIT
+	STATE_CREDIT,
+	STATE_SETTINGS
 };
 class GameStateMachine : public CSingleton<GameStateMachine>
 {
@@ -30,9 +30,19 @@ public:
 	void	Quit() { m_running = false; }
 	void	PerformStateChange();
 
+	inline std::shared_ptr<GameStateBase> PrevState()const
+	{
+		return m_pPrevState;
+	}
+
 	inline std::shared_ptr<GameStateBase> CurrentState()const
 	{
 		return m_pActiveState;
+	}
+
+	inline std::shared_ptr<GameStateBase> NextState()const
+	{
+		return m_pNextState;
 	}
 
 	inline bool NeedsToChangeState()const
@@ -47,6 +57,7 @@ public:
 
 private:
 	std::list < std::shared_ptr<GameStateBase>>	m_StateStack;
+	std::shared_ptr<GameStateBase>				m_pPrevState;
 	std::shared_ptr<GameStateBase>				m_pActiveState;
 	std::shared_ptr<GameStateBase>				m_pNextState;
 	bool	m_running;
