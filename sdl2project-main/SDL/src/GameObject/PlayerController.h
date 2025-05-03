@@ -24,9 +24,9 @@ public:
 
     const SDL_Rect& GetCollider() const { return m_playerCollider; }
     bool IsDead() const { return m_isDead; }
-    void SetOnHitEnemyCallback(std::function<void(int damage)> callback) { m_onHitEnemy = callback; }
+    void SetOnHitEnemyCallbacks(const std::vector<std::function<void(int)>>& callbacks);
     void SetOnScreenShakeCallback(std::function<void()> callback) { m_onScreenShake = callback; }
-
+    void SetEnemyColliders(const std::vector<SDL_Rect*>& enemies);
 private:
     std::shared_ptr<SpriteAnimation> m_player;
     SDL_Rect m_playerCollider;
@@ -60,7 +60,7 @@ private:
     const float m_rollSpeed;
 
     SDL_Rect* m_groundCollider;
-    SDL_Rect* m_enemyCollider;
+    std::vector<SDL_Rect*> m_enemyColliders;
 
     // HP và trạng thái chiến đấu
     int m_maxHP = 5;
@@ -83,7 +83,8 @@ private:
     std::shared_ptr<TextureManager> attack3Texture;
     std::shared_ptr<TextureManager> hurtTexture;
     std::shared_ptr<TextureManager> deadTexture; 
-    std::function<void(int damage)> m_onHitEnemy;
+    //std::function<void(int damage)> m_onHitEnemy;
+    std::vector<std::function<void(int)>> m_onHitEnemyList;
     std::function<void()> m_onScreenShake;
 
 

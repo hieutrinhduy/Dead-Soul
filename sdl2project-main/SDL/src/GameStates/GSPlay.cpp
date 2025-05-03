@@ -7,7 +7,7 @@
 #include "KeyState.h"
 #include "Sound.h"
 #include "TileMap.h"
-#include "PlayerController.h" // Thêm dòng này
+#include "PlayerController.h"
 #include <iostream>
 #include "EnemyController.h"
 
@@ -18,12 +18,10 @@ GSPlay::GSPlay()
 {
     m_tileMap = std::make_shared<TileMap>();
     m_tileMapLoaded = false;
-    m_playerController = std::make_shared<PlayerController>(); // Khởi tạo player controller
+    m_playerController = std::make_shared<PlayerController>();
 }
 
-GSPlay::~GSPlay()
-{
-}
+GSPlay::~GSPlay() {}
 
 void GSPlay::Init()
 {
@@ -59,47 +57,65 @@ void GSPlay::Init()
         m_tileMap->GetHeight() * m_tileMap->GetTileSize()
     );
 
-    // Khởi tạo PlayerController
     m_playerController->Init();
 
     m_enemyController = std::make_shared<EnemyController>();
-    m_enemyController->Init(200, 800); // Enemy patrol từ X=200 tới X=800
+    m_enemyController->Init(200, 800);
+
+    m_enemyController2 = std::make_shared<EnemyController>();
+    m_enemyController2->Init(1000, 1300);
+
+    m_enemyController3 = std::make_shared<EnemyController>();
+    m_enemyController3->Init(1600, 1900);
 
     m_playerController->SetGroundCollider(&groundCollider);
+
     m_enemyController->SetGroundCollider(&groundCollider);
     m_enemyController->SetPlayerCollider(&m_playerController->GetCollider());
 
-    m_playerController->SetEnemyCollider(m_enemyController-> GetEnemyCollider());
+    m_enemyController2->SetGroundCollider(&groundCollider);
+    m_enemyController2->SetPlayerCollider(&m_playerController->GetCollider());
+
+    m_enemyController3->SetGroundCollider(&groundCollider);
+    m_enemyController3->SetPlayerCollider(&m_playerController->GetCollider());
+
+    std::vector<SDL_Rect*> enemyColliders;
+    enemyColliders.push_back(m_enemyController->GetEnemyCollider());
+    enemyColliders.push_back(m_enemyController2->GetEnemyCollider());
+    enemyColliders.push_back(m_enemyController3->GetEnemyCollider());
+    m_playerController->SetEnemyColliders(enemyColliders);
 
     m_enemyController->SetOnHitPlayerCallback([this](int damage) {
         m_playerController->TakeDamage(damage);
-    });
-
-    m_playerController->SetOnHitEnemyCallback([&](int damage) {
-        m_enemyController->TakeDamage(damage);
         });
+
+    m_enemyController2->SetOnHitPlayerCallback([this](int damage) {
+        m_playerController->TakeDamage(damage);
+        });
+
+    m_enemyController3->SetOnHitPlayerCallback([this](int damage) {
+        m_playerController->TakeDamage(damage);
+        });
+
+    std::vector<std::function<void(int)>> hitEnemyCallbacks;
+    hitEnemyCallbacks.push_back([this](int damage) { m_enemyController->TakeDamage(damage); });
+    hitEnemyCallbacks.push_back([this](int damage) { m_enemyController2->TakeDamage(damage); });
+    hitEnemyCallbacks.push_back([this](int damage) { m_enemyController3->TakeDamage(damage); });
+    m_playerController->SetOnHitEnemyCallbacks(hitEnemyCallbacks);
 
     m_playerController->SetOnScreenShakeCallback([]() {
         int randomMagnitude = 5 + rand() % 2;
         Camera::GetInstance()->Shake(0.1f, randomMagnitude);
         });
-} 
-
-void GSPlay::Exit()
-{
 }
 
-void GSPlay::Pause()
-{
-}
+void GSPlay::Exit() {}
 
-void GSPlay::Resume()
-{
-}
+void GSPlay::Pause() {}
 
-void GSPlay::HandleEvents()
-{
-}
+void GSPlay::Resume() {}
+
+void GSPlay::HandleEvents() {}
 
 void GSPlay::HandleKeyEvents(SDL_Event& e)
 {
@@ -113,9 +129,7 @@ void GSPlay::HandleTouchEvents(SDL_Event& e)
         if (button->HandleTouchEvent(&e)) break;
 }
 
-void GSPlay::HandleMouseMoveEvents(SDL_Event& e)
-{
-}
+void GSPlay::HandleMouseMoveEvents(SDL_Event& e) {}
 
 void GSPlay::Update(float deltaTime)
 {
@@ -123,9 +137,10 @@ void GSPlay::Update(float deltaTime)
 
     m_playerController->Update(deltaTime);
     m_enemyController->Update(deltaTime);
+    m_enemyController2->Update(deltaTime);
+    m_enemyController3->Update(deltaTime);
 
     Camera::GetInstance()->Update(deltaTime);
-
 }
 
 void GSPlay::Draw(SDL_Renderer* renderer)
@@ -158,16 +173,12 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
     for (auto& it : m_listButton) it->Draw(renderer);
 
-    // Vẽ player
     m_playerController->Draw(renderer);
 
     m_enemyController->Draw(renderer);
+    m_enemyController2->Draw(renderer);
+    m_enemyController3->Draw(renderer);
 
-    // Vẽ enemy
-    if (enemy)
-        enemy->Draw(renderer);
-
-    // Debug collider
     auto ConvertToCameraView = [](SDL_Rect objCollider, Vector2 camPos) -> SDL_Rect {
         SDL_Rect out = objCollider;
         out.x -= camPos.x;
