@@ -1,6 +1,7 @@
 #include "GSMenu.h"
 #include "ResourceManagers.h"
 #include "MouseButton.h"
+#include "Sound.h"
 
 
 // unit: pixel
@@ -67,6 +68,9 @@ void GSMenu::Init()
 	btnExit->SetSize(BTN_EXIT_SIZE);
 	btnExit->Set2DPosition(BTN_EXIT_POSITION);
 	btnExit->SetOnClick([]() {
+		if (Mix_PlayingMusic() > 0) {
+			Mix_HaltMusic();
+		}
 		exit(0);
 	});
 	m_listButton.push_back(btnExit);
@@ -95,8 +99,14 @@ void GSMenu::Init()
 
 
 	/// scene's SOUND
-	Sound::GetInstance()->LoadSound("Alarm01.wav");
-	Sound::GetInstance()->PlaySound("Alarm01.wav");}
+	Sound::GetInstance()->LoadSound("background_music.mp3");
+	Sound::GetInstance()->PlaySound("background_music.mp3");
+
+	Sound::GetInstance()->LoadSfx("fire_sound.wav");
+	Sound::GetInstance()->PlaySfx("fire_sound.wav", -1);
+
+	Sound::GetInstance()->LoadSfx("ui_pop.wav");
+}
 
 
 void GSMenu::Exit()
@@ -107,16 +117,26 @@ void GSMenu::Exit()
 
 void GSMenu::Pause()
 {
-	Sound::GetInstance()->PauseSound();
+	Mix_HaltMusic();
+	Mix_Pause(-1);
 }
+
 
 
 void GSMenu::Resume()
 {
 	Camera::GetInstance()->ResetCameraPosition();
+	buttonIndex = 0;
 
-	Sound::GetInstance()->ResumeSound();
+
+	// Reload and Replay MUSIC:
+	Sound::GetInstance()->LoadSound("background_music.mp3");
+	Sound::GetInstance()->PlaySound("background_music.mp3");
+
+	// Resume CHUNK:
+	Mix_Resume(-1);
 }
+
 
 
 void GSMenu::HandleEvents()
@@ -143,12 +163,15 @@ void GSMenu::HandleTouchEvents(SDL_Event& e)
 		int y = e.motion.y;
 
 		if (x >= btnPlayLeft && x <= btnPlayRight && y >= btnPlayTop && y <= btnPlayBottom) {
+			if (buttonIndex != 1) Sound::GetInstance()->PlaySfx("ui_pop.wav");
 			buttonIndex = 1;
 		}
 		else if (x >= btnCreditLeft && x <= btnCreditRight && y >= btnCreditTop && y <= btnCreditBottom) {
+			if (buttonIndex != 2) Sound::GetInstance()->PlaySfx("ui_pop.wav");
 			buttonIndex = 2;
 		}
 		else if (x >= btnSettingsLeft && x <= btnSettingsRight && y >= btnSettingsTop && y <= btnSettingsBottom) {
+			if (buttonIndex != 3) Sound::GetInstance()->PlaySfx("ui_pop.wav");
 			buttonIndex = 3;
 		}
 		else {

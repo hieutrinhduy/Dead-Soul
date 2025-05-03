@@ -9,7 +9,6 @@ Sound::Sound()
 
 Sound::~Sound()
 {
-    CleanUp();
 }
 
 bool Sound::Init()
@@ -33,41 +32,21 @@ bool Sound::Init()
 
 void Sound::PlaySound(const std::string& name)
 {
-
-    Mix_Music* music = NULL;
-    auto it = m_Sounds.find(name);
+    /*auto it = m_Sounds.find(name);
     if (it != m_Sounds.end())
     {
-        music = it->second;
-    }
-    //If there is no music playing
-    if (Mix_PlayingMusic() == 0)
+        m_Music = it->second;
+    }*/
+
+
+    //Play the music
+    if (m_Music != nullptr)
     {
-        //Play the music
-        if (music != nullptr)
-        {
-            Mix_PlayMusic(music, -1); // The first argument is the music we want to play and the last argument is the number of times to repeat it. -1 for loop it util stop
-        }
-        else
-        {
-            printf("No sound available can play");
-        }
+        Mix_PlayMusic(m_Music, -1);
     }
-    //If music is being played
     else
     {
-        //If the music is paused
-        if (Mix_PausedMusic() == 1)
-        {
-            //Resume the music
-            Mix_ResumeMusic();
-        }
-        //If the music is playing
-        else
-        {
-            //Pause the music
-            Mix_PauseMusic();
-        }
+        printf("No sound available can play");
     }
 }
 
@@ -91,6 +70,13 @@ void Sound::StopSound()
 
 void Sound::LoadSound(const std::string& name)
 {
+    //If music is being playing
+    if (Mix_PlayingMusic() > 0)
+    {
+        Mix_HaltMusic();
+        Mix_FreeMusic(m_Music);
+    }
+
     //Load music
     std::string pathFile = m_PathMusic + name;
     auto it = m_Sounds.find(name);
@@ -98,7 +84,7 @@ void Sound::LoadSound(const std::string& name)
     {
         return;
     }
-   Mix_Music* m_Music = Mix_LoadMUS(pathFile.c_str());
+   m_Music = Mix_LoadMUS(pathFile.c_str());
    if (m_Music != nullptr)
    {
        m_Sounds.insert(std::pair<const std::string&, Mix_Music*>(name, (m_Music)));
@@ -106,7 +92,6 @@ void Sound::LoadSound(const std::string& name)
    else
    {
        printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
-
    }
 }
 

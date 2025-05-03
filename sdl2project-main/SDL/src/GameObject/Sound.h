@@ -19,7 +19,7 @@ public:
 	void CleanUp();
 private:
 	std::string m_PathMusic;
-	//Mix_Music* m_Music = NULL;
+	Mix_Music* m_Music = NULL;
 	std::map< std::string, Mix_Chunk*> m_Sfxs;
 	std::map<std::string, Mix_Music*> m_Sounds;
 };

@@ -86,6 +86,10 @@ int SpriteAnimation::GetCurrentFrame() {
 	return m_currentFrame;
 }
 
+float SpriteAnimation::GetFrameTime() {
+	return m_frameTime;
+}
+
 
 
 

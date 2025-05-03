@@ -38,6 +38,7 @@ public:
 	int GetHeight();
 	int GetCurrentAction();
 	int GetCurrentFrame();
+	float GetFrameTime();
 
 	// SETTER:
 	void Set2DPosition(float x, float y);

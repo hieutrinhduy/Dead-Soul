@@ -3,6 +3,7 @@
 #include "ResourceManagers.h"
 
 #include "Define.h"
+#include "Sound.h"
 
 
 #define LOGO_SIZE 800, 800
@@ -27,17 +28,23 @@ GSLogo::~GSLogo()
 
 void GSLogo::Init()
 {
+	// BLACK BACKGROUND:
 	auto texture = ResourceManagers::GetInstance()->GetTexture("black_background.png");
 	sceneBackground = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	sceneBackground->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	sceneBackground->Set2DPosition(0, 0);
 
+	// LOGO ANIMATION:
 	texture = ResourceManagers::GetInstance()->GetTexture("logo.png");
 	logoAnimation = std::make_shared<SpriteAnimation>(texture, 0, SPRITE_COLS, SPRITE_ROWS, 0.06f);
 	logoAnimation->SetFlip(SDL_FLIP_NONE);
 	logoAnimation->SetSize(LOGO_SIZE);
 	logoAnimation->Set2DPosition( (SCREEN_WIDTH - logoAnimation->GetWidth()) / 2.0f,
 								  (SCREEN_HEIDHT - logoAnimation->GetHeight()) / 3.0f );
+
+	// SOUND:
+	Sound::GetInstance()->LoadSfx("pop_1.wav");
+	Sound::GetInstance()->LoadSfx("pop_2.wav");
 }
 
 
@@ -82,15 +89,33 @@ void GSLogo::Update(float deltaTime)
 	}
 	if (!m_newRow && logoAnimation->GetCurrentFrame() == 1) m_newRow = true;
 
+
 	// frame 11
 	if (m_reduceFPS && logoAnimation->GetCurrentFrame() == 4 && logoAnimation->GetCurrentAction() == 2) {
 		logoAnimation->SetFrameTime(0.7f);
 		m_reduceFPS = false;
 	}
-	// frame 17
-	else if (!m_reduceFPS && logoAnimation->GetCurrentFrame() == 3 && logoAnimation->GetCurrentAction() == 3) {
-		logoAnimation->SetFrameTime(0.06f);
+
+	// frame 14: open eyes
+	if (!m_reduceFPS && logoAnimation->GetCurrentFrame() == 0 && logoAnimation->GetCurrentAction() == 3) {
+		Sound::GetInstance()->PlaySfx("pop_1.wav");
 		m_reduceFPS = true;
+	}
+	// frame 15: look sideways
+	if (m_reduceFPS && logoAnimation->GetCurrentFrame() == 1 && logoAnimation->GetCurrentAction() == 3) {
+		Sound::GetInstance()->PlaySfx("pop_2.wav");
+		m_reduceFPS = false;
+	}
+	// frame 16: look sideways
+	if (!m_reduceFPS && logoAnimation->GetCurrentFrame() == 2 && logoAnimation->GetCurrentAction() == 3) {
+		Sound::GetInstance()->PlaySfx("pop_2.wav");
+		m_reduceFPS = true;
+	}
+
+	// frame 17
+	else if (m_reduceFPS && logoAnimation->GetCurrentFrame() == 3 && logoAnimation->GetCurrentAction() == 3) {
+		logoAnimation->SetFrameTime(0.06f);
+		m_reduceFPS = false;
 	}
 	// last frame
 	else if (logoAnimation->GetCurrentFrame() == SPRITE_COLS - 1 && logoAnimation->GetCurrentAction() == SPRITE_ROWS) {
