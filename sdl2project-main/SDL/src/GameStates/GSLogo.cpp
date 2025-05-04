@@ -119,6 +119,7 @@ void GSLogo::Update(float deltaTime)
 	}
 	// last frame
 	else if (logoAnimation->GetCurrentFrame() == SPRITE_COLS - 1 && logoAnimation->GetCurrentAction() == SPRITE_ROWS) {
+		Sound::GetInstance()->ClearAudioResource();
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_STORY);
 	}
 }

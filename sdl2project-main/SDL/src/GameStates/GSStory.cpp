@@ -182,7 +182,7 @@ void GSStory::Update(float deltaTime)
 
 	// if reach the last frame
 	else if (projector->GetCurrentAction() == 13) {
-		Mix_HaltMusic();
+		Sound::GetInstance()->ClearAudioResource();
 		GameStateMachine::GetInstance()->ChangeState(StateType::STATE_INTRO);
 	}
 }

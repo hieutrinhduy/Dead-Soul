@@ -18,7 +18,10 @@ GSIntro::GSIntro() : GameStateBase(StateType::STATE_INTRO)
 	if (DataSaver::GetInstance()->LoadGame("save.dat").isWatchedStory) introType = 2;
 	else {
 		introType = 1;
-		DataSaver::GetInstance()->SetSaveData(true, 1);
+
+		SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
+		saveData.isWatchedStory = true;
+		DataSaver::GetInstance()->SetSaveData(saveData);
 		DataSaver::GetInstance()->SaveGame("save.dat");
 	}
 
@@ -135,6 +138,7 @@ void GSIntro::Update(float deltaTime)
 		}
 		// last frame
 		else if (intro->GetCurrentFrame() == INTRO_SPRITE_COLS - 1 && intro->GetCurrentAction() == INTRO_SPRITE_ROWS) {
+			Sound::GetInstance()->ClearAudioResource();
 			GameStateMachine::GetInstance()->ChangeState(StateType::STATE_MENU);
 		}
 	}
@@ -174,6 +178,7 @@ void GSIntro::Update(float deltaTime)
 			}
 			// last frame
 			else if (intro->GetCurrentFrame() == INTRO_SPRITE_COLS - 1 && intro->GetCurrentAction() == INTRO_SPRITE_ROWS) {
+				Sound::GetInstance()->ClearAudioResource();
 				GameStateMachine::GetInstance()->ChangeState(StateType::STATE_MENU);
 			}
 		}

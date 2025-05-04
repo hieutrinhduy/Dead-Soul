@@ -15,6 +15,8 @@ constexpr int ICON_SIZE = 9; // altered compared to reality ( 19x19 px )
 
 constexpr float DECAY_FACTOR = 0.8f;
 
+constexpr int RESET_BUTTON_WIDTH = 300, RESET_BUTTON_HEIGHT = 100;
+
 
 GSSettings::GSSettings() : GameStateBase(StateType::STATE_SETTINGS)
 {
@@ -26,14 +28,15 @@ GSSettings::GSSettings() : GameStateBase(StateType::STATE_SETTINGS)
 	bar2Top = SCREEN_HEIDHT * 1 / 2;
 
 	// volumn in the range of 0 to 128, read from 'save.dat'
-	musicVolume = 128;
-	sfxVolume = 90;
+	musicVolume = DataSaver::GetInstance()->LoadGame("save.dat").musicVolume;
+	sfxVolume = DataSaver::GetInstance()->LoadGame("save.dat").sfxVolume;
 
-	fullVolumeBarWidth = SCREEN_WIDTH * 3 / 4 - milestone;
+	int fullBarWidth = SCREEN_WIDTH * 3 / 4 - milestone;
+	float ratio = (float) fullBarWidth / BAR_WIDTH;
+	fullVolumeBarWidth = fullBarWidth - 2 * ratio;
 
-	float ratio = (float) fullVolumeBarWidth / BAR_WIDTH;
 	iconStartPoint = milestone + ratio - ICON_SIZE * widthScaling / 2;
-	iconEndPoint = milestone + fullVolumeBarWidth - ratio - ICON_SIZE * widthScaling / 2;
+	iconEndPoint = milestone + fullBarWidth - ratio - ICON_SIZE * widthScaling / 2;
 }
 
 
@@ -70,12 +73,12 @@ void GSSettings::Init()
 	// SETTINGS BACKGROUND BARS:
 	texture = ResourceManagers::GetInstance()->GetTexture("img_background_bar.png");
 	auto backgroundBar1 = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
-	backgroundBar1->SetSize(fullVolumeBarWidth, heightScaling * BAR_HEIGHT);
+	backgroundBar1->SetSize(SCREEN_WIDTH * 3 / 4 - milestone, heightScaling * BAR_HEIGHT);
 	backgroundBar1->Set2DPosition(milestone, bar1Top);
 	elements.push_back(backgroundBar1);
 
 	auto backgroundBar2 = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
-	backgroundBar2->SetSize(fullVolumeBarWidth, heightScaling * BAR_HEIGHT);
+	backgroundBar2->SetSize(SCREEN_WIDTH * 3 / 4 - milestone, heightScaling * BAR_HEIGHT);
 	backgroundBar2->Set2DPosition(milestone, bar2Top);
 	elements.push_back(backgroundBar2);
 
@@ -84,29 +87,31 @@ void GSSettings::Init()
 	texture = ResourceManagers::GetInstance()->GetTexture("img_foreground_bar.png");
 	musicForegroundBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	musicForegroundBar->SetSize(fullVolumeBarWidth * musicVolume / 128, heightScaling * BAR_HEIGHT);
-	musicForegroundBar->Set2DPosition(milestone, bar1Top);
+	musicForegroundBar->Set2DPosition(iconStartPoint + ICON_SIZE * widthScaling / 2, bar1Top);
 	elements.push_back(musicForegroundBar);
 
 	sfxForegroundBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	sfxForegroundBar->SetSize(fullVolumeBarWidth * sfxVolume / 128, heightScaling * BAR_HEIGHT);
-	sfxForegroundBar->Set2DPosition(milestone, bar2Top);
+	sfxForegroundBar->Set2DPosition(iconStartPoint + ICON_SIZE * widthScaling / 2, bar2Top);
 	elements.push_back(sfxForegroundBar);
 
 
 	// SETTINGS ICONS:
 	texture = ResourceManagers::GetInstance()->GetTexture("btn_settings.png");
-	iconMusicSettings = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
+	iconMusicSettings = std::make_shared<SliderIcon>(texture, SDL_FLIP_NONE);
 	iconMusicSettings->SetSize(ICON_SIZE * widthScaling, ICON_SIZE * heightScaling);
-	iconMusicSettings->Set2DPosition(iconStartPoint + musicVolume / 128.0f * (iconEndPoint - iconStartPoint),
+	iconMusicSettings->Set2DPosition(iconStartPoint + musicVolume / 128.0f * fullVolumeBarWidth,
 									 bar1Top - (ICON_SIZE - BAR_HEIGHT) / 2.0f * heightScaling);
-	elements.push_back(iconMusicSettings);
+	iconMusicSettings->SetRange(iconStartPoint, iconEndPoint);
+	m_listSliderIcon.push_back(iconMusicSettings);
 
 	texture = ResourceManagers::GetInstance()->GetTexture("btn_settings.png");
-	iconSfxSettings = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
+	iconSfxSettings = std::make_shared<SliderIcon>(texture, SDL_FLIP_NONE);
 	iconSfxSettings->SetSize(ICON_SIZE * widthScaling, ICON_SIZE * heightScaling);
-	iconSfxSettings->Set2DPosition(iconStartPoint + sfxVolume / 128.0f * (iconEndPoint - iconStartPoint),
+	iconSfxSettings->Set2DPosition(iconStartPoint + sfxVolume / 128.0f * fullVolumeBarWidth,
 								   bar2Top - (ICON_SIZE - BAR_HEIGHT) / 2.0f * heightScaling);
-	elements.push_back(iconSfxSettings);
+	iconSfxSettings->SetRange(iconStartPoint, iconEndPoint);
+	m_listSliderIcon.push_back(iconSfxSettings);
 
 
 	// button EXIT:
@@ -122,14 +127,14 @@ void GSSettings::Init()
 
 
 	// button RESET:
-	texture = ResourceManagers::GetInstance()->GetTexture("btn_close.tga");
+	texture = ResourceManagers::GetInstance()->GetTexture("btn_reset.png");
 	auto btnReset = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
-	btnReset->SetSize(50, 50);
-	btnReset->Set2DPosition(SCREEN_WIDTH - 50, 10);
+	btnReset->SetSize(RESET_BUTTON_WIDTH, RESET_BUTTON_HEIGHT);
+	btnReset->Set2DPosition((SCREEN_WIDTH - RESET_BUTTON_WIDTH) / 2, SCREEN_HEIDHT - RESET_BUTTON_HEIGHT - 30);
+	void ResetGame();
 	btnReset->SetOnClick([]() {
-		// reset game:
-
-	});
+		ResetGame();
+		});
 	m_listButton.push_back(btnReset);
 
 
@@ -164,6 +169,8 @@ void GSSettings::HandleKeyEvents(SDL_Event& e)
 {
 }
 
+
+
 void GSSettings::HandleTouchEvents(SDL_Event& e)
 {
 	for (auto button : m_listButton)
@@ -173,16 +180,45 @@ void GSSettings::HandleTouchEvents(SDL_Event& e)
 			break;
 		}
 	}
+
+	for (auto icon : m_listSliderIcon)
+	{
+		if (icon->HandleTouchEvent(&e))
+		{
+			break;
+		}
+	}
 }
+
+
 
 void GSSettings::HandleMouseMoveEvents(SDL_Event& e)
 {
 }
 
+
+
+
 void GSSettings::Update(float deltaTime)
 {
+	musicVolume = 128.0f * (iconMusicSettings->Get2DPosition().x - iconStartPoint) / fullVolumeBarWidth;
+	sfxVolume = 128.0f * (iconSfxSettings->Get2DPosition().x - iconStartPoint) / fullVolumeBarWidth;
 
+	Sound::GetInstance()->SetMusicVolume(musicVolume);
+	Sound::GetInstance()->SetSfxVolume(sfxVolume);
+
+	SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
+	saveData.musicVolume = musicVolume;
+	saveData.sfxVolume = sfxVolume;
+	DataSaver::GetInstance()->SetSaveData(saveData);
+	DataSaver::GetInstance()->SaveGame("save.dat");
+
+	musicForegroundBar->SetSize(fullVolumeBarWidth * musicVolume / 128, heightScaling * BAR_HEIGHT);
+	sfxForegroundBar->SetSize(fullVolumeBarWidth * sfxVolume / 128, heightScaling * BAR_HEIGHT);
 }
+
+
+
 
 void GSSettings::Draw(SDL_Renderer* renderer)
 {
@@ -190,9 +226,27 @@ void GSSettings::Draw(SDL_Renderer* renderer)
 	musicForegroundBar->Draw(renderer);
 	sfxForegroundBar->Draw(renderer);
 
-	// draw other UI ELEMENTS:
+	// draw non-functional UI ELEMENTS:
 	for (auto& it : elements) it->Draw(renderer);
 
 	// draw BUTTONS:
 	for (auto& it : m_listButton) it->Draw(renderer);
+
+	// draw SLIDER ICONS:
+	for (auto& it : m_listSliderIcon) it->Draw(renderer);
+}
+
+
+
+void ResetGame() {
+	SaveData saveData;
+	saveData.musicVolume = DataSaver::GetInstance()->LoadGame("save.dat").musicVolume;
+	saveData.sfxVolume = DataSaver::GetInstance()->LoadGame("save.dat").sfxVolume;
+	DataSaver::GetInstance()->SetSaveData(saveData);
+	DataSaver::GetInstance()->SaveGame("save.dat");
+
+	Sound::GetInstance()->ClearAudioResource();
+
+	GameStateMachine::GetInstance()->Cleanup();
+	GameStateMachine::GetInstance()->PushState(StateType::STATE_LOGO);
 }

@@ -1,8 +1,11 @@
 #pragma once
+
 #include "SDL_mixer.h"
 #include <string>
 #include <map>
 #include "Singleton.h"
+
+
 class Sound :public CSingleton<Sound>
 {
 public:
@@ -16,10 +19,18 @@ public:
 	void LoadSound(const std::string& name);
 	void LoadSfx(const std::string& name);
 	void PlaySfx(const std::string& name, int repeat = 0);
+	void ClearAudioResource();
 	void CleanUp();
+
+	void SetMusicVolume(int volume);
+	void SetSfxVolume(int volume);
+
+
 private:
 	std::string m_PathMusic;
 	Mix_Music* m_Music = NULL;
 	std::map< std::string, Mix_Chunk*> m_Sfxs;
 	std::map<std::string, Mix_Music*> m_Sounds;
+
+	int musicVolume, sfxVolume;
 };

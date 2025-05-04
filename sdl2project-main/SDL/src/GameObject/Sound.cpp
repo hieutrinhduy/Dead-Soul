@@ -1,8 +1,11 @@
-#include"Sound.h"
+#include "Sound.h"
+#include "DataSaver.h"
 #include <SDL_ttf.h>
 
-Sound::Sound()
-{
+Sound::Sound() {
+    musicVolume = DataSaver::GetInstance()->LoadGame("save.dat").musicVolume;
+    sfxVolume = DataSaver::GetInstance()->LoadGame("save.dat").sfxVolume;
+
     m_PathMusic = "Data/Sounds/";
     Init();
 }
@@ -42,6 +45,7 @@ void Sound::PlaySound(const std::string& name)
     //Play the music
     if (m_Music != nullptr)
     {
+        Mix_VolumeMusic(musicVolume);
         Mix_PlayMusic(m_Music, -1);
     }
     else
@@ -127,6 +131,7 @@ void Sound::PlaySfx(const std::string& name, int repeat)
     }
 	if (chunk!= nullptr)
 	{
+        Mix_VolumeChunk(chunk, sfxVolume);
 		Mix_PlayChannel(-1, chunk, repeat);
 	}
     else
@@ -134,6 +139,21 @@ void Sound::PlaySfx(const std::string& name, int repeat)
         printf("Cannot play sfx");
     }
 }
+
+
+void Sound::ClearAudioResource() {
+    for (auto it = m_Sfxs.begin(); it != m_Sfxs.end(); it++)
+    {
+        Mix_FreeChunk(it->second);
+    }
+    m_Sfxs.clear();
+    for (auto it = m_Sounds.begin(); it != m_Sounds.end(); it++)
+    {
+        Mix_FreeMusic(it->second);
+    }
+    m_Sounds.clear();
+}
+
 
 void Sound::CleanUp()
 {
@@ -152,4 +172,18 @@ void Sound::CleanUp()
 	Mix_CloseAudio();
 	Mix_Quit();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+}
+
+
+
+void Sound::SetMusicVolume(int volume) {
+    musicVolume = volume;
+    Mix_VolumeMusic(volume);
+}
+
+void Sound::SetSfxVolume(int volume) {
+    sfxVolume = volume;
+    for (auto it = m_Sfxs.begin(); it != m_Sfxs.end(); it++) {
+        Mix_VolumeChunk(it->second, volume);
+    }
 }

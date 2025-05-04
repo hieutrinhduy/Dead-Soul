@@ -1,4 +1,5 @@
 ﻿#include "GSPlay.h"
+
 #include "ResourceManagers.h"
 #include "GameObject/MouseButton.h"
 #include "GameObject/Sprite2D.h"
@@ -162,6 +163,11 @@ void GSPlay::Init()
         int randomMagnitude = 5 + rand() % 2;
         Camera::GetInstance()->Shake(0.1f, randomMagnitude);
         });
+
+
+    // SOUNDS:
+    Sound::GetInstance()->LoadSound("gameplay_music.mp3");
+    Sound::GetInstance()->PlaySound("gameplay_music.mp3");
 }
 
 
