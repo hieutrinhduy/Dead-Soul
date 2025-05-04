@@ -26,6 +26,7 @@ GSPlay::~GSPlay() {}
 void GSPlay::Init()
 {
     groundCollider = { 0, 1440, 10000, 200 };
+
     auto tex1 = ResourceManagers::GetInstance()->GetTexture("background_layer_1.png");
     auto tex2 = ResourceManagers::GetInstance()->GetTexture("background_layer_2.png");
     auto tex3 = ResourceManagers::GetInstance()->GetTexture("background_layer_3.png");
@@ -59,6 +60,7 @@ void GSPlay::Init()
 
     m_playerController->Init();
 
+    // Enemy thường
     m_enemyController = std::make_shared<EnemyController>();
     m_enemyController->Init(200, 800);
 
@@ -68,37 +70,67 @@ void GSPlay::Init()
     m_enemyController3 = std::make_shared<EnemyController>();
     m_enemyController3->Init(1600, 1900);
 
+    // Enemy đặc biệt: EvilCreature
+    m_evilCreature = std::make_shared<EvilCreature>();
+    m_evilCreature->Init(2200, 2500);
+
+    // Enemy đặc biệt: GhostWarrior
+    m_ghostWarrior = std::make_shared<GhostWarrior>();
+    m_ghostWarrior->Init(2700, 3000);
+
+    // Enemy đặc biệt: GhostWarriorRed
+    m_ghostWarriorRed = std::make_shared<GhostWarriorRed>();
+    m_ghostWarriorRed->Init(3200, 3500);
+
+    // Set ground collider cho tất cả
     m_playerController->SetGroundCollider(&groundCollider);
-
     m_enemyController->SetGroundCollider(&groundCollider);
-    m_enemyController->SetPlayerCollider(&m_playerController->GetCollider());
-
     m_enemyController2->SetGroundCollider(&groundCollider);
-    m_enemyController2->SetPlayerCollider(&m_playerController->GetCollider());
-
     m_enemyController3->SetGroundCollider(&groundCollider);
-    m_enemyController3->SetPlayerCollider(&m_playerController->GetCollider());
+    m_evilCreature->SetGroundCollider(&groundCollider);
+    m_ghostWarrior->SetGroundCollider(&groundCollider);
+    m_ghostWarriorRed->SetGroundCollider(&groundCollider);
 
+    // Set player collider cho tất cả
+    m_enemyController->SetPlayerCollider(&m_playerController->GetCollider());
+    m_enemyController2->SetPlayerCollider(&m_playerController->GetCollider());
+    m_enemyController3->SetPlayerCollider(&m_playerController->GetCollider());
+    m_evilCreature->SetPlayerCollider(&m_playerController->GetCollider());
+    m_ghostWarrior->SetPlayerCollider(&m_playerController->GetCollider());
+    m_ghostWarriorRed->SetPlayerCollider(&m_playerController->GetCollider());
+
+    // Lấy danh sách collider của enemy
     std::vector<SDL_Rect*> enemyColliders;
     enemyColliders.push_back(m_enemyController->GetEnemyCollider());
     enemyColliders.push_back(m_enemyController2->GetEnemyCollider());
     enemyColliders.push_back(m_enemyController3->GetEnemyCollider());
+    enemyColliders.push_back(m_evilCreature->GetCollider());
+    enemyColliders.push_back(m_ghostWarrior->GetCollider());
+    enemyColliders.push_back(m_ghostWarriorRed->GetCollider());
     m_playerController->SetEnemyColliders(enemyColliders);
 
+    // Callback khi enemy đánh player
     m_enemyController->SetOnHitPlayerCallback([this](int damage) {
         m_playerController->TakeDamage(damage);
         });
-
     m_enemyController2->SetOnHitPlayerCallback([this](int damage) {
         m_playerController->TakeDamage(damage);
         });
-
     m_enemyController3->SetOnHitPlayerCallback([this](int damage) {
         m_playerController->TakeDamage(damage);
         });
+    m_evilCreature->SetOnHitPlayerCallback([this](int damage) {
+        m_playerController->TakeDamage(damage);
+        });
+    m_ghostWarrior->SetOnHitPlayerCallback([this](int damage) {
+        m_playerController->TakeDamage(damage);
+        });
+    m_ghostWarriorRed->SetOnHitPlayerCallback([this](int damage) {
+        m_playerController->TakeDamage(damage);
+        });
 
+    // Callback khi player đánh trúng enemy
     std::vector<std::function<void(int)>> hitEnemyCallbacks;
-    hitEnemyCallbacks.clear();
     hitEnemyCallbacks.push_back([this](int damage) {
         std::cout << "Enemy 0 nhận damage = " << damage << std::endl;
         m_enemyController->TakeDamage(damage);
@@ -111,14 +143,29 @@ void GSPlay::Init()
         std::cout << "Enemy 2 nhận damage = " << damage << std::endl;
         m_enemyController3->TakeDamage(damage);
         });
-    m_playerController->SetOnHitEnemyCallbacks(hitEnemyCallbacks);
+    hitEnemyCallbacks.push_back([this](int damage) {
+        std::cout << "EvilCreature nhận damage = " << damage << std::endl;
+        m_evilCreature->TakeDamage(damage);
+        });
+    hitEnemyCallbacks.push_back([this](int damage) {
+        std::cout << "GhostWarrior nhận damage = " << damage << std::endl;
+        m_ghostWarrior->TakeDamage(damage);
+        });
+    hitEnemyCallbacks.push_back([this](int damage) {
+        std::cout << "GhostWarriorRed nhận damage = " << damage << std::endl;
+        m_ghostWarriorRed->TakeDamage(damage);
+        });
     m_playerController->SetOnHitEnemyCallbacks(hitEnemyCallbacks);
 
+    // Rung màn hình khi đánh trúng enemy
     m_playerController->SetOnScreenShakeCallback([]() {
         int randomMagnitude = 5 + rand() % 2;
         Camera::GetInstance()->Shake(0.1f, randomMagnitude);
         });
 }
+
+
+
 
 void GSPlay::Exit() {}
 
@@ -150,6 +197,9 @@ void GSPlay::Update(float deltaTime)
     m_enemyController->Update(deltaTime);
     m_enemyController2->Update(deltaTime);
     m_enemyController3->Update(deltaTime);
+    m_evilCreature->Update(deltaTime);
+    m_ghostWarrior->Update(deltaTime);
+    m_ghostWarriorRed->Update(deltaTime);
 
     Camera::GetInstance()->Update(deltaTime);
 }
@@ -189,6 +239,9 @@ void GSPlay::Draw(SDL_Renderer* renderer)
     m_enemyController->Draw(renderer);
     m_enemyController2->Draw(renderer);
     m_enemyController3->Draw(renderer);
+    m_evilCreature->Draw(renderer);
+    m_ghostWarrior->Draw(renderer);
+    m_ghostWarriorRed->Draw(renderer);
 
     auto ConvertToCameraView = [](SDL_Rect objCollider, Vector2 camPos) -> SDL_Rect {
         SDL_Rect out = objCollider;

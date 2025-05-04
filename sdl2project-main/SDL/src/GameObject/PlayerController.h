@@ -27,6 +27,10 @@ public:
     void SetOnHitEnemyCallbacks(const std::vector<std::function<void(int)>>& callbacks);
     void SetOnScreenShakeCallback(std::function<void()> callback) { m_onScreenShake = callback; }
     void SetEnemyColliders(const std::vector<SDL_Rect*>& enemies);
+    const int UI_HP_X = 50;
+    const int UI_HP_Y = 50;
+    const int UI_HP_WIDTH = 200;
+    const int UI_HP_HEIGHT = 20;
 private:
     std::shared_ptr<SpriteAnimation> m_player;
     SDL_Rect m_playerCollider;
@@ -86,7 +90,6 @@ private:
     //std::function<void(int damage)> m_onHitEnemy;
     std::vector<std::function<void(int)>> m_onHitEnemyList;
     std::function<void()> m_onScreenShake;
-
 
     bool m_canDealDamage;
 

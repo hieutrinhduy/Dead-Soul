@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include <cstdlib>
 #include <iostream>
+#include <algorithm> 
 
 int attackIndex = 0;
 
@@ -44,6 +45,9 @@ void EnemyController::Init(float pointA, float pointB)
     m_pointA = pointA;
     m_pointB = pointB;
     m_enemyFlip = SDL_FLIP_NONE;
+
+    m_hpBarBg = { 0, 0, m_barWidth, m_barHeight };
+    m_hpBarFill = m_hpBarBg;
 }
 
 void EnemyController::SetGroundCollider(SDL_Rect* ground)
@@ -68,14 +72,18 @@ void EnemyController::TakeDamage(int damage)
 
     m_currentHP -= damage;
 
+    float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
+    m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
+
     if (m_currentHP <= 0) {
         m_currentHP = 0;
         std::cout << "[EnemyController] ĐÃ CHẾT\n";
         Die();
     }
     else {
+        m_isAttacking = false;
         m_isHit = true;
-        m_hitTimer = 0.25f;
+        m_hitTimer = 0.1f;
         ChangeAnimation(hitTexture, 5, 0.05f);
     }
 }
@@ -211,7 +219,7 @@ void EnemyController::Update(float deltaTime)
         {
             int currentFrame = m_enemy->GetCurrentFrame();
 
-            if (attackIndex == 1 && currentFrame == 5 && !m_didDamage)
+            if (attackIndex == 1 && currentFrame == 5 && !m_didDamage && m_isAttacking)
             {
                 m_didDamage = true;
                 int offsetX = 100;
@@ -228,7 +236,7 @@ void EnemyController::Update(float deltaTime)
                     if (m_onHitPlayer) m_onHitPlayer(m_damage);
                 }
             }
-            else if (attackIndex == 2 && currentFrame == 6 && !m_didDamage)
+            else if (attackIndex == 2 && currentFrame == 6 && !m_didDamage && m_isAttacking)
             {
                 m_didDamage = true;
                 int offsetX = 100;
@@ -286,6 +294,14 @@ void EnemyController::Update(float deltaTime)
     m_enemy->Set2DPosition(posX, posY);
     m_enemyCollider = { (int)posX + 50, (int)posY, m_enemy->GetWidth() / 2, m_enemy->GetHeight() };
 
+    // Cập nhật vị trí thanh máu
+    m_hpBarBg.x = m_enemyCollider.x + m_enemyCollider.w / 2 - m_barWidth / 2;
+    m_hpBarBg.y = m_enemyCollider.y - 10;  // Khoảng cách phía trên đầu
+
+    m_hpBarFill = m_hpBarBg;
+    float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
+    m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
+
     m_enemy->Update(deltaTime);
 }
 
@@ -309,6 +325,22 @@ void EnemyController::Draw(SDL_Renderer* renderer)
     drawAttackBox.y -= (int)camPos.y;
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderDrawRect(renderer, &drawAttackBox);
+
+    SDL_Rect drawBg = m_hpBarBg;
+    drawBg.x -= static_cast<int>(camPos.x);
+    drawBg.y -= static_cast<int>(camPos.y);
+
+    SDL_Rect drawFill = m_hpBarFill;
+    drawFill.x -= static_cast<int>(camPos.x);
+    drawFill.y -= static_cast<int>(camPos.y);
+
+    // Vẽ nền (đen)
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &drawBg);
+
+    // Vẽ phần máu còn lại (đỏ)
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &drawFill);
 }
 
 bool EnemyController::DetectPlayer()
@@ -323,14 +355,17 @@ bool EnemyController::DetectPlayer()
 void EnemyController::ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime)
 {
     if (!m_enemy) return;
-    auto temp = m_enemy->Get2DPosition();
-    SDL_FPoint pos;
-    pos.x = temp.x;
-    pos.y = temp.y;
+
+    Vector2 pos = m_enemy->Get2DPosition();
+
     m_enemy = std::make_shared<SpriteAnimation>(texture, 1, frameCount, 1, frameTime);
     m_enemy->SetSize(96 * 2, 64 * 2);
     m_enemy->Set2DPosition(pos.x, pos.y);
+
+    m_enemy->SetFlip(m_enemyFlip);
 }
+
+
 
 bool EnemyController::CheckCollision(const SDL_Rect& a, const SDL_Rect& b)
 {

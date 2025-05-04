@@ -3,6 +3,9 @@
 #include "TileMap.h"
 #include "PlayerController.h" 
 #include "EnemyController.h"
+#include "EvilCreature.h"
+#include "GhostWarrior.h"
+#include "GhostWarriorRed.h"
 
 class Sprite2D;
 class SpriteAnimation;
@@ -35,6 +38,10 @@ private:
 	std::shared_ptr<EnemyController> m_enemyController;
 	std::shared_ptr<EnemyController> m_enemyController2;
 	std::shared_ptr<EnemyController> m_enemyController3;
+	std::shared_ptr<EvilCreature> m_evilCreature;
+	std::shared_ptr<GhostWarrior> m_ghostWarrior;
+	std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed;
+
 
 	std::vector<std::shared_ptr<Sprite2D>> m_backgroundList;
 	std::shared_ptr<Sprite2D>	m_background;

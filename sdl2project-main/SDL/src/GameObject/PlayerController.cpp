@@ -3,10 +3,15 @@
 #include "Camera.h"
 #include "Renderer.h"
 #include <iostream>
+#include <algorithm> 
+#include <SDL_ttf.h>
+#include "GhostWarriorRed.h"
+#include "RangedEnemy.h"
+
 float PlayerController::m_airTime = 0.0f;
 float m_deadTimer;
 bool m_finishDead;
-
+TTF_Font* m_font = nullptr;
 
 PlayerController::PlayerController()
     : m_gravityForce(150.0f), m_jumpForce(-500.0f), m_velocityY(0.0f), m_speed(500.0f),
@@ -25,6 +30,10 @@ PlayerController::PlayerController()
 
 PlayerController::~PlayerController()
 {
+    if (m_font) {
+        TTF_CloseFont(m_font);
+        m_font = nullptr;
+    }
 }
 
 void PlayerController::Init()
@@ -57,6 +66,11 @@ void PlayerController::Init()
     };
 
     Camera::GetInstance()->SetTarget(m_player);
+
+    m_font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 18);
+    if (!m_font) {
+        std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
+    }
 }
 
 void PlayerController::TakeDamage(int damage)
@@ -267,19 +281,19 @@ void PlayerController::Update(float deltaTime)
         //Attack1
         if (!m_justDidAttack2 && !m_justDidAttack3)
         {
-            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.21f)
+            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f)
                 m_canDealDamage = true;
         }
         //Attack2
         else if(!m_justDidAttack3)
         {
-            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.21f)
+            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f)
                 m_canDealDamage = true;
         }
         //Attack3
         else
         {
-            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.21f)
+            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f)
                 m_canDealDamage = true;
         }
     }
@@ -318,7 +332,7 @@ void PlayerController::Draw(SDL_Renderer* renderer)
         if (m_playerFlip == SDL_FLIP_NONE)
             attackBox.x = m_playerCollider.x + m_playerCollider.w * 0.6f;
         else
-            attackBox.x = m_playerCollider.x - 210;
+            attackBox.x = m_playerCollider.x - 100;
 
         attackBox.y = m_playerCollider.y + m_playerCollider.h * 0.3f;
         attackBox.w = 150;
@@ -330,7 +344,7 @@ void PlayerController::Draw(SDL_Renderer* renderer)
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderDrawRect(renderer, &attackBox);
 
-        int damageAmount = 25; // 👈 Gán sát thương cố định hoặc tính toán tại đây
+        int damageAmount = 25;
         std::cout << "[DEBUG] m_onHitEnemyList.size() = " << m_onHitEnemyList.size() << std::endl;
         for (size_t i = 0; i < m_enemyColliders.size(); ++i)
         {
@@ -357,6 +371,44 @@ void PlayerController::Draw(SDL_Renderer* renderer)
                     m_onScreenShake();
             }
         }
+    }
+
+    // === HUD: Thanh máu ===
+    SDL_Rect hpBarBg = { UI_HP_X, UI_HP_Y, UI_HP_WIDTH, UI_HP_HEIGHT };
+
+    // Tính phần máu hiện tại
+    float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
+    SDL_Rect hpBarFill = hpBarBg;
+    hpBarFill.w = static_cast<int>(UI_HP_WIDTH * hpPercent);
+
+    // Vẽ nền (đen)
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &hpBarBg);
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &hpBarFill);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawRect(renderer, &hpBarBg);
+
+    // === HUD TEXT: "25/100" ở giữa thanh máu ===
+    std::string hpText = std::to_string(m_currentHP) + "/" + std::to_string(m_maxHP);
+    SDL_Color white = { 255, 255, 255, 255 };
+
+    SDL_Surface* textSurface = TTF_RenderText_Solid(m_font, hpText.c_str(), white);
+    if (textSurface) {
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+        SDL_Rect textRect;
+
+        // Canh giữa text trên thanh máu
+        textRect.w = textSurface->w;
+        textRect.h = textSurface->h;
+        textRect.x = UI_HP_X + (UI_HP_WIDTH - textRect.w) / 2;
+        textRect.y = UI_HP_Y + (UI_HP_HEIGHT - textRect.h) / 2;
+
+        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+
+        SDL_FreeSurface(textSurface);
+        SDL_DestroyTexture(textTexture);
     }
 }
 

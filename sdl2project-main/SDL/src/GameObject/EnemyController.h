@@ -86,6 +86,11 @@ private:
     SDL_Rect m_attackBox;
     bool m_didDamage = false;
 
+    SDL_Rect m_hpBarBg;
+    SDL_Rect m_hpBarFill;
+    int m_barWidth = 50;
+    int m_barHeight = 6;
+
 private:
     bool DetectPlayer();
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);
