@@ -4,6 +4,7 @@
 
 #include "Text.h"
 #include "MouseButton.h"
+#include "SliderIcon.h"
 
 
 class GSSettings : public GameStateBase
@@ -27,11 +28,16 @@ public:
 	void	Draw(SDL_Renderer* renderer) override;
 
 
+
 private:
 	//Uint32 callback(Uint32 interval, void*param);
 	std::list<std::shared_ptr<Sprite2D>> elements;
-	std::shared_ptr<Sprite2D> musicForegroundBar, sfxForegroundBar, iconMusicSettings, iconSfxSettings;
+	std::shared_ptr<Sprite2D> musicForegroundBar, sfxForegroundBar;
+	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings;
+
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;
+	std::list< std::shared_ptr<SliderIcon>> m_listSliderIcon;
+
 	float widthScaling, heightScaling;
 
 	// 'milestone' is y-coordinate of vertical grid line of settings panel:

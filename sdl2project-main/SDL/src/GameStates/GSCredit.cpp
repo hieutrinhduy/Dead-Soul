@@ -6,8 +6,8 @@
 #include "Sound.h"
 
 
-constexpr auto NARRATION_1 = "HoangTrung Tien - VETERAN KNIGHT";
-constexpr auto NARRATION_2 = "TrinhDuy Hieu - VETERAN KNIGHT";
+constexpr auto NARRATION_1 = "Hoang Trung Tien - VETERAN KNIGHT";
+constexpr auto NARRATION_2 = "Trinh Duy Hieu - VETERAN KNIGHT";
 #define NARRATION_SIZE 450,32
 
 

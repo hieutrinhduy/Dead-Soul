@@ -294,11 +294,11 @@ void PlayerController::Update(float deltaTime)
 
 void PlayerController::Draw(SDL_Renderer* renderer)
 {
-    if (m_isDead && m_finishDead) 
+    if (m_isDead && m_finishDead)
     {
         DestroyPlayer();
         return;
-    } 
+    }
 
     if (m_player)
         m_player->Draw(renderer);
@@ -324,14 +324,14 @@ void PlayerController::Draw(SDL_Renderer* renderer)
         attackBox.w = 150;
         attackBox.h = 60;
 
-        Vector2 camPos = Camera::GetInstance()->GetPosition();
-
         attackBox.x -= (int)camPos.x;
         attackBox.y -= (int)camPos.y;
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderDrawRect(renderer, &attackBox);
 
+        int damageAmount = 25; // 👈 Gán sát thương cố định hoặc tính toán tại đây
+        std::cout << "[DEBUG] m_onHitEnemyList.size() = " << m_onHitEnemyList.size() << std::endl;
         for (size_t i = 0; i < m_enemyColliders.size(); ++i)
         {
             SDL_Rect enemyScreen = *m_enemyColliders[i];
@@ -340,17 +340,26 @@ void PlayerController::Draw(SDL_Renderer* renderer)
 
             if (CheckCollision(attackBox, enemyScreen))
             {
-                if (i < m_onHitEnemyList.size() && m_onHitEnemyList[i])
-                    m_onHitEnemyList;
+                if (i < m_onHitEnemyList.size()) {
+                    if (m_onHitEnemyList[i]) {
+                        std::cout << ">> Callback tồn tại. GỌI...\n";
+                        m_onHitEnemyList[i](damageAmount);
+                    }
+                    else {
+                        std::cout << ">> Callback bị nullptr!\n";
+                    }
+                }
+                else {
+                    std::cout << ">> Chỉ số callback KHÔNG TỒN TẠI\n";
+                }
 
                 if (m_onScreenShake)
                     m_onScreenShake();
             }
         }
-
-
     }
 }
+
 
 
 
@@ -466,5 +475,6 @@ void PlayerController::DestroyPlayer()
 
 void PlayerController::SetOnHitEnemyCallbacks(const std::vector<std::function<void(int)>>& callbacks)
 {
+    std::cout << "[PlayerController] SetOnHitEnemyCallbacks gọi với " << callbacks.size() << " callback(s)\n";
     m_onHitEnemyList = callbacks;
 }

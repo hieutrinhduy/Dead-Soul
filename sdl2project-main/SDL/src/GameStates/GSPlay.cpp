@@ -98,9 +98,20 @@ void GSPlay::Init()
         });
 
     std::vector<std::function<void(int)>> hitEnemyCallbacks;
-    hitEnemyCallbacks.push_back([this](int damage) { m_enemyController->TakeDamage(damage); });
-    hitEnemyCallbacks.push_back([this](int damage) { m_enemyController2->TakeDamage(damage); });
-    hitEnemyCallbacks.push_back([this](int damage) { m_enemyController3->TakeDamage(damage); });
+    hitEnemyCallbacks.clear();
+    hitEnemyCallbacks.push_back([this](int damage) {
+        std::cout << "Enemy 0 nhận damage = " << damage << std::endl;
+        m_enemyController->TakeDamage(damage);
+        });
+    hitEnemyCallbacks.push_back([this](int damage) {
+        std::cout << "Enemy 1 nhận damage = " << damage << std::endl;
+        m_enemyController2->TakeDamage(damage);
+        });
+    hitEnemyCallbacks.push_back([this](int damage) {
+        std::cout << "Enemy 2 nhận damage = " << damage << std::endl;
+        m_enemyController3->TakeDamage(damage);
+        });
+    m_playerController->SetOnHitEnemyCallbacks(hitEnemyCallbacks);
     m_playerController->SetOnHitEnemyCallbacks(hitEnemyCallbacks);
 
     m_playerController->SetOnScreenShakeCallback([]() {

@@ -64,18 +64,22 @@ void EnemyController::TakeDamage(int damage)
 {
     if (m_isDead) return;
 
+    std::cout << "[EnemyController] Bị trúng đòn: -" << damage << " HP\n";
+
     m_currentHP -= damage;
 
     if (m_currentHP <= 0) {
         m_currentHP = 0;
+        std::cout << "[EnemyController] ĐÃ CHẾT\n";
         Die();
     }
     else {
         m_isHit = true;
         m_hitTimer = 0.25f;
-        ChangeAnimation(hitTexture, 5, 0.05);
+        ChangeAnimation(hitTexture, 5, 0.05f);
     }
 }
+
 
 void EnemyController::Die()
 {

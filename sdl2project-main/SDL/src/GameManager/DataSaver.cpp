@@ -1,7 +1,7 @@
 #include "DataSaver.h"
 #include <fstream>
 
-DataSaver::DataSaver() {
+DataSaver::DataSaver() : m_saveFileName("save.dat") {
 
 }
 
@@ -11,9 +11,8 @@ DataSaver::~DataSaver() {
 }
 
 
-void DataSaver::SetSaveData(bool isWatchedStory, int level) {
-	gameState.isWatchedStory = isWatchedStory;
-	gameState.level = level;
+void DataSaver::SetSaveData(SaveData saveData) {
+    m_saveData = saveData;
 }
 
 
@@ -21,19 +20,19 @@ void DataSaver::SaveGame(const std::string& filename) {
     std::ofstream out(filename, std::ios::binary);
 
     if (out.is_open()) {
-        out.write((char*)&gameState, sizeof(GameState));
+        out.write((char*)&m_saveData, sizeof(SaveData));
         out.close();
     }
 }
 
 
-GameState DataSaver::LoadGame(const std::string& filename) {
+SaveData DataSaver::LoadGame(const std::string& filename) {
     std::ifstream in(filename, std::ios::binary);
 
     if (in.is_open()) {
-        in.read((char*)&gameState, sizeof(GameState));
+        in.read((char*)&m_saveData, sizeof(SaveData));
         in.close();
     }
 
-    return gameState;
+    return m_saveData;
 }

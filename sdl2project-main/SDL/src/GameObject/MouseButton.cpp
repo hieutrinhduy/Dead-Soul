@@ -40,8 +40,3 @@ void MouseButton::SetOnClick(std::function<void(void)> pBtClick)
 {
 	m_pBtClick = pBtClick;
 }
-
-
-
-
-

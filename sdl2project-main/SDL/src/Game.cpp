@@ -8,6 +8,7 @@
 #include "DataSaver.h"
 #include "ResourceManagers.h"
 #include "Renderer.h"
+
 Game::Game()
 {
 	//Init create window for rendering
@@ -22,6 +23,7 @@ bool Game::Init()
 	else {
 		GameStateMachine::GetInstance()->PushState(StateType::STATE_LOGO);
 	}
+
 	return success;
 }
 
