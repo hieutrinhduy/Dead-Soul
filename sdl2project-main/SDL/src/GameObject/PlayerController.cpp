@@ -155,7 +155,6 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
 
 void PlayerController::Update(float deltaTime)
 {
-    m_player->MoveX(20);
     if (!m_player) return;
     if (m_isDead) {
         if (!m_finishDead) {
