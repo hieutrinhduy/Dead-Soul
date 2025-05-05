@@ -88,7 +88,7 @@ void GSPlay::Init()
 
     //Enemy ban dan: RangedEnemy
     m_rangedEnemy = std::make_shared<RangedEnemy>();
-    m_rangedEnemy->Init(4000, 4300);
+    m_rangedEnemy->Init(4500, 4800);
 
     // Set ground collider cho tất cả
     m_playerController->SetGroundCollider(&groundCollider);

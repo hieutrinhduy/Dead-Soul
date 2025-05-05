@@ -491,6 +491,7 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
         if (e.button.button == SDL_BUTTON_LEFT) {
             if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit) {
                 float now = SDL_GetTicks() / 1000.0f;
+
                 if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
                     ChangeAnimation(attack2Texture, 4, 0.1f);
                     m_justDidAttack2 = true;

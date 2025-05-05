@@ -46,7 +46,7 @@ void RangedEnemy::TakeDamage(int damage)
     if (m_currentHP <= 0) { m_currentHP = 0; Die(); }
     else {
         m_isHit = true;
-        m_hitTimer = 0.1f;
+        m_hitTimer = 0.2f;
         ChangeAnimation(hitTexture, 4, 0.05f);
     }
 }
@@ -54,7 +54,7 @@ void RangedEnemy::TakeDamage(int damage)
 void RangedEnemy::Die()
 {
     m_isDead = true;
-    m_deadTimer = 1.3f;
+    m_deadTimer = 0.69f;
     m_finishDead = false;
     ChangeAnimation(deadTexture, 7, 0.1f);
 }
@@ -113,7 +113,7 @@ void RangedEnemy::Update(float dt)
             float dx = m_playerCollider->x - posX;
             m_flip = (dx > 0) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
-            if (!m_isAttacking && abs(dx) < m_attackRange) {
+            if (!m_isAttacking && abs(dx) <= m_attackRange) {
                 m_state = RangedEnemyState::Attack;
                 m_attackFlip = m_flip;
                 m_isAttacking = true;
@@ -124,7 +124,7 @@ void RangedEnemy::Update(float dt)
         break;
     case RangedEnemyState::Attack:
         m_attackTimer -= dt;
-        if (m_sprite && !m_didDamage && m_sprite->GetCurrentFrame() == 5) {
+        if (m_sprite && !m_didDamage && m_sprite->GetCurrentFrame() == 5 && !m_isHit) {
             m_didDamage = true;
             ShootProjectile();
         }
@@ -168,6 +168,28 @@ void RangedEnemy::Draw(SDL_Renderer* renderer)
 {
     if (m_isDead && m_finishDead) return;
     if (m_sprite) m_sprite->Draw(renderer);
+
+    Vector2 camPos = Camera::GetInstance()->GetPosition();
+    SDL_Rect drawBg = m_hpBarBg;
+
+    int rightPos = 32;
+    if (m_flip == SDL_FLIP_HORIZONTAL) {
+        rightPos -= 32 * 2;
+    }
+    drawBg.x -= static_cast<int>(camPos.x) + rightPos;
+    drawBg.y -= static_cast<int>(camPos.y);
+
+    SDL_Rect drawFill = m_hpBarFill;
+    drawFill.x -= static_cast<int>(camPos.x) + rightPos;
+    drawFill.y -= static_cast<int>(camPos.y);
+
+    // Vẽ nền (đen)
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &drawBg);
+
+    // Vẽ phần máu còn lại (đỏ)
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &drawFill);
 }
 
 bool RangedEnemy::DetectPlayer()
@@ -195,7 +217,7 @@ void RangedEnemy::ShootProjectile()
 {
     Vector2 pos = m_sprite->Get2DPosition();
     int direction = (m_attackFlip == SDL_FLIP_HORIZONTAL) ? 1 : -1;
-    pos.x += (direction == 1) ? m_sprite->GetWidth() : -32;
+    pos.x += (direction == 1) ? 64 : -32;
 
     auto bullet = std::make_shared<Bullet>(pos, 500.0f, direction, m_damage);
 
