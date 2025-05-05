@@ -46,7 +46,7 @@ void GhostWarrior::TakeDamage(int damage)
     else {
         m_isAttacking = false;
         m_isHit = true;
-        m_hitTimer = 0.1f;
+        m_hitTimer = 0.2f;
         ChangeAnimation(hitTexture, 5, 0.05f);
     }
 }

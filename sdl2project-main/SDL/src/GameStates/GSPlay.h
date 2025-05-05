@@ -6,6 +6,8 @@
 #include "EvilCreature.h"
 #include "GhostWarrior.h"
 #include "GhostWarriorRed.h"
+#include "RangedEnemy.h"
+
 
 class Sprite2D;
 class SpriteAnimation;
@@ -41,7 +43,7 @@ private:
 	std::shared_ptr<EvilCreature> m_evilCreature;
 	std::shared_ptr<GhostWarrior> m_ghostWarrior;
 	std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed;
-
+	std::shared_ptr<RangedEnemy> m_rangedEnemy;
 
 	std::vector<std::shared_ptr<Sprite2D>> m_backgroundList;
 	std::shared_ptr<Sprite2D>	m_background;

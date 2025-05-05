@@ -44,10 +44,12 @@ void GhostWarriorRed::TakeDamage(int damage)
     m_hpBarFill.w = static_cast<int>(m_barWidth * std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f));
     if (m_currentHP <= 0) { m_currentHP = 0; Die(); }
     else {
-        m_isAttacking = false;
-        m_isHit = true;
-        m_hitTimer = 0.1f;
-        ChangeAnimation(hitTexture, 5, 0.05f);
+        if (!m_isAttacking) {
+            m_isAttacking = false;
+            m_isHit = true;
+            m_hitTimer = 0.2f;
+            ChangeAnimation(hitTexture, 5, 0.05f);
+        }
     }
 }
 

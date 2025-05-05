@@ -53,7 +53,7 @@ void PlayerController::Init()
     deadTexture = ResourceManagers::GetInstance()->GetTexture("_Death.png");
 
     m_player = std::make_shared<SpriteAnimation>(idleTexture, 1, 2, 1, 0.5f);
-    m_player->SetSize(150, 150);
+    m_player->SetSize(180, 180);
     m_player->Set2DPosition(500, -500);
     m_playerCollider = { (int)m_player->GetPosition().x, (int)m_player->GetPosition().y, m_player->GetWidth()/2, m_player->GetHeight()/2 };
 
@@ -131,6 +131,7 @@ void PlayerController::Update(float deltaTime)
     if (m_isAttacking) {
         m_attackTimer -= deltaTime;
         if (m_attackTimer <= 0.0f) {
+            m_didDamage = false;
             m_isAttacking = false;
             ChangeAnimation(idleTexture, 2, 0.5f);
         }
@@ -278,23 +279,31 @@ void PlayerController::Update(float deltaTime)
         float elapsedAttackTime = m_attackDuration - m_attackTimer;
         m_canDealDamage = false;
 
+        int currentFrame = m_player->GetCurrentFrame();
+
         //Attack1
         if (!m_justDidAttack2 && !m_justDidAttack3)
         {
-            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f)
+            if (/*elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f*/ currentFrame == 3 && !m_didDamage) {
                 m_canDealDamage = true;
+                m_didDamage = true;
+            }
         }
         //Attack2
         else if(!m_justDidAttack3)
         {
-            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f)
+            if (/*elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f*/ currentFrame == 3 && !m_didDamage) {
                 m_canDealDamage = true;
+                m_didDamage = true;
+            }
         }
         //Attack3
         else
         {
-            if (elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f)
+            if (/*elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f*/ currentFrame == 3 && !m_didDamage) {
                 m_canDealDamage = true;
+                m_didDamage = true;
+            }
         }
     }
     else
@@ -344,7 +353,7 @@ void PlayerController::Draw(SDL_Renderer* renderer)
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderDrawRect(renderer, &attackBox);
 
-        int damageAmount = 25;
+        int damageAmount = 10;
         std::cout << "[DEBUG] m_onHitEnemyList.size() = " << m_onHitEnemyList.size() << std::endl;
         for (size_t i = 0; i < m_enemyColliders.size(); ++i)
         {
@@ -454,7 +463,7 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
                 if (m_jumpCount == 1) {
                     m_airTime = 0.0f;
                     m_forceJumpAnimation = true;
-                    m_forceJumpTimer = m_forceJumpDuration;
+                    m_forceJumpTimer = m_forceJumpDuration; 
                 }
                 m_jumpCount++;
                 m_isGrounded = false;

@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include "PlayerController.h"
 
 enum class RangedEnemyState
 {
@@ -31,8 +32,10 @@ public:
 
     void TakeDamage(int damage);
     void SetOnHitPlayerCallback(std::function<void(int damage)> callback) { m_onHitPlayer = callback; }
+    void SetPlayerController(PlayerController* player) { m_playerController = player; }
 
 private:
+    PlayerController* m_playerController = nullptr;
     std::shared_ptr<SpriteAnimation> m_sprite;
     SDL_Rect m_collider;
     SDL_Rect* m_groundCollider = nullptr;
@@ -80,11 +83,17 @@ private:
 
     bool m_didFire = false;
 
+    float m_attackRange = 700;
+    bool m_didDamage = false;
+    bool m_isGrounded = false;
+    float m_detectRange = 700;
+
 private:
+    void ShootProjectile();
     bool DetectPlayer();
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);
     bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b);
     bool GroundCheck();
-    void Die();
+    void Die(); 
     void Destroy();
 };

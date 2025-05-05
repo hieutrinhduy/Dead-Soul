@@ -72,6 +72,7 @@ private:
     bool m_isDead = false;
     bool m_isHit = false;
     float m_hitTimer = 0.0f;
+    bool m_didDamage = false;
 
     // Texture Manager
     std::shared_ptr<TextureManager> idleTexture;

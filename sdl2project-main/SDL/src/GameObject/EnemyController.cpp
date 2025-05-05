@@ -81,10 +81,15 @@ void EnemyController::TakeDamage(int damage)
         Die();
     }
     else {
-        m_isAttacking = false;
-        m_isHit = true;
-        m_hitTimer = 0.1f;
-        ChangeAnimation(hitTexture, 5, 0.05f);
+        int currentFrame = m_enemy->GetCurrentFrame();
+        if (m_isAttacking && attackIndex == 1 && currentFrame >= 3) return;
+        if (m_isAttacking && attackIndex == 2 && currentFrame >= 4) return;
+        if (!m_isAttacking) {
+            m_isAttacking = false;
+            m_isHit = true;
+            m_hitTimer = 0.2f;
+            ChangeAnimation(hitTexture, 5, 0.05f);
+        }
     }
 }
 

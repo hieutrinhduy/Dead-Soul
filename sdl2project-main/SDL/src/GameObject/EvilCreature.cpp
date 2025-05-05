@@ -51,7 +51,6 @@ SDL_Rect* EvilCreature::GetCollider()
 void EvilCreature::TakeDamage(int damage)
 {
     if (m_isDead) return;
-
     std::cout << "[EvilCreature] Bị trúng đòn: -" << damage << " HP\n";
 
     m_currentHP -= damage;
@@ -64,10 +63,12 @@ void EvilCreature::TakeDamage(int damage)
         Die();
     }
     else {
-        m_isAttacking = false;
-        m_isHit = true;
-        m_hitTimer = 0.1f;
-        ChangeAnimation(hitTexture, 5, 0.05f);
+        if (!m_isAttacking) {
+            m_isAttacking = false;
+            m_isHit = true;
+            m_hitTimer = 0.2f;
+            ChangeAnimation(hitTexture, 5, 0.05f);
+        }
     }
 }
 
