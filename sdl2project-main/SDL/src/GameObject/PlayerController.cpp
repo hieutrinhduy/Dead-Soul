@@ -8,7 +8,6 @@
 #include "RangedEnemy.h"
 
 
-
 float PlayerController::m_airTime = 0.0f;
 float m_deadTimer;
 bool m_finishDead;
@@ -156,6 +155,8 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
 void PlayerController::Update(float deltaTime)
 {
     if (!m_player) return;
+
+    //Nếu chết thì đếm ngược thời gian trước khi dừng draw
     if (m_isDead) {
         if (!m_finishDead) {
             m_deadTimer -= deltaTime;
@@ -167,6 +168,7 @@ void PlayerController::Update(float deltaTime)
         return;
     }
 
+    //Nếu bị hit, sau khi bị hit chuyển về trạng thái chạy hoặc idle
     if (m_isHit) {
         m_hitTimer -= deltaTime;
         if (m_hitTimer <= 0.0f) {
@@ -182,6 +184,7 @@ void PlayerController::Update(float deltaTime)
         return;
     }
 
+    //Sau khi tấn công 1 khoảng thời gian trở về trạng thái idle
     if (m_isAttacking) {
         m_attackTimer -= deltaTime;
         if (m_attackTimer <= 0.0f) {
@@ -191,6 +194,7 @@ void PlayerController::Update(float deltaTime)
         }
     }
 
+    //Khi đang lộn, nếu flip trái thì lộn trái, nếu đang flip phải thì lộn phải
     if (m_isRolling) {
         m_rollTimer -= deltaTime;
         float moveDir = (m_playerFlip == SDL_FLIP_NONE) ? 1.0f : -1.0f;
@@ -202,33 +206,36 @@ void PlayerController::Update(float deltaTime)
         m_player->Set2DPosition(pos.x, pos.y);
         m_playerCollider.x = (int)pos.x;
 
+        //Lộn xong về idle
         if (m_rollTimer <= 0.0f) {
             m_isRolling = false;
             ChangeAnimation(idleTexture, 2, 0.5f);
         }
     }
 
+    //Tốc độ nhân vật
     m_speed = 500.0f;
-    auto temp = m_player->Get2DPosition();
-    SDL_FPoint oldPos;
+    auto temp = m_player->Get2DPosition(); //Biến tạm lưu vị trí nhân vật
+    SDL_FPoint oldPos; //Biến tạm lưu vị trí hiện tại nhân vật
     oldPos.x = temp.x;
     oldPos.y = temp.y;
     SDL_FPoint newPos = oldPos;
     SDL_FPoint velocity = { 0, 0 };
 
+    //Tính toán vị trí tiếp theo khi nhấn nút di chuyển (Không phải hiện tại nhé)
     if (!m_isAttacking && !m_isRolling &&!m_isHit) {
         if (m_KeyPress & 1) velocity.x -= 1.0f;
         if (m_KeyPress & (1 << 2)) velocity.x += 1.0f;
     }
-
     newPos.x += velocity.x * m_speed * deltaTime;
 
+    //Flip nhân vật
     if (velocity.x != 0 && !m_isAttacking) {
         m_playerFlip = (velocity.x > 0) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
     }
-
     m_player->SetFlip(m_playerFlip);
 
+    //Tính toán collider tiếp theo khi nhấn nút di chuyển (Không phải hiện tại nhé)
     SDL_Rect newCollider;
     if (m_playerFlip == SDL_FLIP_NONE) {
         newCollider = { (int)newPos.x + 40, (int)newPos.y , m_player->GetWidth() - 100, m_player->GetHeight()};
@@ -238,48 +245,52 @@ void PlayerController::Update(float deltaTime)
         newCollider = { (int)newPos.x + 50, (int)newPos.y , m_player->GetWidth() - 100, m_player->GetHeight()};
     }
 
-    //if (!m_enemyCollider || !CheckCollision(newCollider, *m_enemyCollider)) {
-    //    m_player->Set2DPosition(newPos.x, oldPos.y);
-    //    m_playerCollider.x = (int)newPos.x;
-    //}
-
+    //Set vị trí và collider x mới
     m_player->Set2DPosition(newPos.x, oldPos.y);
     m_playerCollider.x = (int)newPos.x;
 
+    //Nếu ko ở trên mặt đất thì tăng dần biến m_airTime, nếu trên mặt đất thì reset = 0
     if (!m_isGrounded) m_airTime += deltaTime;
     else m_airTime = 0.0f;
 
+    //Chỉnh tốc độ rơi dựa trên m_airTime (thời gian trên không), càng lâu thì rơi càng nhanh, tối đa vận tốc rơi là 800
     m_velocityY += m_gravityForce * (1.0f + m_airTime * 15.0f) * deltaTime;
     if (m_velocityY > 800) m_velocityY = 800;
 
+    // Tính vị trí mới theo trục Y dựa vào trọng lực (trên kia là tính x)
     float posX = m_player->Get2DPosition().x;
     float posY = m_player->Get2DPosition().y + m_velocityY * deltaTime;
 
+    // Cập nhật tạm collider theo vị trí dự đoán
     if (m_playerFlip == SDL_FLIP_NONE) {
-        m_playerCollider = { (int)posX + 40, (int)posY /*+ m_player->GetHeight() / 2*/, m_player->GetWidth() - 100, m_player->GetHeight() };
+        m_playerCollider = { (int)posX + 40, (int)posY , m_player->GetWidth() - 100, m_player->GetHeight() };
     }
     else
     {
-        m_playerCollider = { (int)posX + 50, (int)posY /*+ m_player->GetHeight() / 2*/, m_player->GetWidth() - 100, m_player->GetHeight() };
+        m_playerCollider = { (int)posX + 50, (int)posY, m_player->GetWidth() - 100, m_player->GetHeight() };
     }
 
+    // Kiểm tra nhân vật có đang ở trên mặt đất không
     m_isGrounded = GroundCheck();
 
+    // Nếu đang ở trên mặt đất thì cố định lại vị trí Y, reset vận tốc rơi và số lần nhảy
     if (m_isGrounded) {
         m_velocityY = 0;
         posY = m_groundCollider->y - m_player->GetHeight() + 2;
         m_jumpCount = 0;
     }
 
+    // Cập nhật vị trí và collider mới sau khi xử lý rơi và mặt đất
     m_player->Set2DPosition(posX, posY);
-
     if (m_playerFlip == SDL_FLIP_NONE) {
-        m_playerCollider = { (int)posX + 40, (int)posY/* + m_player->GetHeight() / 2*/, m_player->GetWidth() - 100, m_player->GetHeight() };
+        m_playerCollider = { (int)posX + 40, (int)posY, m_player->GetWidth() - 100, m_player->GetHeight() };
     }
     else
     {
-        m_playerCollider = { (int)posX + 50, (int)posY /*+ m_player->GetHeight() / 2*/, m_player->GetWidth() - 100, m_player->GetHeight() };
+        m_playerCollider = { (int)posX + 50, (int)posY, m_player->GetWidth() - 100, m_player->GetHeight() };
     }
+
+    // ---- Xử lý trạng thái chuyển động để đổi animation ----
 
     static bool wasRunning = false;
     static bool wasGrounded = true;
@@ -289,32 +300,29 @@ void PlayerController::Update(float deltaTime)
     bool isJumpingUp = (!m_isGrounded && m_velocityY < 0);
     bool isFallingDown = (!m_isGrounded && m_velocityY >= 0);
 
+    // Đếm ngược thời gian chạy anim nhảy
     if (m_forceJumpAnimation) {
         m_forceJumpTimer -= deltaTime;
         if (m_forceJumpTimer <= 0.0f) {
             m_forceJumpAnimation = false;
         }
     }
-
+    // không đang tấn công hay lộn, thì xét đổi animation
     if (!m_forceJumpAnimation && !m_isAttacking && !m_isRolling) {
+        // Vừa tiếp đất
         if (!wasGrounded && m_isGrounded) {
             if (isRunning)
                 ChangeAnimation(runTexture, 6, 0.07f);
             else
                 ChangeAnimation(idleTexture, 2, 0.5f);
         }
-        else if (/*wasGrounded &&*/ !m_isGrounded) {
+        // Đang trên không
+        else if (!m_isGrounded) {
             if (m_airTime > 0.19f) {
                 ChangeAnimation(jumpOnAirTexture, 1, 0.05f);
             }
         }
-        //When falling
-        //else if (!m_isGrounded) {
-        //    if (isJumpingUp && !wasJumpingUp)
-        //        ChangeAnimation(jumpFallTexture, 2, 0.05f);
-        //    else if (isFallingDown && wasJumpingUp)
-        //        ChangeAnimation(fallTexture, 3, 0.05f);
-        //}
+        // Trạng thái chạy thay đổi (từ chạy quá idle, ngược lại)
         else if (m_isGrounded && (wasRunning != isRunning)) {
             if (isRunning)
                 ChangeAnimation(runTexture, 6, 0.07f);
@@ -338,7 +346,7 @@ void PlayerController::Update(float deltaTime)
         //Attack1
         if (!m_justDidAttack2 && !m_justDidAttack3)
         {
-            if (/*elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f*/ currentFrame == 3 && !m_didDamage) {
+            if (currentFrame == 3 && !m_didDamage) {
                 m_canDealDamage = true;
                 m_didDamage = true;
             }
@@ -346,7 +354,7 @@ void PlayerController::Update(float deltaTime)
         //Attack2
         else if(!m_justDidAttack3)
         {
-            if (/*elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f*/ currentFrame == 3 && !m_didDamage) {
+            if (currentFrame == 3 && !m_didDamage) {
                 m_canDealDamage = true;
                 m_didDamage = true;
             }
@@ -354,7 +362,7 @@ void PlayerController::Update(float deltaTime)
         //Attack3
         else
         {
-            if (/*elapsedAttackTime >= 0.19f && elapsedAttackTime <= 0.2f*/ currentFrame == 3 && !m_didDamage) {
+            if (currentFrame == 3 && !m_didDamage) {
                 m_canDealDamage = true;
                 m_didDamage = true;
             }
