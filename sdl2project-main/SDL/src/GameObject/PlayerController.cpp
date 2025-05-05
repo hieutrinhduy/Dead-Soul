@@ -4,7 +4,6 @@
 #include "Renderer.h"
 #include <iostream>
 #include <algorithm> 
-#include <SDL_ttf.h>
 #include "GhostWarriorRed.h"
 #include "RangedEnemy.h"
 
@@ -399,26 +398,26 @@ void PlayerController::Draw(SDL_Renderer* renderer)
     SDL_RenderDrawRect(renderer, &hpBarBg);
 
     // === HUD TEXT: "25/100" ở giữa thanh máu ===
-    std::string hpText = std::to_string(m_currentHP) + "/" + std::to_string(m_maxHP);
-    SDL_Color white = { 255, 255, 255, 255 };
+    //std::string hpText = std::to_string(m_currentHP) + "/" + std::to_string(m_maxHP);
+    //SDL_Color white = { 255, 255, 255, 255 };
 
-    SDL_Surface* textSurface = TTF_RenderText_Solid(m_font, hpText.c_str(), white);
-    if (textSurface) {
-        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    //SDL_Surface* textSurface = TTF_RenderText_Solid(m_font, hpText.c_str(), white);
+    //if (textSurface) {
+    //    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
-        SDL_Rect textRect;
+    //    SDL_Rect textRect;
 
-        // Canh giữa text trên thanh máu
-        textRect.w = textSurface->w;
-        textRect.h = textSurface->h;
-        textRect.x = UI_HP_X + (UI_HP_WIDTH - textRect.w) / 2;
-        textRect.y = UI_HP_Y + (UI_HP_HEIGHT - textRect.h) / 2;
+    //    // Canh giữa text trên thanh máu
+    //    textRect.w = textSurface->w;
+    //    textRect.h = textSurface->h;
+    //    textRect.x = UI_HP_X + (UI_HP_WIDTH - textRect.w) / 2;
+    //    textRect.y = UI_HP_Y + (UI_HP_HEIGHT - textRect.h) / 2;
 
-        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+    //    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
 
-        SDL_FreeSurface(textSurface);
-        SDL_DestroyTexture(textTexture);
-    }
+    //    SDL_FreeSurface(textSurface);
+    //    SDL_DestroyTexture(textTexture);
+    //}
 }
 
 

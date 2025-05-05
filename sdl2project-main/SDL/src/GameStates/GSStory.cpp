@@ -49,14 +49,14 @@ GSStory::~GSStory()
 
 void GSStory::Init()
 {
-	// story sprite
+	// STORY SPRITE:
 	auto texture = ResourceManagers::GetInstance()->GetTexture("story.png");
 	projector = std::make_shared<SpriteAnimation>(texture, 1, SPRITE_COLS, SPRITE_ROWS, 4.0f);
 	projector->SetFlip(SDL_FLIP_NONE);
 	projector->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	projector->Set2DPosition(0, 0);
 
-	// set narration text
+	// set NARRATION TEXT:
 	auto font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 48);
 	narrationLine = std::make_shared<Text>(LINE_1, font, textColor);
 	narrationLine->SetSize(LINE_1_SIZE);

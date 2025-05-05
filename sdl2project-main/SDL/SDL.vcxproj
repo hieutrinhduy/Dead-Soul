@@ -215,6 +215,7 @@
     <ClInclude Include="src\GameObject\GhostWarriorRed.h" />
     <ClInclude Include="src\GameObject\KeyState.h" />
     <ClInclude Include="src\GameObject\MouseButton.h" />
+    <ClInclude Include="src\GameObject\PlayerController.h" />
     <ClInclude Include="src\GameObject\RangedEnemy.h" />
     <ClInclude Include="src\GameObject\Renderer.h" />
     <ClInclude Include="src\GameObject\SliderIcon.h" />
