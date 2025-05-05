@@ -7,10 +7,17 @@
 #include "GhostWarriorRed.h"
 #include "RangedEnemy.h"
 
+
+
 float PlayerController::m_airTime = 0.0f;
 float m_deadTimer;
 bool m_finishDead;
-TTF_Font* m_font = nullptr;
+//TTF_Font* m_font = nullptr;
+
+
+/* ----------------------------------------------------------------------------------------------------------------------- */
+//      CONSTRUCTOR & DECONSTRUCTOR  ->  INIT  ->  HANDLE KEY_EVENTS  ->  HANDLE MOUSE_EVENTS  ->  UPDATE  ->  DRAW
+/* ----------------------------------------------------------------------------------------------------------------------- */
 
 PlayerController::PlayerController()
     : m_gravityForce(150.0f), m_jumpForce(-500.0f), m_velocityY(0.0f), m_speed(500.0f),
@@ -29,11 +36,13 @@ PlayerController::PlayerController()
 
 PlayerController::~PlayerController()
 {
-    if (m_font) {
+    /*if (m_font) {
         TTF_CloseFont(m_font);
         m_font = nullptr;
-    }
+    }*/
 }
+
+
 
 void PlayerController::Init()
 {
@@ -66,40 +75,87 @@ void PlayerController::Init()
 
     Camera::GetInstance()->SetTarget(m_player);
 
-    m_font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 18);
+    /*m_font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 18);
     if (!m_font) {
         std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
+    }*/
+}
+
+
+
+void PlayerController::HandleKeyEvents(SDL_Event& e)
+{
+    if (e.type == SDL_KEYDOWN) {
+        switch (e.key.keysym.sym) {
+        case SDLK_a: m_KeyPress |= 1; break;
+        case SDLK_d: m_KeyPress |= (1 << 2); break;
+        case SDLK_SPACE:
+            if (!m_isAttacking && m_jumpCount < m_maxJump && !m_isRolling && !m_isHit) {
+                m_velocityY = m_jumpForce;
+                ChangeAnimation(jumpTexture, 2, 0.1f);
+                if (m_jumpCount == 1) {
+                    m_airTime = 0.0f;
+                    m_forceJumpAnimation = true;
+                    m_forceJumpTimer = m_forceJumpDuration;
+                }
+                m_jumpCount++;
+                m_isGrounded = false;
+            }
+            break;
+        case SDLK_LSHIFT:
+            if (!m_isAttacking && !m_isRolling && m_isGrounded && !m_isHit) {
+                ChangeAnimation(rollTexture, 12, 0.03f);
+                m_isRolling = true;
+                m_rollTimer = m_rollDuration;
+            }
+            break;
+        }
+    }
+    else if (e.type == SDL_KEYUP) {
+        switch (e.key.keysym.sym) {
+        case SDLK_a: m_KeyPress &= ~1; break;
+        case SDLK_d: m_KeyPress &= ~(1 << 2); break;
+        }
     }
 }
 
-void PlayerController::TakeDamage(int damage)
-{
-    if (m_isDead || m_isHit || m_isRolling) return;
 
-    m_currentHP -= damage;
-    if (m_currentHP <= 0)
-    {
-        m_currentHP = 0;
-        Die();
-        return;
+
+void PlayerController::HandleMouseEvents(SDL_Event& e)
+{
+    if (e.type == SDL_MOUSEBUTTONDOWN) {
+        if (e.button.button == SDL_BUTTON_LEFT) {
+            if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit) {
+                float now = SDL_GetTicks() / 1000.0f;
+
+                if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
+                    ChangeAnimation(attack2Texture, 4, 0.1f);
+                    m_justDidAttack2 = true;
+                    m_justDidAttack3 = false;
+                }
+                else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
+                    ChangeAnimation(attack3Texture, 4, 0.1f);
+                    m_justDidAttack3 = true;
+                    m_justDidAttack2 = false;
+                }
+                else {
+                    ChangeAnimation(attackTexture, 4, 0.1f);
+                    m_justDidAttack2 = false;
+                    m_justDidAttack3 = false;
+                }
+                m_isAttacking = true;
+                m_attackTimer = m_attackDuration;
+                m_lastAttackTime = now;
+            }
+        }
     }
-
-    // Bị hit
-    m_isHit = true;
-    m_hitTimer = 0.1f;
-    ChangeAnimation(hurtTexture, 1, 0.1f);
 }
 
-void PlayerController::Die()
-{
-    m_isDead = true;
-    m_deadTimer = 0.3f;
-    m_finishDead = false;
-    ChangeAnimation(deadTexture, 10, 0.05f);
-}
+
 
 void PlayerController::Update(float deltaTime)
 {
+    m_player->MoveX(20);
     if (!m_player) return;
     if (m_isDead) {
         if (!m_finishDead) {
@@ -314,6 +370,8 @@ void PlayerController::Update(float deltaTime)
         m_player->Update(deltaTime);
 }
 
+
+
 void PlayerController::Draw(SDL_Renderer* renderer)
 {
     if (m_isDead && m_finishDead)
@@ -423,6 +481,37 @@ void PlayerController::Draw(SDL_Renderer* renderer)
 
 
 
+/* ------------------------- */
+//      other FUNCTIONS
+/* ------------------------- */
+
+void PlayerController::TakeDamage(int damage)
+{
+    if (m_isDead || m_isHit || m_isRolling) return;
+
+    m_currentHP -= damage;
+    if (m_currentHP <= 0)
+    {
+        m_currentHP = 0;
+        Die();
+        return;
+    }
+
+    // Bị hit
+    m_isHit = true;
+    m_hitTimer = 0.1f;
+    ChangeAnimation(hurtTexture, 1, 0.1f);
+}
+
+void PlayerController::Die()
+{
+    m_isDead = true;
+    m_deadTimer = 0.3f;
+    m_finishDead = false;
+    ChangeAnimation(deadTexture, 10, 0.05f);
+}
+
+
 void PlayerController::ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime)
 {
     if (!m_player) return;
@@ -449,70 +538,7 @@ bool PlayerController::GroundCheck()
     if (!m_groundCollider) return false;
     return CheckCollision(m_playerCollider, *m_groundCollider);
 }
-void PlayerController::HandleKeyEvents(SDL_Event& e)
-{
-    if (e.type == SDL_KEYDOWN) {
-        switch (e.key.keysym.sym) {
-        case SDLK_a: m_KeyPress |= 1; break;
-        case SDLK_d: m_KeyPress |= (1 << 2); break;
-        case SDLK_SPACE:
-            if (!m_isAttacking && m_jumpCount < m_maxJump && !m_isRolling && !m_isHit) {
-                m_velocityY = m_jumpForce;
-                ChangeAnimation(jumpTexture, 2, 0.1f);
-                if (m_jumpCount == 1) {
-                    m_airTime = 0.0f;
-                    m_forceJumpAnimation = true;
-                    m_forceJumpTimer = m_forceJumpDuration; 
-                }
-                m_jumpCount++;
-                m_isGrounded = false;
-            }
-            break;
-        case SDLK_LSHIFT:
-            if (!m_isAttacking && !m_isRolling && m_isGrounded && !m_isHit) {
-                ChangeAnimation(rollTexture, 12, 0.03f);
-                m_isRolling = true;
-                m_rollTimer = m_rollDuration;
-            }
-            break;
-        }
-    }
-    else if (e.type == SDL_KEYUP) {
-        switch (e.key.keysym.sym) {
-        case SDLK_a: m_KeyPress &= ~1; break;
-        case SDLK_d: m_KeyPress &= ~(1 << 2); break;
-        }
-    }
-}
-void PlayerController::HandleMouseEvents(SDL_Event& e)
-{
-    if (e.type == SDL_MOUSEBUTTONDOWN) {
-        if (e.button.button == SDL_BUTTON_LEFT) {
-            if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit) {
-                float now = SDL_GetTicks() / 1000.0f;
 
-                if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
-                    ChangeAnimation(attack2Texture, 4, 0.1f);
-                    m_justDidAttack2 = true;
-                    m_justDidAttack3 = false;
-                }
-                else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
-                    ChangeAnimation(attack3Texture, 4, 0.1f);
-                    m_justDidAttack3 = true;
-                    m_justDidAttack2 = false;
-                }
-                else {
-                    ChangeAnimation(attackTexture, 4, 0.1f);
-                    m_justDidAttack2 = false;
-                    m_justDidAttack3 = false;
-                }
-                m_isAttacking = true;
-                m_attackTimer = m_attackDuration;
-                m_lastAttackTime = now;
-            }
-        }
-    }
-}
 
 void PlayerController::SetGroundCollider(SDL_Rect* ground)
 {

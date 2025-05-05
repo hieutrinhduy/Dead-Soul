@@ -31,6 +31,9 @@ public:
     const int UI_HP_Y = 50;
     const int UI_HP_WIDTH = 200;
     const int UI_HP_HEIGHT = 20;
+
+
+
 private:
     std::shared_ptr<SpriteAnimation> m_player;
     SDL_Rect m_playerCollider;
@@ -73,8 +76,9 @@ private:
     bool m_isHit = false;
     float m_hitTimer = 0.0f;
     bool m_didDamage = false;
+    bool m_canDealDamage;
 
-    // Texture Manager
+    // TEXTURES:
     std::shared_ptr<TextureManager> idleTexture;
     std::shared_ptr<TextureManager> runTexture;
     std::shared_ptr<TextureManager> jumpTexture;
@@ -83,18 +87,15 @@ private:
     std::shared_ptr<TextureManager> landTexture;
     std::shared_ptr<TextureManager> fallTexture;
     std::shared_ptr<TextureManager> rollTexture;
-    std::shared_ptr<TextureManager> attackTexture;
-    std::shared_ptr<TextureManager> attack2Texture;
-    std::shared_ptr<TextureManager> attack3Texture;
+    std::shared_ptr<TextureManager> attackTexture, attack2Texture, attack3Texture;
     std::shared_ptr<TextureManager> hurtTexture;
-    std::shared_ptr<TextureManager> deadTexture; 
+    std::shared_ptr<TextureManager> deadTexture;
+
     //std::function<void(int damage)> m_onHitEnemy;
     std::vector<std::function<void(int)>> m_onHitEnemyList;
     std::function<void()> m_onScreenShake;
 
-    bool m_canDealDamage;
 
-private:
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);
     bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b);
     bool GroundCheck();
