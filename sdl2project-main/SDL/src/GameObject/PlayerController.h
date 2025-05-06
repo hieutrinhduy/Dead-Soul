@@ -16,17 +16,37 @@ public:
     void Update(float deltaTime);
     void Draw(SDL_Renderer* renderer);
 
+
+    // GETTER:
+    const SDL_Rect& GetCollider() const { return m_playerCollider; }
+
+
+    // SETTER:
+    // set movement ability data:
+    void SetMovementState(bool canGoLeft, bool canGoRight, bool bumpTheHead, bool isGrounded) {
+        m_canGoLeft = canGoLeft; m_canGoRight = canGoRight;
+        m_bumpTheHead = bumpTheHead; m_isGrounded = isGrounded;
+    };
+    void SetMovementLimit(float left, float right, float top, float bottom) {
+        leftLimit = left; rightLimit = right;
+        topLimit = top; bottomLimit = bottom;
+    }
+
+    // set collider:
     void SetGroundCollider(SDL_Rect* ground);
     void SetEnemyCollider(SDL_Rect* enemy);
+    void SetEnemyColliders(const std::vector<SDL_Rect*>& enemies);
+
+    // set callback:
+    void SetOnHitEnemyCallbacks(const std::vector<std::function<void(int)>>& callbacks);
+    void SetOnScreenShakeCallback(std::function<void()> callback) { m_onScreenShake = callback; }
+
+
 
     void TakeDamage(int damage);
     void Die();
 
-    const SDL_Rect& GetCollider() const { return m_playerCollider; }
     bool IsDead() const { return m_isDead; }
-    void SetOnHitEnemyCallbacks(const std::vector<std::function<void(int)>>& callbacks);
-    void SetOnScreenShakeCallback(std::function<void()> callback) { m_onScreenShake = callback; }
-    void SetEnemyColliders(const std::vector<SDL_Rect*>& enemies);
     const int UI_HP_X = 50;
     const int UI_HP_Y = 50;
     const int UI_HP_WIDTH = 200;
@@ -35,6 +55,10 @@ public:
 private:
     std::shared_ptr<SpriteAnimation> m_player;
     SDL_Rect m_playerCollider;
+
+    // variables that detemine MOVEMENT_ABILITY:
+    bool m_canGoLeft, m_canGoRight, m_bumpTheHead, m_isGrounded;
+    float leftLimit, rightLimit, topLimit, bottomLimit;
 
     int m_currentWeaponIndex = 0;   
     // 0 = Default Sword
@@ -47,7 +71,6 @@ private:
     static float m_airTime;
     int m_jumpCount;
     const int m_maxJump;
-    bool m_isGrounded;
 
     bool m_forceJumpAnimation;
     float m_forceJumpTimer;

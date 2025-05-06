@@ -1,12 +1,12 @@
 #pragma once
 
 #include <vector>
-#include <string>
 #include <map>
 #include <SDL.h>
 
 #include "Define.h"
 #include "TextureManager.h"
+#include "PlayerController.h"
 
 
 /*
@@ -25,9 +25,17 @@ public:
     void LoadTileTexturesFromTileset();
     void DrawMap(SDL_Renderer* renderer);
 
+    // GETTER:
     int GetWidth();
     int GetHeight();
     int GetTileSize();
+
+    // SETTER:
+    void SetPlayer(std::shared_ptr<PlayerController> player);
+
+    // checking MOVEMENT_ABILITY thread:
+    void StartCheckingPlayerMovementAbility();
+
 
 private:
     const char* m_tilemapFile;
@@ -37,4 +45,7 @@ private:
     std::map<int, std::shared_ptr<TextureManager>> m_tileTextures;
     std::string m_tilesFolder;
     int m_tileSize;
+
+    bool m_isPlaying;
+    std::shared_ptr<PlayerController> m_player;
 };

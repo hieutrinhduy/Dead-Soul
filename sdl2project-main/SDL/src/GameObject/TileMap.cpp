@@ -2,14 +2,16 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <thread>
 
 #include "ResourceManagers.h"
 #include "Camera.h"
 
 
-
+#pragma region CONSTRUCTOR & DECONSTRUCTOR
 TileMap::TileMap(const char* tilemapFile, const char* tilesetFile, int tileSize) :
-    m_tileSize(tileSize), m_tilemapFile(tilemapFile), m_tilesetFile(tilesetFile)
+    m_tileSize(tileSize), m_tilemapFile(tilemapFile), m_tilesetFile(tilesetFile),
+    m_isPlaying(false)
 {
     GetTileIdFromTilemap();
     LoadTileTexturesFromTileset();
@@ -19,8 +21,10 @@ TileMap::TileMap(const char* tilemapFile, const char* tilesetFile, int tileSize)
 TileMap::~TileMap()
 {
 }
+#pragma endregion
 
 
+#pragma region Implement TILE_MAP
 void TileMap::GetTileIdFromTilemap()
 {
     FILE* file = NULL;
@@ -33,8 +37,8 @@ void TileMap::GetTileIdFromTilemap()
 
 
     int16_t rows, cols, id;
-    fread(&rows, 2, 1, file); printf("%d\n", rows);
-    fread(&cols, 2, 1, file); printf("%d\n", cols);
+    fread(&rows, 2, 1, file);
+    fread(&cols, 2, 1, file);
 
     for (int i = 0; i < rows; i++) {
         std::vector<int> a;
@@ -87,8 +91,50 @@ void TileMap::DrawMap(SDL_Renderer* renderer)
         }
     }
 }
+#pragma endregion
 
 
+#pragma region GETTER
 int TileMap::GetWidth() { return m_tileIds.empty() ? 0 : m_tileIds[0].size(); }
 int TileMap::GetHeight() { return m_tileIds.size(); }
 int TileMap::GetTileSize() { return m_tileSize; }
+#pragma endregion
+
+
+#pragma region SETTER
+void TileMap::SetPlayer(std::shared_ptr<PlayerController> player) { m_player = player; }
+#pragma endregion
+
+
+#pragma region Start a thread that Check MOVEMENT_ABILITY
+void TileMap::StartCheckingPlayerMovementAbility() {
+    std::thread t([this]() {
+        while (m_isPlaying) {
+            SDL_Rect player = m_player->GetCollider();
+            int startColumn = player.x / m_tileSize;
+            int endColumn = (player.x + player.w) / m_tileSize;
+            int startRow = player.y / m_tileSize;
+            int endRow = (player.y + player.h) / m_tileSize;
+            // if the player's position is exactly on the edge of a tile, do not take the next tile
+            if (endColumn * m_tileSize == player.x + player.w) endColumn -= 1;
+            if (endRow * m_tileSize == player.y + player.h) endRow -= 1;
+
+            // BOTTOM LIMIT:
+            bool finishCheck = false;
+            int bottomRowLimit = endRow + 1;
+            for (int i = endRow + 1;;i++) {
+                for (int j = startColumn; j <= endColumn; j++) {
+                    if (m_tileIds[i][j] == 1) {
+                        finishCheck = true;
+                        break;
+                    }
+                }
+                if (finishCheck) {
+                    finishCheck = false;
+                    break;
+                }
+            }
+        }
+    });
+}
+#pragma endregion

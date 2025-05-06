@@ -225,12 +225,7 @@ void PlayerController::Update(float deltaTime)
         m_rollTimer -= deltaTime;
         float moveDir = (m_playerFlip == SDL_FLIP_NONE) ? 1.0f : -1.0f;
         float moveAmount = moveDir * m_rollSpeed * deltaTime;
-        auto temp = m_player->Get2DPosition();
-        SDL_FPoint pos;
-        pos.x = temp.x + moveAmount;
-        pos.y = temp.y;
-        m_player->Set2DPosition(pos.x, pos.y);
-        m_playerCollider.x = (int)pos.x;
+        m_player->MoveX(moveAmount);
 
         //Lộn xong về idle
         if (m_rollTimer <= 0.0f) {
