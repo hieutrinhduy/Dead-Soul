@@ -1,5 +1,7 @@
 ﻿#include "GSPlay.h"
 
+#include <iostream>
+
 #include "ResourceManagers.h"
 #include "GameObject/MouseButton.h"
 #include "GameObject/Sprite2D.h"
@@ -9,25 +11,32 @@
 #include "Sound.h"
 #include "TileMap.h"
 #include "PlayerController.h"
-#include <iostream>
 #include "EnemyController.h"
 #include "RangedEnemy.h"
 #include "Bullet.h"
 #include "PlayerBullet.h"
+
+
 
 SDL_Rect groundCollider;
 SDL_Rect enemyCollider;
 std::vector<std::shared_ptr<Bullet>> g_bullets;
 std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 
+
+
 GSPlay::GSPlay()
 {
-    m_tileMap = std::make_shared<TileMap>();
+    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output.bin", "Data/Textures/Map/tiles", 32);
     m_tileMapLoaded = false;
     m_playerController = std::make_shared<PlayerController>();
 }
 
+
 GSPlay::~GSPlay() {}
+
+
+
 
 void GSPlay::Init()
 {
@@ -53,11 +62,11 @@ void GSPlay::Init()
     button->SetOnClick([this]() { GameStateMachine::GetInstance()->PopState(); });
     m_listButton.push_back(button);
 
-    m_tileMap->LoadMap("Data/Map/map6.txt");
-    if (!m_tileMapLoaded) {
-        m_tileMap->LoadTiles(Renderer::GetInstance()->GetRenderer(), "Data/Map/tiles", 32);
-        m_tileMapLoaded = true;
-    }
+    /* m_tileMap->LoadMap("Data/Map/map6.txt");
+     if (!m_tileMapLoaded) {
+         m_tileMap->LoadTiles(Renderer::GetInstance()->GetRenderer(), "Data/Map/tiles", 32);
+         m_tileMapLoaded = true;
+     }*/
 
     Camera::GetInstance()->SetLevelDimension(
         m_tileMap->GetWidth() * m_tileMap->GetTileSize(),
@@ -113,7 +122,7 @@ void GSPlay::Init()
     m_rangedEnemy->SetPlayerCollider(&m_playerController->GetCollider());
 
     // Lấy danh sách collider của enemy
-
+    std::vector<SDL_Rect*> enemyColliders;
     enemyColliders.push_back(m_enemyController->GetEnemyCollider());
     enemyColliders.push_back(m_enemyController2->GetEnemyCollider());
     enemyColliders.push_back(m_enemyController3->GetEnemyCollider());
@@ -141,7 +150,7 @@ void GSPlay::Init()
         });
     m_ghostWarriorRed->SetOnHitPlayerCallback([this](int damage) {
         m_playerController->TakeDamage(damage);
-        });    
+        });
     m_rangedEnemy->SetOnHitPlayerCallback([this](int damage) {
         m_playerController->TakeDamage(damage);
         });
@@ -184,8 +193,6 @@ void GSPlay::Init()
         Camera::GetInstance()->Shake(0.1f, randomMagnitude);
         });
 
-    m_hitEnemyCallbacks = hitEnemyCallbacks;
-
 
     // SOUNDS:
     Sound::GetInstance()->LoadSound("gameplay_music.mp3");
@@ -201,7 +208,12 @@ void GSPlay::Pause() {}
 
 void GSPlay::Resume() {}
 
+
+
+
 void GSPlay::HandleEvents() {}
+
+
 
 void GSPlay::HandleKeyEvents(SDL_Event& e)
 {
@@ -209,13 +221,20 @@ void GSPlay::HandleKeyEvents(SDL_Event& e)
     m_playerController->HandleMouseEvents(e);
 }
 
+
+
 void GSPlay::HandleTouchEvents(SDL_Event& e)
 {
     for (auto& button : m_listButton)
         if (button->HandleTouchEvent(&e)) break;
 }
 
+
+
 void GSPlay::HandleMouseMoveEvents(SDL_Event& e) {}
+
+
+
 
 void GSPlay::Update(float deltaTime)
 {
@@ -274,6 +293,9 @@ void GSPlay::Update(float deltaTime)
     Camera::GetInstance()->Update(deltaTime);
 }
 
+
+
+
 void GSPlay::Draw(SDL_Renderer* renderer)
 {
     Vector2 camPos = Camera::GetInstance()->GetPosition();
@@ -299,8 +321,9 @@ void GSPlay::Draw(SDL_Renderer* renderer)
         }
     }
 
-    if (m_tileMap)
-        m_tileMap->DrawMap(Renderer::GetInstance()->GetRenderer(), camPos.x, camPos.y, SCREEN_WIDTH, SCREEN_HEIDHT);
+
+    if (m_tileMap) m_tileMap->DrawMap(renderer);
+
 
     for (auto& it : m_listButton) it->Draw(renderer);
 

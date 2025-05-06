@@ -27,7 +27,7 @@ PlayerController::PlayerController()
     m_isAttacking(false), m_attackTimer(0.0f), m_attackDuration(0.39f), m_lastAttackTime(-999.0f), m_justDidAttack2(false), m_justDidAttack3(false),
     m_isRolling(false), m_rollTimer(0.0f), m_rollDuration(0.35f), m_rollSpeed(900.0f),
     m_groundCollider(nullptr),
-    m_maxHP(5), m_currentHP(5),
+    m_maxHP(5), m_currentHP(100),
     m_isDead(false),
     m_isHit(false), m_hitTimer(0.0f)
 {

@@ -1,25 +1,40 @@
 #pragma once
+
 #include <vector>
 #include <string>
 #include <map>
 #include <SDL.h>
 
+#include "Define.h"
+#include "TextureManager.h"
+
+
+/*
+    Read binary file to get tile_id -> get texture based on tile_id
+    After having enough tile_id and corresponding texture, draw tile map
+*/
+
+
 class TileMap
 {
 public:
-    TileMap();
+    TileMap(const char* tileMapFile, const char* tilesetFile, int tileSize);
     ~TileMap();
 
-    void LoadMap(const std::string& filePath);
-    void LoadTiles(SDL_Renderer* renderer, const std::string& tilesFolder, int tileSize);
-    void DrawMap(SDL_Renderer* renderer, float cameraX, float cameraY, int screenWidth, int screenHeight);
+    void GetTileIdFromTilemap();
+    void LoadTileTexturesFromTileset();
+    void DrawMap(SDL_Renderer* renderer);
+
     int GetWidth();
     int GetHeight();
     int GetTileSize();
 
 private:
-    std::vector<std::vector<int>> m_mapData;
-    std::map<int, SDL_Texture*> m_tileTextures;
+    const char* m_tilemapFile;
+    const char* m_tilesetFile;
+
+    std::vector<std::vector<int>> m_tileIds;
+    std::map<int, std::shared_ptr<TextureManager>> m_tileTextures;
     std::string m_tilesFolder;
     int m_tileSize;
 };
