@@ -24,14 +24,26 @@ void PlayerBullet::Update(float dt)
     if (m_destroyed) return;
 
     Vector2 pos = m_sprite->Get2DPosition();
+
     pos.x += m_speed * m_direction * dt;
+
+    m_velocityY += m_gravityForce * dt;
+    pos.y += m_velocityY * dt;
+
     m_sprite->Set2DPosition(pos.x, pos.y);
-
-    m_collider.x = (int)pos.x;
-    m_collider.y = (int)pos.y;
-
+    m_collider.x = static_cast<int>(pos.x);
+    m_collider.y = static_cast<int>(pos.y);
+    float angle = atan2(m_velocityY, m_speed * m_direction);
+    if (m_direction == -1) {
+        m_sprite->SetRotation(angle * 180  / M_PI + 180);  
+    }
+    else
+    {
+        m_sprite->SetRotation(angle * 180 / M_PI);
+    }
     m_sprite->Update(dt);
 }
+
 
 void PlayerBullet::Draw(SDL_Renderer* renderer)
 {

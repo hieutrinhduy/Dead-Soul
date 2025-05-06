@@ -28,4 +28,8 @@ private:
     bool m_destroyed;
     std::function<void()> m_onScreenShake;
     std::function<void(int)> m_onHitEnemy;
+
+    float m_velocityY = 0.0f;
+    float m_gravityForce = 600.0f;
+
 };

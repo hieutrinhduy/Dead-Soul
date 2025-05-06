@@ -616,7 +616,7 @@ void PlayerController::ShootProjectile()
     pos.x += (direction == 1) ? m_playerCollider.w : -32;
     pos.y += 32;
 
-    auto bullet = std::make_shared<PlayerBullet>(pos, 1200, direction, 1);
+    auto bullet = std::make_shared<PlayerBullet>(pos, 1500, direction, 1);
 
     bullet->SetOnHitEnemyCallback([this](int damage) {
 
