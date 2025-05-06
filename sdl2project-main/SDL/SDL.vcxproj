@@ -226,6 +226,7 @@
     <ClInclude Include="src\GameObject\SpriteAnimation.h" />
     <ClInclude Include="src\GameObject\Text.h" />
     <ClInclude Include="src\GameObject\TextureManager.h" />
+    <ClInclude Include="src\GameObject\TileMap.h" />
     <ClInclude Include="src\GameObject\Timer.h" />
     <ClInclude Include="src\GameStates\GameStateBase.h" />
     <ClInclude Include="src\GameStates\GameStateMachine.h" />
