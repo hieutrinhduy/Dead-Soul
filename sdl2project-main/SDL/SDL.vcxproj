@@ -179,6 +179,7 @@
     <ClCompile Include="src\GameObject\EvilCreature.cpp" />
     <ClCompile Include="src\GameObject\GhostWarrior.cpp" />
     <ClCompile Include="src\GameObject\MouseButton.cpp" />
+    <ClCompile Include="src\GameObject\PlayerBullet.cpp" />
     <ClCompile Include="src\GameObject\PlayerController.cpp" />
     <ClCompile Include="src\GameObject\Renderer.cpp" />
     <ClCompile Include="src\GameObject\SliderIcon.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="src\GameObject\GhostWarriorRed.h" />
     <ClInclude Include="src\GameObject\KeyState.h" />
     <ClInclude Include="src\GameObject\MouseButton.h" />
+    <ClInclude Include="src\GameObject\PlayerBullet.h" />
     <ClInclude Include="src\GameObject\PlayerController.h" />
     <ClInclude Include="src\GameObject\RangedEnemy.h" />
     <ClInclude Include="src\GameObject\Renderer.h" />

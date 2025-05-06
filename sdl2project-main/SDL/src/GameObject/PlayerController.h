@@ -2,7 +2,7 @@
 #include "SpriteAnimation.h"
 #include <memory>
 #include <SDL.h>
-#include <functional> 
+#include <functional>
 
 class PlayerController
 {
@@ -32,11 +32,13 @@ public:
     const int UI_HP_WIDTH = 200;
     const int UI_HP_HEIGHT = 20;
 
-
-
 private:
     std::shared_ptr<SpriteAnimation> m_player;
     SDL_Rect m_playerCollider;
+
+    int m_currentWeaponIndex = 0;   
+    // 0 = Default Sword
+    // 1 = Arrow
 
     float m_gravityForce;
     float m_jumpForce;
@@ -56,7 +58,7 @@ private:
 
     bool m_isAttacking;
     float m_attackTimer;
-    const float m_attackDuration;
+    float m_attackDuration;
     float m_lastAttackTime;
     bool m_justDidAttack2;
     bool m_justDidAttack3;
@@ -87,7 +89,8 @@ private:
     std::shared_ptr<TextureManager> landTexture;
     std::shared_ptr<TextureManager> fallTexture;
     std::shared_ptr<TextureManager> rollTexture;
-    std::shared_ptr<TextureManager> attackTexture, attack2Texture, attack3Texture;
+    std::shared_ptr<TextureManager> attackTexture, attack2Texture, attack3Texture; //DEFAULT WEAPON
+    std::shared_ptr<TextureManager> arrowAttackTexture;// ARROW WEAPON
     std::shared_ptr<TextureManager> hurtTexture;
     std::shared_ptr<TextureManager> deadTexture;
 
@@ -95,7 +98,7 @@ private:
     std::vector<std::function<void(int)>> m_onHitEnemyList;
     std::function<void()> m_onScreenShake;
 
-
+    void ShootProjectile();
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);
     bool CheckCollision(const SDL_Rect& a, const SDL_Rect& b);
     bool GroundCheck();

@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿//Enemy Bullet
+#pragma once
 #include "SpriteAnimation.h"
 #include <memory>
 #include <functional>

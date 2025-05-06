@@ -39,6 +39,7 @@ public:
 
 private:
 	std::shared_ptr<PlayerController> m_playerController;
+
 	std::shared_ptr<EnemyController> m_enemyController;
 	std::shared_ptr<EnemyController> m_enemyController2;
 	std::shared_ptr<EnemyController> m_enemyController3;
@@ -55,10 +56,14 @@ private:
 	std::shared_ptr<SpriteAnimation> enemy;
 	std::shared_ptr<MouseButton> button;
 	std::shared_ptr<TileMap> m_tileMap;
+	std::vector<SDL_Rect*> enemyColliders;
 	bool m_tileMapLoaded = false;
 
 	float time = 0.0f;
 	float m_Velocity = 10.0f;
+
+	std::vector<std::function<void(int)>> m_hitEnemyCallbacks; //Luu hit callback cua tung enemy
+
 
 	// === Thêm 5 hàm private mới cho quản lý Update ===
 	void UpdateAttackTimer(float deltaTime);

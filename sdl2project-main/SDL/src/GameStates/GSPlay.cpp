@@ -13,10 +13,12 @@
 #include "EnemyController.h"
 #include "RangedEnemy.h"
 #include "Bullet.h"
+#include "PlayerBullet.h"
 
 SDL_Rect groundCollider;
 SDL_Rect enemyCollider;
 std::vector<std::shared_ptr<Bullet>> g_bullets;
+std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 
 GSPlay::GSPlay()
 {
@@ -111,7 +113,7 @@ void GSPlay::Init()
     m_rangedEnemy->SetPlayerCollider(&m_playerController->GetCollider());
 
     // Lấy danh sách collider của enemy
-    std::vector<SDL_Rect*> enemyColliders;
+
     enemyColliders.push_back(m_enemyController->GetEnemyCollider());
     enemyColliders.push_back(m_enemyController2->GetEnemyCollider());
     enemyColliders.push_back(m_enemyController3->GetEnemyCollider());
@@ -182,6 +184,7 @@ void GSPlay::Init()
         Camera::GetInstance()->Shake(0.1f, randomMagnitude);
         });
 
+    m_hitEnemyCallbacks = hitEnemyCallbacks;
 
 
     // SOUNDS:
@@ -237,6 +240,37 @@ void GSPlay::Update(float deltaTime)
             ++it;
     }
 
+    for (int i = 0; i < g_playerBullets.size(); )
+    {
+        auto& bullet = g_playerBullets[i];
+        bullet->Update(deltaTime);
+
+        bool hit = false;
+        for (size_t j = 0; j < enemyColliders.size(); ++j)
+        {
+            if (bullet->HasHitEnemy(enemyColliders[j]))
+            {
+                std::cout << bullet->GetDamage() << std::endl;
+                if (j < m_hitEnemyCallbacks.size())
+                    m_hitEnemyCallbacks[j](bullet->GetDamage());
+                hit = true;
+                break;
+            }
+        }
+
+        if (bullet->IsOutOfScreen() || hit)
+        {
+            g_playerBullets.erase(g_playerBullets.begin() + i);
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+
+
+
     Camera::GetInstance()->Update(deltaTime);
 }
 
@@ -281,6 +315,11 @@ void GSPlay::Draw(SDL_Renderer* renderer)
     m_rangedEnemy->Draw(renderer);
 
     for (auto& bullet : g_bullets)
+    {
+        bullet->Draw(Renderer::GetInstance()->GetRenderer());
+    }
+
+    for (auto& bullet : g_playerBullets)
     {
         bullet->Draw(Renderer::GetInstance()->GetRenderer());
     }

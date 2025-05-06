@@ -6,13 +6,13 @@
 #include <algorithm> 
 #include "GhostWarriorRed.h"
 #include "RangedEnemy.h"
-
+#include "PlayerBullet.h"
 
 float PlayerController::m_airTime = 0.0f;
 float m_deadTimer;
 bool m_finishDead;
 //TTF_Font* m_font = nullptr;
-
+extern std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 
 /* ----------------------------------------------------------------------------------------------------------------------- */
 //      CONSTRUCTOR & DECONSTRUCTOR  ->  INIT  ->  HANDLE KEY_EVENTS  ->  HANDLE MOUSE_EVENTS  ->  UPDATE  ->  DRAW
@@ -53,11 +53,14 @@ void PlayerController::Init()
     landTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerLand.png");
     fallTexture = ResourceManagers::GetInstance()->GetTexture("_Fall.png");
     rollTexture = ResourceManagers::GetInstance()->GetTexture("_Roll.png");
+    hurtTexture = ResourceManagers::GetInstance()->GetTexture("_Hit.png");
+    deadTexture = ResourceManagers::GetInstance()->GetTexture("_Death.png");
+    //For Default Weapon (m_currentWeaponIndex = 0)
     attackTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack1.png");
     attack2Texture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack2.png");
     attack3Texture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack3.png");
-    hurtTexture = ResourceManagers::GetInstance()->GetTexture("_Hit.png");
-    deadTexture = ResourceManagers::GetInstance()->GetTexture("_Death.png");
+    //For Weapon Arrow (m_currentWeaponIndex = 1)
+    arrowAttackTexture = ResourceManagers::GetInstance()->GetTexture("ArrowAttack.png");
 
     m_player = std::make_shared<SpriteAnimation>(idleTexture, 1, 2, 1, 0.5f);
     m_player->SetSize(180, 180);
@@ -108,6 +111,13 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
                 m_rollTimer = m_rollDuration;
             }
             break;
+        case SDLK_1:
+            m_currentWeaponIndex = 0;
+            m_attackDuration = 0.39f;
+            break;
+        case SDLK_2:
+            m_currentWeaponIndex = 1;
+            m_attackDuration = 0.5;
         }
     }
     else if (e.type == SDL_KEYUP) {
@@ -124,27 +134,43 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
 {
     if (e.type == SDL_MOUSEBUTTONDOWN) {
         if (e.button.button == SDL_BUTTON_LEFT) {
-            if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit) {
-                float now = SDL_GetTicks() / 1000.0f;
-
-                if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
-                    ChangeAnimation(attack2Texture, 4, 0.1f);
-                    m_justDidAttack2 = true;
-                    m_justDidAttack3 = false;
+            switch (m_currentWeaponIndex)
+            {
+            case 0:
+                if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit) {
+                    float now = SDL_GetTicks() / 1000.0f;
+                    //Cac don danh cach nhau 1s
+                    if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
+                        ChangeAnimation(attack2Texture, 4, 0.1f);
+                        m_justDidAttack2 = true;
+                        m_justDidAttack3 = false;
+                    }
+                    else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
+                        ChangeAnimation(attack3Texture, 4, 0.1f);
+                        m_justDidAttack3 = true;
+                        m_justDidAttack2 = false;
+                    }
+                    else {
+                        ChangeAnimation(attackTexture, 4, 0.1f);
+                        m_justDidAttack2 = false;
+                        m_justDidAttack3 = false;
+                    }
+                    m_isAttacking = true;
+                    m_attackTimer = m_attackDuration;
+                    m_lastAttackTime = now;
                 }
-                else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
-                    ChangeAnimation(attack3Texture, 4, 0.1f);
-                    m_justDidAttack3 = true;
-                    m_justDidAttack2 = false;
+                break;
+            case 1:
+                if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit) {
+                    float now = SDL_GetTicks() / 1000.0f;
+                    //Cac don danh cach nhau 1s
+                    //if (now - m_lastAttackTime <= 1.0f) {
+                    //}
+                    ChangeAnimation(arrowAttackTexture, 11, 0.05f);
+                    m_isAttacking = true;
+                    m_attackTimer = m_attackDuration;
+                    m_lastAttackTime = now;
                 }
-                else {
-                    ChangeAnimation(attackTexture, 4, 0.1f);
-                    m_justDidAttack2 = false;
-                    m_justDidAttack3 = false;
-                }
-                m_isAttacking = true;
-                m_attackTimer = m_attackDuration;
-                m_lastAttackTime = now;
             }
         }
     }
@@ -336,41 +362,51 @@ void PlayerController::Update(float deltaTime)
     wasJumpingUp = isJumpingUp;
 
     // Khi đang Attack
-    if (m_isAttacking && !m_enemyColliders.empty())
+    int currentFrame = m_player->GetCurrentFrame();
+    switch (m_currentWeaponIndex)
     {
-        float elapsedAttackTime = m_attackDuration - m_attackTimer;
-        m_canDealDamage = false;
-
-        int currentFrame = m_player->GetCurrentFrame();
-
-        //Attack1
-        if (!m_justDidAttack2 && !m_justDidAttack3)
+    case 0:
+        if (m_isAttacking && !m_enemyColliders.empty())
         {
-            if (currentFrame == 3 && !m_didDamage) {
-                m_canDealDamage = true;
-                m_didDamage = true;
+            float elapsedAttackTime = m_attackDuration - m_attackTimer;
+            m_canDealDamage = false;
+
+
+            //Attack1
+            if (!m_justDidAttack2 && !m_justDidAttack3)
+            {
+                if (currentFrame == 3 && !m_didDamage) {
+                    m_canDealDamage = true;
+                    m_didDamage = true;
+                }
+            }
+            //Attack2
+            else if(!m_justDidAttack3)
+            {
+                if (currentFrame == 3 && !m_didDamage) {
+                    m_canDealDamage = true;
+                    m_didDamage = true;
+                }
+            }
+            //Attack3
+            else
+            {
+                if (currentFrame == 3 && !m_didDamage) {
+                    m_canDealDamage = true;
+                    m_didDamage = true;
+                }
             }
         }
-        //Attack2
-        else if(!m_justDidAttack3)
-        {
-            if (currentFrame == 3 && !m_didDamage) {
-                m_canDealDamage = true;
-                m_didDamage = true;
-            }
-        }
-        //Attack3
         else
         {
-            if (currentFrame == 3 && !m_didDamage) {
-                m_canDealDamage = true;
-                m_didDamage = true;
-            }
+            m_canDealDamage = false;
         }
-    }
-    else
-    {
-        m_canDealDamage = false;
+        break;
+    case 1:
+        if (currentFrame == 9 && !m_didDamage && m_isAttacking) {
+            ShootProjectile();
+            m_didDamage = true;
+        }
     }
 
     if (m_player)
@@ -572,3 +608,25 @@ void PlayerController::SetOnHitEnemyCallbacks(const std::vector<std::function<vo
     std::cout << "[PlayerController] SetOnHitEnemyCallbacks gọi với " << callbacks.size() << " callback(s)\n";
     m_onHitEnemyList = callbacks;
 }
+
+void PlayerController::ShootProjectile()
+{
+    Vector2 pos = { static_cast<float>(m_playerCollider.x), static_cast<float>(m_playerCollider.y) };
+    int direction = (m_playerFlip == SDL_FLIP_NONE) ? 1 : -1;
+    pos.x += (direction == 1) ? m_playerCollider.w : -32;
+    pos.y += 32;
+
+    auto bullet = std::make_shared<PlayerBullet>(pos, 1200, direction, 1);
+
+    bullet->SetOnHitEnemyCallback([this](int damage) {
+
+        });
+
+    //Bullet ScreenShake
+    //bullet->SetOnScreenShakeCallback([this]() {
+    //    if (m_onScreenShake) m_onScreenShake();
+    //    });
+
+    g_playerBullets.push_back(bullet);
+}
+
