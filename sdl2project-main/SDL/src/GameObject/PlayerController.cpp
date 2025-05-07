@@ -8,6 +8,10 @@
 #include "RangedEnemy.h"
 #include "PlayerBullet.h"
 
+
+constexpr int PLAYER_SIZE = 150, PLAYER_STARTING_POSITION_X = 200, PLAYER_STARTING_POSITION_Y = 0;
+
+
 float PlayerController::m_airTime = 0.0f;
 float m_deadTimer;
 bool m_finishDead;
@@ -63,8 +67,8 @@ void PlayerController::Init()
     arrowAttackTexture = ResourceManagers::GetInstance()->GetTexture("ArrowAttack.png");
 
     m_player = std::make_shared<SpriteAnimation>(idleTexture, 1, 2, 1, 0.5f);
-    m_player->SetSize(180, 180);
-    m_player->Set2DPosition(500, -500);
+    m_player->SetSize(PLAYER_SIZE, PLAYER_SIZE);
+    m_player->Set2DPosition(PLAYER_STARTING_POSITION_X, PLAYER_STARTING_POSITION_Y);
     m_playerCollider = { (int)m_player->GetPosition().x, (int)m_player->GetPosition().y, m_player->GetWidth()/2, m_player->GetHeight()/2 };
 
     auto  pos = m_player->Get2DPosition();
@@ -248,7 +252,8 @@ void PlayerController::Update(float deltaTime)
         if (m_KeyPress & 1) velocity.x -= 1.0f;
         if (m_KeyPress & (1 << 2)) velocity.x += 1.0f;
     }
-    newPos.x += velocity.x * m_speed * deltaTime;
+    if (velocity.x < 0) { newPos.x += std::max(velocity.x * m_speed * deltaTime, -leftLimit); }
+    else newPos.x += std::min(velocity.x * m_speed * deltaTime, rightLimit);
 
     //Flip nhân vật
     if (velocity.x != 0 && !m_isAttacking) {
@@ -280,7 +285,15 @@ void PlayerController::Update(float deltaTime)
 
     // Tính vị trí mới theo trục Y dựa vào trọng lực (trên kia là tính x)
     float posX = m_player->Get2DPosition().x;
-    float posY = m_player->Get2DPosition().y + m_velocityY * deltaTime;
+    float posY;
+    if (m_velocityY < 0) {
+        if (-topLimit > m_velocityY * deltaTime) {
+            posY = m_player->Get2DPosition().y - topLimit;
+            m_velocityY = -m_velocityY;
+        }
+        else posY = m_player->Get2DPosition().y + m_velocityY * deltaTime;
+    }
+    else posY = m_player->Get2DPosition().y + std::min(m_velocityY * deltaTime, bottomLimit);
 
     // Cập nhật tạm collider theo vị trí dự đoán
     if (m_playerFlip == SDL_FLIP_NONE) {
@@ -292,12 +305,12 @@ void PlayerController::Update(float deltaTime)
     }
 
     // Kiểm tra nhân vật có đang ở trên mặt đất không
-    m_isGrounded = GroundCheck();
+    //m_isGrounded = GroundCheck();
 
     // Nếu đang ở trên mặt đất thì cố định lại vị trí Y, reset vận tốc rơi và số lần nhảy
     if (m_isGrounded) {
         m_velocityY = 0;
-        posY = m_groundCollider->y - m_player->GetHeight() + 2;
+        //posY = m_groundCollider->y - m_player->GetHeight() + 2;
         m_jumpCount = 0;
     }
 

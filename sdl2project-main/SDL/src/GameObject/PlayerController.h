@@ -17,11 +17,17 @@ public:
     void Draw(SDL_Renderer* renderer);
 
 
-    // GETTER:
+    /* -------- GETTER: -------- */
     const SDL_Rect& GetCollider() const { return m_playerCollider; }
 
+    //get movement ability data:
+    bool CanGoLeft() const { return m_canGoLeft; };
+    bool CanGoRight() const { return m_canGoRight; };
+    bool BumpTheHead() const { return m_bumpTheHead; };
+    bool OnTheGround() const { return m_isGrounded; };
 
-    // SETTER:
+
+    /* -------- SETTER: -------- */
     // set movement ability data:
     void SetMovementState(bool canGoLeft, bool canGoRight, bool bumpTheHead, bool isGrounded) {
         m_canGoLeft = canGoLeft; m_canGoRight = canGoRight;

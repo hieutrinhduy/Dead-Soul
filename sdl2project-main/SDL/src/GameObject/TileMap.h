@@ -37,14 +37,18 @@ public:
     void StartCheckingPlayerMovementAbility();
 
 
+
 private:
     const char* m_tilemapFile;
     const char* m_tilesetFile;
+
+    int m_mapWidth, m_mapHeight;
 
     std::vector<std::vector<int>> m_tileIds;
     std::map<int, std::shared_ptr<TextureManager>> m_tileTextures;
     std::string m_tilesFolder;
     int m_tileSize;
+
 
     bool m_isPlaying;
     std::shared_ptr<PlayerController> m_player;

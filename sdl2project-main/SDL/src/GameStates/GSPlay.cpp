@@ -27,9 +27,10 @@ std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 
 GSPlay::GSPlay()
 {
-    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output.bin", "Data/Textures/Map/tiles", 32);
-    m_tileMapLoaded = false;
     m_playerController = std::make_shared<PlayerController>();
+
+    m_tileMapLoaded = false;
+    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output.bin", "Data/Textures/Map/tiles", 32);
 }
 
 
@@ -74,6 +75,8 @@ void GSPlay::Init()
     );
 
     m_playerController->Init();
+    m_tileMap->SetPlayer(m_playerController);
+    m_tileMap->StartCheckingPlayerMovementAbility();
 
     // Enemy thường
     m_enemyController = std::make_shared<EnemyController>();
