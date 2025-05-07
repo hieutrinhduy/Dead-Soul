@@ -109,120 +109,123 @@ void TileMap::SetPlayer(std::shared_ptr<PlayerController> player) { m_player = p
 #pragma endregion
 
 
-#pragma region Start a thread that Check MOVEMENT_ABILITY
+#pragma region Thread that Check MOVEMENT_ABILITY
 void TileMap::StartCheckingPlayerMovementAbility() {
     std::thread t([this]() {
+        m_finishThread = false;
         bool canGoLeft = true, canGoRight = true, bumpTheHead = true, isGrounded = true;
         float leftLimit = 200, rightLimit = 200, topLimit = 200, bottomLimit = 200;
 
-        if (m_player == NULL) printf("error!\n");
-        else {
-            while (m_isPlaying && m_player != NULL) {
-                SDL_Rect player = m_player->GetCollider();
-                float playerRight = player.x + player.w;
-                float playerBottom = player.y + player.h;
+        while (m_isPlaying) {
+            SDL_Rect player = m_player->GetCollider();
+            float playerRight = player.x + player.w;
+            float playerBottom = player.y + player.h;
 
-                int startColumn = player.x / m_tileSize;
-                int endColumn = playerRight / m_tileSize;
-                int startRow = player.y / m_tileSize;
-                int endRow = playerBottom / m_tileSize;
-                // if the player's position is exactly on the edge of a tile, do not take the next tile
-                if (endColumn * m_tileSize == playerRight) endColumn -= 1;
-                if (endRow * m_tileSize == playerBottom) endRow -= 1;
+            int startColumn = player.x / m_tileSize;
+            int endColumn = playerRight / m_tileSize;
+            int startRow = player.y / m_tileSize;
+            int endRow = playerBottom / m_tileSize;
+            // if the player's position is exactly on the edge of a tile, do not take the next tile
+            if (endColumn * m_tileSize == playerRight) endColumn -= 1;
+            if (endRow * m_tileSize == playerBottom) endRow -= 1;
 
-                // LEFT LIMIT:
-                bool finishCheck = false;
-                int leftColumnLimit = startColumn;
-                for (int i = 1; i <= CHECK_SCOPE; i++) {
-                    leftColumnLimit--;
-                    if (leftColumnLimit == -1) break;
-                    for (int j = startRow; j <= endRow; j++) {
-                        if (m_tileIds[j][leftColumnLimit] == 32) {
-                            finishCheck = true;
-                            break;
-                        }
-                    }
-                    if (finishCheck) {
+            // LEFT LIMIT:
+            bool finishCheck = false;
+            int leftColumnLimit = startColumn;
+            for (int i = 1; i <= CHECK_SCOPE; i++) {
+                leftColumnLimit--;
+                if (leftColumnLimit == -1) break;
+                for (int j = startRow; j <= endRow; j++) {
+                    if (m_tileIds[j][leftColumnLimit] == 32) {
+                        finishCheck = true;
                         break;
                     }
                 }
-                float tilePosition = (leftColumnLimit + 1) * m_tileSize;
-                leftLimit = player.x - tilePosition;
-                if (tilePosition == player.x) canGoLeft = false;
-                else canGoLeft = true;
-
-                // RIGHT LIMIT:
-                finishCheck = false;
-                int rightColumnLimit = endColumn;
-                for (int i = 1; i <= CHECK_SCOPE; i++) {
-                    rightColumnLimit++;
-                    if (rightColumnLimit == m_mapWidth) break;
-                    for (int j = startRow; j <= endRow; j++) {
-                        if (m_tileIds[j][rightColumnLimit] == 32) {
-                            finishCheck = true;
-                            break;
-                        }
-                    }
-                    if (finishCheck) {
-                        break;
-                    }
+                if (finishCheck) {
+                    break;
                 }
-                tilePosition = rightColumnLimit * m_tileSize;
-                rightLimit = tilePosition - playerRight;
-                if (tilePosition == playerRight) canGoRight = false;
-                else canGoRight = true;
-
-                // TOP LIMIT:
-                finishCheck = false;
-                int topRowLimit = startRow;
-                for (int i = 1; i <= CHECK_SCOPE; i++) {
-                    topRowLimit--;
-                    if (topRowLimit == -1) break;
-                    for (int j = startColumn; j <= endColumn; j++) {
-                        if (m_tileIds[topRowLimit][j] == 32) {
-                            finishCheck = true;
-                            break;
-                        }
-                    }
-                    if (finishCheck) {
-                        break;
-                    }
-                }
-                tilePosition = (topRowLimit + 1) * m_tileSize;
-                topLimit = player.y - tilePosition;
-                if (tilePosition == player.y) bumpTheHead = true;
-                else bumpTheHead = false;
-
-                // BOTTOM LIMIT:
-                finishCheck = false;
-                int bottomRowLimit = endRow;
-                for (int i = 1; i <= CHECK_SCOPE; i++) {
-                    bottomRowLimit++;
-                    if (bottomRowLimit == m_mapHeight) break;
-                    for (int j = startColumn; j <= endColumn; j++) {
-                        if (m_tileIds[bottomRowLimit][j] >= 0 && m_tileIds[bottomRowLimit][j] < 6) {
-                            finishCheck = true;
-                            break;
-                        }
-                    }
-                    if (finishCheck) {
-                        break;
-                    }
-                }
-                tilePosition = bottomRowLimit * m_tileSize;
-                bottomLimit = tilePosition - playerBottom;
-                if (tilePosition == playerBottom) isGrounded = true;
-                else isGrounded = false;
-
-                // update MOVEMENT_ABILITY:
-                m_player->SetMovementLimit(leftLimit, rightLimit, topLimit, bottomLimit);
-                m_player->SetMovementState(canGoLeft, canGoRight, bumpTheHead, isGrounded);
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
+            float tilePosition = (leftColumnLimit + 1) * m_tileSize;
+            leftLimit = player.x - tilePosition;
+            if (tilePosition == player.x) canGoLeft = false;
+            else canGoLeft = true;
+
+            // RIGHT LIMIT:
+            finishCheck = false;
+            int rightColumnLimit = endColumn;
+            for (int i = 1; i <= CHECK_SCOPE; i++) {
+                rightColumnLimit++;
+                if (rightColumnLimit == m_mapWidth) break;
+                for (int j = startRow; j <= endRow; j++) {
+                    if (m_tileIds[j][rightColumnLimit] == 32) {
+                        finishCheck = true;
+                        break;
+                    }
+                }
+                if (finishCheck) {
+                    break;
+                }
+            }
+            tilePosition = rightColumnLimit * m_tileSize;
+            rightLimit = tilePosition - playerRight;
+            if (tilePosition == playerRight) canGoRight = false;
+            else canGoRight = true;
+
+            // TOP LIMIT:
+            finishCheck = false;
+            int topRowLimit = startRow;
+            for (int i = 1; i <= CHECK_SCOPE; i++) {
+                topRowLimit--;
+                if (topRowLimit == -1) break;
+                for (int j = startColumn; j <= endColumn; j++) {
+                    if (m_tileIds[topRowLimit][j] == 32) {
+                        finishCheck = true;
+                        break;
+                    }
+                }
+                if (finishCheck) {
+                    break;
+                }
+            }
+            tilePosition = (topRowLimit + 1) * m_tileSize;
+            topLimit = player.y - tilePosition;
+            if (tilePosition == player.y) bumpTheHead = true;
+            else bumpTheHead = false;
+
+            // BOTTOM LIMIT:
+            finishCheck = false;
+            int bottomRowLimit = endRow;
+            for (int i = 1; i <= CHECK_SCOPE; i++) {
+                bottomRowLimit++;
+                if (bottomRowLimit == m_mapHeight) break;
+                for (int j = startColumn; j <= endColumn; j++) {
+                    if (m_tileIds[bottomRowLimit][j] >= 0 && m_tileIds[bottomRowLimit][j] < 6) {
+                        finishCheck = true;
+                        break;
+                    }
+                }
+                if (finishCheck) {
+                    break;
+                }
+            }
+            tilePosition = bottomRowLimit * m_tileSize;
+            bottomLimit = tilePosition - playerBottom;
+            if (tilePosition == playerBottom) isGrounded = true;
+            else isGrounded = false;
+
+            // update MOVEMENT_ABILITY:
+            m_player->SetMovementLimit(leftLimit, rightLimit, topLimit, bottomLimit);
+            m_player->SetMovementState(canGoLeft, canGoRight, bumpTheHead, isGrounded);
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
+        m_finishThread = true;
     });
 
     t.detach();
+}
+
+void TileMap::ClearThread() {
+    m_isPlaying = false;
 }
 #pragma endregion

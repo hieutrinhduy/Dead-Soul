@@ -58,7 +58,7 @@ bool Renderer::Init()
 		}
 	}
 
-	//	//Initialize PNG loading
+	// Initialize PNG loading
 	bool ret = true;
 	int imgFlags = IMG_INIT_PNG; //we can use other type maybe jpg, bmp...
 	if (!(IMG_Init(imgFlags) & imgFlags))
@@ -67,7 +67,7 @@ bool Renderer::Init()
 		ret = false;
 	}
 
-	//Initialize SDL_ttf
+	// Initialize SDL_ttf
 	if (TTF_Init() == -1)
 	{
 		printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());

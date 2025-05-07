@@ -35,6 +35,8 @@ public:
 
     // checking MOVEMENT_ABILITY thread:
     void StartCheckingPlayerMovementAbility();
+    void ClearThread();
+    bool m_finishThread;
 
 
 

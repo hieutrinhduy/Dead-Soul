@@ -205,7 +205,10 @@ void GSPlay::Init()
 
 
 
-void GSPlay::Exit() {}
+void GSPlay::Exit() {
+    m_tileMap->ClearThread();
+    while(m_tileMap->m_finishThread) {}
+}
 
 void GSPlay::Pause() {}
 
