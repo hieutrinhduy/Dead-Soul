@@ -56,7 +56,7 @@ void EvilCreature::TakeDamage(int damage)
     m_currentHP -= damage;
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
     m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
-
+     
     if (m_currentHP <= 0) {
         m_currentHP = 0;
         std::cout << "[EvilCreature] ĐÃ CHẾT\n";

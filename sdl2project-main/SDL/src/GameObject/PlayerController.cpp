@@ -275,12 +275,26 @@ void PlayerController::Update(float deltaTime)
     m_playerCollider.x = (int)newPos.x;
 
     //Nếu ko ở trên mặt đất thì tăng dần biến m_airTime, nếu trên mặt đất thì reset = 0
-    if (!m_isGrounded) m_airTime += deltaTime;
+    if (!m_isGrounded) 
+    {
+        //Check trạng thái nhảy
+        if (m_velocityY <= 0) {
+            m_isJumping = true;
+            m_isFalling = false;
+        }
+        else
+        {
+            m_isJumping = false;
+            m_isFalling = true;
+        }
+        m_airTime += deltaTime;
+    } 
     else m_airTime = 0.0f;
 
     //Chỉnh tốc độ rơi dựa trên m_airTime (thời gian trên không), càng lâu thì rơi càng nhanh, tối đa vận tốc rơi là 800
     m_velocityY += m_gravityForce * (1.0f + m_airTime * 15.0f) * deltaTime;
     if (m_velocityY > 800) m_velocityY = 800;
+
 
     // Tính vị trí mới theo trục Y dựa vào trọng lực (trên kia là tính x)
     float posX = m_player->Get2DPosition().x;
@@ -307,6 +321,8 @@ void PlayerController::Update(float deltaTime)
     if (m_isGrounded) {
         m_velocityY = 0;
         m_jumpCount = 0;
+        m_isJumping = false;
+        m_isFalling = false;
     }
 
     // Cập nhật vị trí và collider mới sau khi xử lý rơi và mặt đất
@@ -600,10 +616,6 @@ void PlayerController::SetEnemyColliders(const std::vector<SDL_Rect*>& enemies)
 void PlayerController::DestroyPlayer()
 {
     m_playerCollider = { 0, 0, 0, 0 };
-
-    //m_player = nullptr;
-
-    //std::cout << "Player destroyed!\n";
 }
 
 void PlayerController::SetOnHitEnemyCallbacks(const std::vector<std::function<void(int)>>& callbacks)

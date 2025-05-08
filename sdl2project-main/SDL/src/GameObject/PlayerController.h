@@ -72,6 +72,10 @@ private:
     bool m_canGoLeft, m_canGoRight, m_bumpTheHead, m_isGrounded;
     float leftLimit, rightLimit, topLimit, bottomLimit;
 
+    //jump variables
+    bool m_isJumping;
+    bool m_isFalling;
+
     int m_currentWeaponIndex = 0;   
     // 0 = Default Sword
     // 1 = Arrow
