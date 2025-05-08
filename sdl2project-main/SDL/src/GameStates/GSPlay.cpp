@@ -27,6 +27,8 @@ std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 
 GSPlay::GSPlay()
 {
+    m_uiManager = std::make_shared<UIManager>();
+
     m_playerController = std::make_shared<PlayerController>();
 
     m_tileMapLoaded = false;
@@ -367,4 +369,7 @@ void GSPlay::Draw(SDL_Renderer* renderer)
     SDL_RenderDrawRect(renderer, &ConvertToCameraView(groundCollider, camPos));
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    // draw UI:
+    m_uiManager->Draw(renderer);
 }

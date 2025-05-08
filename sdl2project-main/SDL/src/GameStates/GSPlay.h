@@ -3,6 +3,7 @@
 #include "GameStateBase.h"
 #include "TileMap.h"
 
+#include "UIManager.h"
 #include "PlayerController.h" 
 #include "EnemyController.h"
 #include "EvilCreature.h"
@@ -38,6 +39,7 @@ public:
 	int m_KeyPress;
 
 private:
+	std::shared_ptr<UIManager> m_uiManager;
 	std::shared_ptr<PlayerController> m_playerController;
 
 	std::shared_ptr<EnemyController> m_enemyController;

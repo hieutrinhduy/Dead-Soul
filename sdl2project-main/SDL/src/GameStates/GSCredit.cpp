@@ -8,7 +8,8 @@
 
 constexpr auto NARRATION_1 = "Hoang Trung Tien - VETERAN KNIGHT";
 constexpr auto NARRATION_2 = "Trinh Duy Hieu - VETERAN KNIGHT";
-#define NARRATION_SIZE 450,32
+#define NARRATION_1_SIZE 480,40
+#define NARRATION_2_SIZE 440,40
 
 
 
@@ -34,15 +35,15 @@ void GSCredit::Init()
 
 
 	// NARRATIONS:
-	auto font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 28);
+	auto font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 28);
 	narration1 = std::make_shared<Text>(NARRATION_1, font, narrationColor);
-	narration1->SetSize(NARRATION_SIZE);
-	narration1->Set2DPosition( (SCREEN_WIDTH / 2.0f - narration1->GetWidth()) / 2, heightScaling * 50 );
+	narration1->SetSize(NARRATION_1_SIZE);
+	narration1->Set2DPosition( (SCREEN_WIDTH / 2.0f - narration1->GetWidth()) / 2, heightScaling * 48 );
 
-	font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 28);
+	font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 28);
 	narration2 = std::make_shared<Text>(NARRATION_2, font, narrationColor);
-	narration2->SetSize(NARRATION_SIZE);
-	narration2->Set2DPosition((SCREEN_WIDTH * 3 / 2.0f - narration1->GetWidth()) / 2, heightScaling * 50 );
+	narration2->SetSize(NARRATION_2_SIZE);
+	narration2->Set2DPosition((SCREEN_WIDTH * 3 / 2.0f - narration2->GetWidth()) / 2, heightScaling * 48 );
 
 	
 	// BUTTON:
