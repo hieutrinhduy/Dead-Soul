@@ -22,7 +22,7 @@ public:
 
 private:
 	std::shared_ptr<Sprite2D> hpBar, spBar, mpBar, expBar;
-	std::shared_ptr<Sprite2D> hpBgBar, spBgBar, mpBgBar;
+	std::shared_ptr<Sprite2D> hpBgBar, spBgBar, mpBgBar, expBgBar;
 	float fullHpBarWidth, fullSpBarWidth, fullMpBarWidth;
 
 	std::shared_ptr<Sprite2D> iconCoin;
@@ -35,6 +35,8 @@ private:
 
 	std::list<std::shared_ptr<Sprite2D>> uiElements;
 	std::list<std::shared_ptr<Text>> texts;
+
+	SDL_Color hpTextColor, expTextColor;
 
 	std::shared_ptr<PlayerController> m_playerController;
 };

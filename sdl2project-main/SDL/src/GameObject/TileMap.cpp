@@ -132,17 +132,23 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             // LEFT LIMIT:
             bool finishCheck = false;
             int leftColumnLimit = startColumn;
-            for (int i = 1; i <= CHECK_SCOPE; i++) {
+            if (m_player->IsJumping() && m_tileIds[startRow - 1][startColumn - 1] == 32 ||
+                m_player->IsFalling() && m_tileIds[endRow + 1][startColumn - 1] == 32) {
                 leftColumnLimit--;
-                if (leftColumnLimit == 2) break;
-                for (int j = startRow; j <= endRow; j++) {
-                    if (m_tileIds[j][leftColumnLimit] == 32) {
-                        finishCheck = true;
+            }
+            else {
+                for (int i = 1; i <= CHECK_SCOPE; i++) {
+                    leftColumnLimit--;
+                    if (leftColumnLimit == 2) break;
+                    for (int j = startRow; j <= endRow; j++) {
+                        if (m_tileIds[j][leftColumnLimit] == 32) {
+                            finishCheck = true;
+                            break;
+                        }
+                    }
+                    if (finishCheck) {
                         break;
                     }
-                }
-                if (finishCheck) {
-                    break;
                 }
             }
             float tilePosition = (leftColumnLimit + 1) * m_tileSize;
@@ -153,6 +159,10 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             // RIGHT LIMIT:
             finishCheck = false;
             int rightColumnLimit = endColumn;
+            if (m_player->IsJumping() && m_tileIds[startRow - 1][startColumn + 1] == 32 ||
+                m_player->IsFalling() && m_tileIds[endRow + 1][endColumn + 1] == 32) {
+                rightColumnLimit++;
+            }
             for (int i = 1; i <= CHECK_SCOPE; i++) {
                 rightColumnLimit++;
                 if (rightColumnLimit == m_mapWidth - 3) break;
@@ -211,7 +221,10 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             tilePosition = bottomRowLimit * m_tileSize;
             bottomLimit = tilePosition - playerBottom;
             if (tilePosition == playerBottom) isGrounded = true;
-            else isGrounded = false;
+            else {
+                if (isGrounded && !m_player->IsJumping()) m_player->LoseTheirFooting();
+                isGrounded = false;
+            }
 
             // update MOVEMENT_ABILITY:
             m_player->SetMovementLimit(leftLimit, rightLimit, topLimit, bottomLimit);

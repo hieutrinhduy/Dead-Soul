@@ -633,3 +633,10 @@ void PlayerController::ShootProjectile()
     g_playerBullets.push_back(bullet);
 }
 
+
+
+void PlayerController::LoseTheirFooting() {
+    m_jumpCount = 1;
+    m_velocityY = 600;
+    ChangeAnimation(jumpOnAirTexture, 1, 0.05f);
+}

@@ -21,6 +21,8 @@ public:
     const SDL_Rect& GetCollider() const { return m_playerCollider; }
 
     //get movement ability data:
+    bool IsJumping() const { return m_velocityY < 0; };
+    bool IsFalling() const { return m_velocityY > 0; };
     bool CanGoLeft() const { return m_canGoLeft; };
     bool CanGoRight() const { return m_canGoRight; };
     bool BumpTheHead() const { return m_bumpTheHead; };
@@ -48,15 +50,19 @@ public:
     void SetOnScreenShakeCallback(std::function<void()> callback) { m_onScreenShake = callback; }
 
 
-
     void TakeDamage(int damage);
     void Die();
 
     bool IsDead() const { return m_isDead; }
+
     const int UI_HP_X = 50;
     const int UI_HP_Y = 50;
     const int UI_HP_WIDTH = 200;
     const int UI_HP_HEIGHT = 20;
+
+    void LoseTheirFooting();
+
+
 
 private:
     std::shared_ptr<SpriteAnimation> m_player;
