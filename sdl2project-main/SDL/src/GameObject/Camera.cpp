@@ -1,4 +1,4 @@
-#include"Camera.h"
+﻿#include"Camera.h"
 
 SDL_Rect Camera::GetViewBox()
 {
@@ -29,24 +29,44 @@ void Camera::Update(float deltaTime)
 		//Center the camera over the dot
 		m_ViewBox.x = (m_target->GetPosition().x - SCREEN_WIDTH / 2);
 		m_ViewBox.y = (m_target->GetPosition().y  - SCREEN_HEIDHT / 2) ;
+
+		//Lui 2 tiles
+		int marginTiles = 2;
+		int tileSize = 32;
+
+		//Tinh toan gioi han
+		int minX = marginTiles * tileSize;
+		int minY = marginTiles * tileSize;
+		int maxX = GetLevelWidth() - m_ViewBox.w - minX;
+		int maxY = GetLevelHeight() - m_ViewBox.h - minY;
 		
-		//Keep the camera in bounds
-		if (m_ViewBox.x < 0)
-		{
-			m_ViewBox.x = 0;
-		}
-		if (m_ViewBox.y < 0)
-		{
-			m_ViewBox.y = 0;
-		}
-		if (m_ViewBox.x > (GetLevelWidth() - m_ViewBox.w))
-		{
-			m_ViewBox.x = (GetLevelWidth() - m_ViewBox.w);
-		}
-		if (m_ViewBox.y > (GetLevelHeight() - m_ViewBox.h))
-		{
-			m_ViewBox.y = (GetLevelHeight() - m_ViewBox.h);
-		}
+		////Keep the camera in bounds
+		//if (m_ViewBox.x < 0)
+		//{
+		//	m_ViewBox.x = 0;
+		//}
+		//if (m_ViewBox.y < 0)
+		//{
+		//	m_ViewBox.y = 0;
+		//}
+		//if (m_ViewBox.x > (GetLevelWidth() - m_ViewBox.w))
+		//{
+		//	m_ViewBox.x = (GetLevelWidth() - m_ViewBox.w);
+		//}
+		//if (m_ViewBox.y > (GetLevelHeight() - m_ViewBox.h))
+		//{
+		//	m_ViewBox.y = (GetLevelHeight() - m_ViewBox.h);
+		//}
+
+		//Gioi han 2 ô dimemsion
+		if (m_ViewBox.x < minX)
+			m_ViewBox.x = minX;
+		if (m_ViewBox.y < minY)
+			m_ViewBox.y = minY;
+		if (m_ViewBox.x > maxX)
+			m_ViewBox.x = maxX;
+		if (m_ViewBox.y > maxY)
+			m_ViewBox.y = maxY;
 		m_Position = Vector2(m_ViewBox.x, m_ViewBox.y);
 	}
 
