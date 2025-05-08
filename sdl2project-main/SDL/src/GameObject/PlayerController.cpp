@@ -9,7 +9,9 @@
 #include "PlayerBullet.h"
 
 
-constexpr int PLAYER_SIZE = 150, PLAYER_STARTING_POSITION_X = 200, PLAYER_STARTING_POSITION_Y = 0;
+constexpr int PLAYER_SIZE = 150, PLAYER_STARTING_POSITION_X = 200, PLAYER_STARTING_POSITION_Y = 0; // sprite size, measure unit: screen pixel
+constexpr float COLLIDER_X = 0.35f, COLLIDER_Y = 0.1f, COLLIDER_W = 0.24f, COLLIDER_H = 0.9f;      // collider : sprite_size ratio
+constexpr float COLLIDER_X_FLIP = 1 - COLLIDER_X - COLLIDER_W;                                     // collider-x when flipped
 
 
 float PlayerController::m_airTime = 0.0f;
@@ -66,25 +68,22 @@ void PlayerController::Init()
     //For Weapon Arrow (m_currentWeaponIndex = 1)
     arrowAttackTexture = ResourceManagers::GetInstance()->GetTexture("ArrowAttack.png");
 
+    // SPRITE:
     m_player = std::make_shared<SpriteAnimation>(idleTexture, 1, 2, 1, 0.5f);
     m_player->SetSize(PLAYER_SIZE, PLAYER_SIZE);
     m_player->Set2DPosition(PLAYER_STARTING_POSITION_X, PLAYER_STARTING_POSITION_Y);
-    m_playerCollider = { (int)m_player->GetPosition().x, (int)m_player->GetPosition().y, m_player->GetWidth()/2, m_player->GetHeight()/2 };
 
-    auto  pos = m_player->Get2DPosition();
+    // COLLIDER:
+    Vector2 pos = m_player->Get2DPosition();
     m_playerCollider = {
-        (int)(pos.x + 40),
-        (int)(pos.y + m_player-> GetHeight() / 2),
-        m_player->GetWidth() - 100,
-        m_player->GetHeight()/2 
+        (int)(PLAYER_SIZE * COLLIDER_X + pos.x),
+        (int)(PLAYER_SIZE * COLLIDER_Y + pos.y),
+        (int)(PLAYER_SIZE * COLLIDER_W),
+        (int)(PLAYER_SIZE * COLLIDER_H),
     };
 
+    // set CAMERA'S TARGET:
     Camera::GetInstance()->SetTarget(m_player);
-
-    /*m_font = ResourceManagers::GetInstance()->GetFont("arial.ttf", 18);
-    if (!m_font) {
-        std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
-    }*/
 }
 
 
@@ -304,13 +303,9 @@ void PlayerController::Update(float deltaTime)
         m_playerCollider = { (int)posX + 50, (int)posY, m_player->GetWidth() - 100, m_player->GetHeight() };
     }
 
-    // Kiểm tra nhân vật có đang ở trên mặt đất không
-    //m_isGrounded = GroundCheck();
-
-    // Nếu đang ở trên mặt đất thì cố định lại vị trí Y, reset vận tốc rơi và số lần nhảy
+    // just landing on the ground
     if (m_isGrounded) {
         m_velocityY = 0;
-        //posY = m_groundCollider->y - m_player->GetHeight() + 2;
         m_jumpCount = 0;
     }
 

@@ -134,7 +134,7 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             int leftColumnLimit = startColumn;
             for (int i = 1; i <= CHECK_SCOPE; i++) {
                 leftColumnLimit--;
-                if (leftColumnLimit == -1) break;
+                if (leftColumnLimit == 2) break;
                 for (int j = startRow; j <= endRow; j++) {
                     if (m_tileIds[j][leftColumnLimit] == 32) {
                         finishCheck = true;
@@ -155,7 +155,7 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             int rightColumnLimit = endColumn;
             for (int i = 1; i <= CHECK_SCOPE; i++) {
                 rightColumnLimit++;
-                if (rightColumnLimit == m_mapWidth) break;
+                if (rightColumnLimit == m_mapWidth - 3) break;
                 for (int j = startRow; j <= endRow; j++) {
                     if (m_tileIds[j][rightColumnLimit] == 32) {
                         finishCheck = true;
