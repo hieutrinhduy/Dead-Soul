@@ -1,8 +1,11 @@
 ﻿#pragma once
-#include "SpriteAnimation.h"
+
 #include <memory>
 #include <SDL.h>
 #include <functional>
+
+#include "SpriteAnimation.h"
+
 
 class PlayerController
 {
