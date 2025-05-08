@@ -648,6 +648,7 @@ void PlayerController::ShootProjectile()
 
 
 void PlayerController::LoseTheirFooting() {
+    m_isRolling = false;
     m_jumpCount = 1;
     m_velocityY = 600;
     ChangeAnimation(jumpOnAirTexture, 1, 0.05f);
