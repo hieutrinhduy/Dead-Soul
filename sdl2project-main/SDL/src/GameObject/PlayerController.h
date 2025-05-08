@@ -85,6 +85,7 @@ private:
 
     float m_gravityForce;
     float m_jumpForce;
+    float m_velocityX;
     float m_velocityY;
     float m_speed;
     static float m_airTime;

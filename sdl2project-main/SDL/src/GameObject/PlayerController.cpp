@@ -327,6 +327,9 @@ void PlayerController::Update(float deltaTime)
 
     // Cập nhật vị trí và collider mới sau khi xử lý rơi và mặt đất
     m_player->Set2DPosition(posX, posY);
+    //Cap nhat velocity X
+    m_velocityX = (newPos.x - oldPos.x) / deltaTime;
+    std::cout << m_velocityX << std::endl;
     if (m_playerFlip == SDL_FLIP_NONE) {
         m_playerCollider = { (int)posX + 40, (int)posY, m_player->GetWidth() - 100, m_player->GetHeight() };
     }

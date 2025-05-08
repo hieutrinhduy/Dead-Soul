@@ -28,7 +28,7 @@ EnemyController::~EnemyController()
 {
 }
 
-void EnemyController::Init(float pointA, float pointB)
+void EnemyController::Init(float pointA, float pointB, float posY)
 {
     idleTexture = ResourceManagers::GetInstance()->GetTexture("Skeleton_01_White_Idle.png");
     runTexture = ResourceManagers::GetInstance()->GetTexture("Skeleton_01_White_Walk.png");
@@ -39,7 +39,7 @@ void EnemyController::Init(float pointA, float pointB)
 
     m_enemy = std::make_shared<SpriteAnimation>(runTexture, 1, 10, 1, 0.05f);
     m_enemy->SetSize(96 * 2, 64 * 2);
-    m_enemy->Set2DPosition(pointA, -500);
+    m_enemy->Set2DPosition(pointA, posY);
     m_enemyCollider = { (int)m_enemy->GetPosition().x + 50, (int)m_enemy->GetPosition().y, m_enemy->GetWidth() / 2, m_enemy->GetHeight() };
 
     m_pointA = pointA;
@@ -117,7 +117,7 @@ void EnemyController::Update(float deltaTime)
             if (m_deadTimer <= 0.0f) {
                 m_finishDead = true;
                 DestroyEnemy();
-            }
+            } 
         }
         if (m_enemy)
             m_enemy->Update(deltaTime);
@@ -159,11 +159,13 @@ void EnemyController::Update(float deltaTime)
             m_enemyFlip = SDL_FLIP_NONE;
         }
 
-        if (DetectPlayer()) {
+        // CHỈ phát hiện player nếu KHÔNG vừa quay về từ chase
+        if (!m_recentlyReturnedFromChase && DetectPlayer()) {
             m_currentState = EnemyState::Chase;
             m_lostPlayerTimer = 0.0f;
         }
         break;
+
 
     case EnemyState::Chase:
         if (DetectPlayer()) {
@@ -174,29 +176,44 @@ void EnemyController::Update(float deltaTime)
             if (m_lostPlayerTimer >= 0.1f) {
                 m_currentState = EnemyState::Patrol;
                 ChangeAnimation(runTexture, 10, 0.05f);
-                m_enemyFlip = (m_direction == 1) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+                m_recentlyReturnedFromChase = true; // GẮN CỜ
                 break;
             }
         }
 
         if (m_playerCollider) {
             float distanceX = m_playerCollider->x - posX;
+            float moveDir = (distanceX > 0) ? 1.0f : -1.0f;
+            m_enemyFlip = (moveDir > 0) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
 
-            if (distanceX > 0) {
-                m_enemyFlip = SDL_FLIP_NONE;
-                posX += m_speed * 2 * deltaTime;
+            float nextPosX = posX + moveDir * m_speed * 2 * deltaTime;
+            if (nextPosX < m_pointA || nextPosX > m_pointB) {
+                m_currentState = EnemyState::Patrol;
+                ChangeAnimation(runTexture, 10, 0.05f);
+                m_recentlyReturnedFromChase = true;
+
+                // ✅ THÊM ĐOẠN NÀY
+                if (posX < m_pointA + 10) {
+                    m_direction = 1;
+                    m_enemyFlip = SDL_FLIP_NONE;
+                }
+                else if (posX > m_pointB - 10) {
+                    m_direction = -1;
+                    m_enemyFlip = SDL_FLIP_HORIZONTAL;
+                }
+
+                break;
             }
-            else {
-                m_enemyFlip = SDL_FLIP_HORIZONTAL;
-                posX -= m_speed * 2 * deltaTime;
-            }
+
+
+            posX = nextPosX;
+
+            float enemyCenterX = posX + m_enemy->GetWidth() / 2;
+            float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2;
+            float dx = playerCenterX - enemyCenterX;
 
             int attackDistance = 150;
-            if (m_enemyFlip == SDL_FLIP_HORIZONTAL) {
-                attackDistance = 50;
-            }
-
-            if (!m_isAttacking && abs(distanceX) < attackDistance) {
+            if (!m_isAttacking && std::abs(dx) < attackDistance) {
                 m_currentState = EnemyState::Attack;
                 m_attackFlip = m_enemyFlip;
                 m_isAttacking = true;
@@ -211,10 +228,11 @@ void EnemyController::Update(float deltaTime)
                     attackIndex = 2;
                     m_attackTimer = .75f;
                 }
-
             }
         }
         break;
+
+
 
     case EnemyState::Attack:
     {
@@ -266,10 +284,12 @@ void EnemyController::Update(float deltaTime)
             if (DetectPlayer()) {
                 m_currentState = EnemyState::Chase;
                 ChangeAnimation(runTexture, 10, 0.05f);
+                m_enemyFlip = (m_playerCollider->x > m_enemy->Get2DPosition().x) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
             }
             else {
                 m_currentState = EnemyState::Patrol;
                 ChangeAnimation(runTexture, 10, 0.05f);
+                m_enemyFlip = (m_direction == 1) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
             }
         }
     }
@@ -281,20 +301,20 @@ void EnemyController::Update(float deltaTime)
     m_enemy->SetFlip((m_currentState == EnemyState::Attack) ? m_attackFlip : m_enemyFlip);
     m_enemyCollider.x = (int)posX;
 
-    if (!m_isGrounded) m_airTime += deltaTime;
-    else m_airTime = 0.0f;
+    //if (!m_isGrounded) m_airTime += deltaTime;
+    //else m_airTime = 0.0f;
 
-    m_velocityY += m_gravityForce * (1.0f + m_airTime * 10.0f) * deltaTime;
-    if (m_velocityY > 800) m_velocityY = 800;
+    //m_velocityY += m_gravityForce * (1.0f + m_airTime * 10.0f) * deltaTime;
+    //if (m_velocityY > 800) m_velocityY = 800;
 
-    posY += m_velocityY * deltaTime;
-    m_enemyCollider = { (int)posX + 50, (int)posY, m_enemy->GetWidth() / 2, m_enemy->GetHeight() };
-    m_isGrounded = GroundCheck();
+    //posY += m_velocityY * deltaTime;
+    //m_enemyCollider = { (int)posX + 50, (int)posY, m_enemy->GetWidth() / 2, m_enemy->GetHeight() };
+    //m_isGrounded = GroundCheck();
 
-    if (m_isGrounded) {
-        m_velocityY = 0;
-        posY = m_groundCollider->y - m_enemy->GetHeight() + 2;
-    }
+    //if (m_isGrounded) {
+    //    m_velocityY = 0;
+    //    posY = m_groundCollider->y - m_enemy->GetHeight() + 2;
+    //}
 
     m_enemy->Set2DPosition(posX, posY);
     m_enemyCollider = { (int)posX + 50, (int)posY, m_enemy->GetWidth() / 2, m_enemy->GetHeight() };
@@ -306,6 +326,18 @@ void EnemyController::Update(float deltaTime)
     m_hpBarFill = m_hpBarBg;
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
     m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
+
+    if (m_lostPlayerTimer > 0.0f)
+        m_lostPlayerTimer -= deltaTime;
+
+    if (m_recentlyReturnedFromChase) {
+        m_recentlyReturnedTimer += deltaTime;
+        if (m_recentlyReturnedTimer >= 0.3f) {
+            m_recentlyReturnedFromChase = false;
+            m_recentlyReturnedTimer = 0.0f;
+        }
+    }
+
 
     m_enemy->Update(deltaTime);
 }
@@ -354,7 +386,7 @@ bool EnemyController::DetectPlayer()
     float enemyCenterX = m_enemyCollider.x + m_enemyCollider.w / 2.0f;
     float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2.0f;
     float distance = std::abs(enemyCenterX - playerCenterX);
-    return distance < 500.0f;
+    return distance < 250.0f;
 }
 
 void EnemyController::ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime)

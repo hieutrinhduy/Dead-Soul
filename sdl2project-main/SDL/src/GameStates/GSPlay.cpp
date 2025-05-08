@@ -82,13 +82,13 @@ void GSPlay::Init()
 
     // Enemy thường
     m_enemyController = std::make_shared<EnemyController>();
-    m_enemyController->Init(200, 800);
+    m_enemyController->Init(200, 800, 575);
 
     m_enemyController2 = std::make_shared<EnemyController>();
-    m_enemyController2->Init(1000, 1300);
+    m_enemyController2->Init(1060, 1210, 575);
 
     m_enemyController3 = std::make_shared<EnemyController>();
-    m_enemyController3->Init(1600, 1900);
+    m_enemyController3->Init(600, 1900, 1315);
 
     // Enemy đặc biệt: EvilCreature
     m_evilCreature = std::make_shared<EvilCreature>();

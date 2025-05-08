@@ -18,7 +18,7 @@ public:
     EnemyController();
     ~EnemyController();
 
-    void Init(float pointA, float pointB);
+    void Init(float pointA, float pointB, float posY);
     void Update(float deltaTime);
     void Draw(SDL_Renderer* renderer);
 
@@ -90,6 +90,9 @@ private:
     SDL_Rect m_hpBarFill;
     int m_barWidth = 50;
     int m_barHeight = 6;
+
+    bool m_recentlyReturnedFromChase = false;
+    float m_recentlyReturnedTimer = 0.0f;
 
 private:
     bool DetectPlayer();
