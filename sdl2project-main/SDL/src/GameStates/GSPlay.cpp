@@ -82,7 +82,7 @@ void GSPlay::Init()
 
     // Enemy thường
     m_enemyController = std::make_shared<EnemyController>();
-    m_enemyController->Init(200, 800, 575);
+    m_enemyController->Init(200, 800, 575 );
 
     m_enemyController2 = std::make_shared<EnemyController>();
     m_enemyController2->Init(1060, 1210, 575);
