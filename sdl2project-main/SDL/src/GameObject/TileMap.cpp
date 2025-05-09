@@ -163,17 +163,19 @@ void TileMap::StartCheckingPlayerMovementAbility() {
                 m_player->IsFalling() && m_tileIds[endRow + 1][endColumn + 1] == 32) {
                 rightColumnLimit++;
             }
-            for (int i = 1; i <= CHECK_SCOPE; i++) {
-                rightColumnLimit++;
-                if (rightColumnLimit == m_mapWidth - 3) break;
-                for (int j = startRow; j <= endRow; j++) {
-                    if (m_tileIds[j][rightColumnLimit] == 32) {
-                        finishCheck = true;
+            else {
+                for (int i = 1; i <= CHECK_SCOPE; i++) {
+                    rightColumnLimit++;
+                    if (rightColumnLimit == m_mapWidth - 3) break;
+                    for (int j = startRow; j <= endRow; j++) {
+                        if (m_tileIds[j][rightColumnLimit] == 32) {
+                            finishCheck = true;
+                            break;
+                        }
+                    }
+                    if (finishCheck) {
                         break;
                     }
-                }
-                if (finishCheck) {
-                    break;
                 }
             }
             tilePosition = rightColumnLimit * m_tileSize;

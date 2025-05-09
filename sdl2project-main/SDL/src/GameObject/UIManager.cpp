@@ -1,8 +1,16 @@
+/*
+	m_timeScale == -2 => LOADING SCENE
+	m_timeScale == -1 => CHANGE LEVEL
+	m_timeScale == 0 => PAUSE GAME (just is pause, or level up, die, victory<complete all levels>) 
+	m_timeScale == 1 => RESUME GAME
+*/
+
 #include "UIManager.h"
 
 #include <thread>
 
 #include "ResourceManagers.h"
+#include "Renderer.h"
 #include "Define.h"
 
 
@@ -23,9 +31,11 @@ constexpr int MP_BACKGROUND_BAR_POSITION_X = BAR_LEFT,
 
 
 #pragma region Constructor && Deconstructor
-UIManager::UIManager(std::shared_ptr<int> timeScale) : m_timeScale(timeScale), hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 }) {
-	auto font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 36);
-
+UIManager::UIManager(std::shared_ptr<int> timeScale) :
+	m_renderer(Renderer::GetInstance()->GetRenderer()), m_timeScale(timeScale),
+	hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 })
+{
+	DisplayLoadingScene();
 	m_inventorySlot = 1;
 	
 	// get player's stats from save file:
@@ -41,6 +51,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) : m_timeScale(timeScale), h
 	fullSpBarWidth = fullHpBarWidth * 5 / 6;
 	fullMpBarWidth = fullHpBarWidth / 2;
 
+	auto font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 36);
 
 	// HP BAR:
 	auto texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\hp_background_bar.png");
@@ -127,21 +138,32 @@ UIManager::~UIManager() {}
 #pragma region Multi-thread
 void UIManager::DisplayLoadingScene() {
     std::thread t([this]() {
-		int timer = 0;
+		int dotCount = 0;
 		std::string loadingText = "LOADING";
+
+		loadingBackground = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("bg_settings.png"), SDL_FLIP_NONE);
+		loadingBackground->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+		loadingBackground->Set2DPosition(0, 0);
+
 		txtLoading = std::make_shared<Text>(loadingText, ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 36), expTextColor);
 		txtLoading->SetSize(300, 36);
 		txtLoading->Set2DPosition( (SCREEN_WIDTH - txtLoading->GetWidth()) / 2.0f, SCREEN_HEIDHT - txtLoading->GetHeight() - 20);
 
-		while (*m_timeScale == 0) {
-			int dotCount = timer / 120;
-			for (int i = 0; i <= dotCount; i++) loadingText += ".";
-			
+		/*while (*m_timeScale == -2) {
+			dotCount++;
+			loadingText += ".";
+			if (dotCount == 4) {
+				dotCount = 0;
+				loadingText = "LOADING";
+			}
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		}
+			loadingBackground->Draw(m_renderer);
+			txtLoading->Draw(m_renderer);
 
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}*/
 
+		UpdateUI();
     });
 
     t.detach();
@@ -149,9 +171,11 @@ void UIManager::DisplayLoadingScene() {
 
 
 
-void UIManager::DisplayLoadingScene() {
+void UIManager::UpdateUI() {
 	std::thread t([this]() {
 
+
+		m_finishThread = true;
 	});
 
 	t.detach();
@@ -159,9 +183,9 @@ void UIManager::DisplayLoadingScene() {
 
 
 
-//void TileMap::ClearThread() {
-//    m_isPlaying = false;
-//}
+void UIManager::ClearThread() {
+	*m_timeScale = -2;
+}
 #pragma endregion
 
 

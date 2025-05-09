@@ -22,10 +22,15 @@ public:
 	// MULTI-THREAD:
 	void DisplayLoadingScene();
 	void UpdateUI();
+	void ClearThread();
+	bool m_finishThread;
 
 
 private:
+	SDL_Renderer* m_renderer;
 	std::shared_ptr<int> m_timeScale;
+
+	std::shared_ptr<Sprite2D> loadingBackground;
 
 	std::shared_ptr<Sprite2D> hpBar, spBar, mpBar, expBar;
 	std::shared_ptr<Sprite2D> hpBgBar, spBgBar, mpBgBar, expBgBar;

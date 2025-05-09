@@ -1,4 +1,11 @@
-﻿#include "GSPlay.h"
+﻿/*
+    m_timeScale == -2 => LOADING SCENE
+    m_timeScale == -1 => CHANGE LEVEL
+    m_timeScale == 0 => PAUSE GAME (just is pause, or level up, die, victory<complete all levels>)
+    m_timeScale == 1 => RESUME GAME
+*/
+
+#include "GSPlay.h"
 
 #include <iostream>
 
@@ -27,7 +34,8 @@ std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 
 GSPlay::GSPlay()
 {
-    m_uiManager = std::make_shared<UIManager>();
+    timeScale = std::make_shared<int>(-2);
+    m_uiManager = std::make_shared<UIManager>(timeScale);
 
     m_playerController = std::make_shared<PlayerController>();
 
@@ -82,7 +90,7 @@ void GSPlay::Init()
 
     // Enemy thường
     m_enemyController = std::make_shared<EnemyController>();
-    m_enemyController->Init(200, 800, 575 );
+    m_enemyController->Init(200, 800, 575);
 
     m_enemyController2 = std::make_shared<EnemyController>();
     m_enemyController2->Init(1060, 1210, 575);
@@ -202,17 +210,27 @@ void GSPlay::Init()
     // SOUNDS:
     Sound::GetInstance()->LoadSound("gameplay_music.mp3");
     Sound::GetInstance()->PlaySound("gameplay_music.mp3");
+
+    // run game:
+    *timeScale = 1;
 }
 
 
 
 
 void GSPlay::Exit() {
+    // stop thread at TileMap:
     m_tileMap->ClearThread();
-    while(m_tileMap->m_finishThread) {}
+    while(!m_tileMap->m_finishThread) {}
+
+    // stop thread at UIManager:
+    m_uiManager->ClearThread();
+    while(!m_uiManager->m_finishThread) {}
 }
 
+
 void GSPlay::Pause() {}
+
 
 void GSPlay::Resume() {}
 
@@ -246,6 +264,9 @@ void GSPlay::HandleMouseMoveEvents(SDL_Event& e) {}
 
 void GSPlay::Update(float deltaTime)
 {
+    // if the game is not running or hasn't resumed, not update:
+    if (*timeScale != 1) return;
+
     for (auto& it : m_listButton) it->Update(deltaTime);
 
     m_playerController->Update(deltaTime);
@@ -306,6 +327,14 @@ void GSPlay::Update(float deltaTime)
 
 void GSPlay::Draw(SDL_Renderer* renderer)
 {
+    // if the game isn't running or hasn't resumed, stop draw:
+    if (*timeScale != 1) {
+        // draw UI:
+        m_uiManager->Draw(renderer);
+
+        return;
+    }
+
     Vector2 camPos = Camera::GetInstance()->GetPosition();
     std::vector<float> parallaxFactors = { 0.2f, 0.5f, 0.8f };
 
