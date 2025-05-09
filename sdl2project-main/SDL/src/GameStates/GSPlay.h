@@ -39,6 +39,8 @@ public:
 	int m_KeyPress;
 
 private:
+	std::shared_ptr<int> timeScale;
+
 	std::shared_ptr<UIManager> m_uiManager;
 	std::shared_ptr<PlayerController> m_playerController;
 

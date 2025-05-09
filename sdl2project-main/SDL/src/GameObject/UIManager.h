@@ -9,7 +9,7 @@
 
 class UIManager {
 public:
-	UIManager();
+	UIManager(std::shared_ptr<int> timeScale);
 	~UIManager();
 
 	void Draw(SDL_Renderer* renderer);
@@ -19,8 +19,14 @@ public:
 		m_playerController = playerController;
 	}
 
+	// MULTI-THREAD:
+	void DisplayLoadingScene();
+	void UpdateUI();
+
 
 private:
+	std::shared_ptr<int> m_timeScale;
+
 	std::shared_ptr<Sprite2D> hpBar, spBar, mpBar, expBar;
 	std::shared_ptr<Sprite2D> hpBgBar, spBgBar, mpBgBar, expBgBar;
 	float fullHpBarWidth, fullSpBarWidth, fullMpBarWidth;
@@ -31,7 +37,7 @@ private:
 	std::list<std::shared_ptr<Sprite2D>> itemBgs;
 	int m_inventorySlot;
 
-	std::shared_ptr<Text> txtHP, txtSP, txtMP, txtEXP, txtCoin;
+	std::shared_ptr<Text> txtLoading, txtHP, txtSP, txtMP, txtEXP, txtCoin;
 
 	std::list<std::shared_ptr<Sprite2D>> uiElements;
 	std::list<std::shared_ptr<Text>> texts;

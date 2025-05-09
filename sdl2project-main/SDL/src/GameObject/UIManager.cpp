@@ -1,5 +1,7 @@
 #include "UIManager.h"
 
+#include <thread>
+
 #include "ResourceManagers.h"
 #include "Define.h"
 
@@ -20,7 +22,10 @@ constexpr int MP_BACKGROUND_BAR_POSITION_X = BAR_LEFT,
 
 
 
-UIManager::UIManager() : hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 }) {
+#pragma region Constructor && Deconstructor
+UIManager::UIManager(std::shared_ptr<int> timeScale) : m_timeScale(timeScale), hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 }) {
+	auto font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 36);
+
 	m_inventorySlot = 1;
 	
 	// get player's stats from save file:
@@ -50,7 +55,6 @@ UIManager::UIManager() : hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 })
 	hpBar->SetSize(fullHpBarWidth, BACKGROUND_BAR_HEIGHT);
 	uiElements.push_back(hpBar);
 
-	auto font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", BACKGROUND_BAR_HEIGHT);
 	txtHP = std::make_shared<Text>(hpStat, font, hpTextColor);
 	txtHP->SetSize(STAT_TEXT_WIDTH, BACKGROUND_BAR_HEIGHT);
 	txtHP->Set2DPosition( (fullHpBarWidth - txtHP->GetWidth()) / 2, HP_BACKGROUND_BAR_POSITION_Y - 2 );
@@ -70,7 +74,6 @@ UIManager::UIManager() : hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 })
 	spBar->SetSize(fullSpBarWidth, BACKGROUND_BAR_HEIGHT);
 	uiElements.push_back(spBar);
 
-	font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", BACKGROUND_BAR_HEIGHT);
 	txtSP = std::make_shared<Text>(spStat, font, hpTextColor);
 	txtSP->SetSize(STAT_TEXT_WIDTH, BACKGROUND_BAR_HEIGHT);
 	txtSP->Set2DPosition( (fullSpBarWidth - txtSP->GetWidth()) / 2, SP_BACKGROUND_BAR_POSITION_Y - 2 );
@@ -90,7 +93,6 @@ UIManager::UIManager() : hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 })
 	mpBar->SetSize(fullMpBarWidth, BACKGROUND_BAR_HEIGHT);
 	uiElements.push_back(mpBar);
 
-	font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", BACKGROUND_BAR_HEIGHT);
 	txtMP = std::make_shared<Text>(mpStat, font, hpTextColor);
 	txtMP->SetSize(STAT_TEXT_WIDTH, BACKGROUND_BAR_HEIGHT);
 	txtMP->Set2DPosition( (fullMpBarWidth - txtMP->GetWidth()) / 2, MP_BACKGROUND_BAR_POSITION_Y - 2 );
@@ -110,7 +112,6 @@ UIManager::UIManager() : hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 })
 	expBar->SetSize(SCREEN_WIDTH, 20);
 	uiElements.push_back(expBar);
 
-	font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", expBar->GetHeight());
 	txtEXP = std::make_shared<Text>(expStat, font, expTextColor);
 	txtEXP->SetSize(STAT_TEXT_WIDTH + 5, expBar->GetHeight());
 	txtEXP->Set2DPosition( (SCREEN_WIDTH - txtEXP->GetWidth()) / 2.0f, expBar->Get2DPosition().y - 2 );
@@ -119,7 +120,49 @@ UIManager::UIManager() : hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 })
 
 
 UIManager::~UIManager() {}
+#pragma endregion
 
+
+
+#pragma region Multi-thread
+void UIManager::DisplayLoadingScene() {
+    std::thread t([this]() {
+		int timer = 0;
+		std::string loadingText = "LOADING";
+		txtLoading = std::make_shared<Text>(loadingText, ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 36), expTextColor);
+		txtLoading->SetSize(300, 36);
+		txtLoading->Set2DPosition( (SCREEN_WIDTH - txtLoading->GetWidth()) / 2.0f, SCREEN_HEIDHT - txtLoading->GetHeight() - 20);
+
+		while (*m_timeScale == 0) {
+			int dotCount = timer / 120;
+			for (int i = 0; i <= dotCount; i++) loadingText += ".";
+			
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+
+
+    });
+
+    t.detach();
+}
+
+
+
+void UIManager::DisplayLoadingScene() {
+	std::thread t([this]() {
+
+	});
+
+	t.detach();
+}
+
+
+
+//void TileMap::ClearThread() {
+//    m_isPlaying = false;
+//}
+#pragma endregion
 
 
 
