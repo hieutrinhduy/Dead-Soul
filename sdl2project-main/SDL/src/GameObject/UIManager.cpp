@@ -35,9 +35,24 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	m_renderer(Renderer::GetInstance()->GetRenderer()), m_timeScale(timeScale),
 	hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 })
 {
-	DisplayLoadingScene();
+	TTF_Font* font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 36);
+
+	// LOADING SCENE:
+	loadingBackground = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("bg_settings.png"), SDL_FLIP_NONE);
+	loadingBackground->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	loadingBackground->Set2DPosition(0, 0);
+	loadingBackground->Draw(m_renderer);
+
+	txtLoading = std::make_shared<Text>("LOADING", font, expTextColor);
+	txtLoading->SetSize(300, 36);
+	txtLoading->Set2DPosition((SCREEN_WIDTH - txtLoading->GetWidth()) / 2.0f, SCREEN_HEIDHT - txtLoading->GetHeight() - 20);
+
+
+	std::string loadingText = "LOADING";
+
 	m_inventorySlot = 1;
 	
+
 	// get player's stats from save file:
 	int hp = 100, sp = 100, mp = 100, exp = 100;
 	int maxHP = 100, maxSP = 100, maxMP = 100, maxEXP = 100;
@@ -51,7 +66,6 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	fullSpBarWidth = fullHpBarWidth * 5 / 6;
 	fullMpBarWidth = fullHpBarWidth / 2;
 
-	auto font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 36);
 
 	// HP BAR:
 	auto texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\hp_background_bar.png");
@@ -135,58 +149,9 @@ UIManager::~UIManager() {}
 
 
 
-#pragma region Multi-thread
-void UIManager::DisplayLoadingScene() {
-    std::thread t([this]() {
-		int dotCount = 0;
-		std::string loadingText = "LOADING";
+void UIManager::Update(float deltaTime) {
 
-		loadingBackground = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("bg_settings.png"), SDL_FLIP_NONE);
-		loadingBackground->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
-		loadingBackground->Set2DPosition(0, 0);
-
-		txtLoading = std::make_shared<Text>(loadingText, ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 36), expTextColor);
-		txtLoading->SetSize(300, 36);
-		txtLoading->Set2DPosition( (SCREEN_WIDTH - txtLoading->GetWidth()) / 2.0f, SCREEN_HEIDHT - txtLoading->GetHeight() - 20);
-
-		/*while (*m_timeScale == -2) {
-			dotCount++;
-			loadingText += ".";
-			if (dotCount == 4) {
-				dotCount = 0;
-				loadingText = "LOADING";
-			}
-
-			loadingBackground->Draw(m_renderer);
-			txtLoading->Draw(m_renderer);
-
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-		}*/
-
-		UpdateUI();
-    });
-
-    t.detach();
 }
-
-
-
-void UIManager::UpdateUI() {
-	std::thread t([this]() {
-
-
-		m_finishThread = true;
-	});
-
-	t.detach();
-}
-
-
-
-void UIManager::ClearThread() {
-	*m_timeScale = -2;
-}
-#pragma endregion
 
 
 

@@ -212,7 +212,7 @@ void GSPlay::Init()
     Sound::GetInstance()->PlaySound("gameplay_music.mp3");
 
     // run game:
-    *timeScale = 1;
+    *timeScale = -2;
 }
 
 
@@ -222,10 +222,6 @@ void GSPlay::Exit() {
     // stop thread at TileMap:
     m_tileMap->ClearThread();
     while(!m_tileMap->m_finishThread) {}
-
-    // stop thread at UIManager:
-    m_uiManager->ClearThread();
-    while(!m_uiManager->m_finishThread) {}
 }
 
 

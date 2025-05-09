@@ -12,18 +12,13 @@ public:
 	UIManager(std::shared_ptr<int> timeScale);
 	~UIManager();
 
+	void Update(float deltaTime);
 	void Draw(SDL_Renderer* renderer);
 
 	// SETTER:
 	void SetReferenceToPlayerController(std::shared_ptr<PlayerController> playerController) {
 		m_playerController = playerController;
 	}
-
-	// MULTI-THREAD:
-	void DisplayLoadingScene();
-	void UpdateUI();
-	void ClearThread();
-	bool m_finishThread;
 
 
 private:

@@ -54,12 +54,11 @@ SDL_Texture* TextureManager::LoadImage(const std::string & path)
 
 SDL_Texture* TextureManager::LoadTextureText(TTF_Font* font, SDL_Color color, const std::string& textureText)
 {
-	
 	// free texture
-		if (m_texture) {
-			SDL_DestroyTexture(m_texture);
-			m_texture = nullptr;
-		}
+	if (m_texture) {
+		SDL_DestroyTexture(m_texture);
+		m_texture = nullptr;
+	}
 	
 	SDL_Surface* textSurface = TTF_RenderText_Solid(font, textureText.c_str(), color);
 	if (textSurface == NULL)
