@@ -9,7 +9,7 @@
 #include "PlayerBullet.h"
 
 
-constexpr int PLAYER_SIZE = 150, PLAYER_STARTING_POSITION_X = 200, PLAYER_STARTING_POSITION_Y = 0; // sprite size, measure unit: screen pixel
+constexpr int PLAYER_SIZE = 150, PLAYER_STARTING_POSITION_X = 200, PLAYER_STARTING_POSITION_Y = 100; // sprite size, measure unit: screen pixel
 constexpr float COLLIDER_X = 0.35f, COLLIDER_Y = 0.1f, COLLIDER_W = 0.24f, COLLIDER_H = 0.9f;      // collider : sprite_size ratio
 constexpr float COLLIDER_X_FLIP = 1 - COLLIDER_X - COLLIDER_W;                                     // collider-x when flipped
 
@@ -609,13 +609,8 @@ void PlayerController::ShootProjectile()
 
     auto bullet = std::make_shared<PlayerBullet>(pos, 1500, direction, 1);
 
-    bullet->SetOnHitEnemyCallback([this](int damage) {
+    //bullet->SetOnHitEnemyCallback([this](int damage) {
 
-        });
-
-    //Bullet ScreenShake
-    //bullet->SetOnScreenShakeCallback([this]() {
-    //    if (m_onScreenShake) m_onScreenShake();
     //    });
 
     g_playerBullets.push_back(bullet);

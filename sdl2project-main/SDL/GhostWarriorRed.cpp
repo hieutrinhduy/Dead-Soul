@@ -177,15 +177,30 @@ void GhostWarriorRed::Update(float dt)
         if (m_attackTimer <= 0.0f) {
             m_isAttacking = false;
             m_didDamage = false;
-            if (DetectPlayer()) {
-                m_state = GhostWarriorRedState::Chase;
-                ChangeAnimation(runTexture, 8, 0.05f);
-                m_flip = (m_playerCollider->x > m_sprite->Get2DPosition().x) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+
+            bool isChasing = DetectPlayer();
+            m_state = isChasing ? GhostWarriorRedState::Chase : GhostWarriorRedState::Patrol;
+            ChangeAnimation(runTexture, 8, 0.05f);
+
+            if (!isChasing) {
+                if (posX < m_pointA + 10) {
+                    m_direction = 1;
+                    m_flip = SDL_FLIP_HORIZONTAL;
+                }
+                else if (posX > m_pointB - 10) {
+                    m_direction = -1;
+                    m_flip = SDL_FLIP_NONE;
+                }
+                else {
+                    // Giữ nguyên direction, nhưng update flip theo direction
+                    m_flip = (m_direction == 1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+                }
             }
             else {
-                m_state = GhostWarriorRedState::Patrol;
-                ChangeAnimation(runTexture, 8, 0.05f);
-                m_flip = (m_direction == 1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+                float enemyCenterX = posX + m_sprite->GetWidth() / 2;
+                float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2;
+                float dx = playerCenterX - enemyCenterX;
+                m_flip = (dx > 0) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
             }
         }
 

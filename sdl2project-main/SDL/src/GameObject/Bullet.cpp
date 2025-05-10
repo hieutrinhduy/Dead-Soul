@@ -49,11 +49,11 @@ bool Bullet::HasHitPlayer(const SDL_Rect* playerCollider)
     if (!playerCollider || m_destroyed) return false;
 
     if (SDL_HasIntersection(&m_collider, playerCollider)) {
-        m_destroyed = true;
-
+        std::cout << "Hit player" << std::endl;
         if (m_onHitPlayer) {
             m_onHitPlayer(m_damage);
         }
+        m_destroyed = true;
 
         return true;
     }

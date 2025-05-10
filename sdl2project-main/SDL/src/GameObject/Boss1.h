@@ -72,6 +72,7 @@ private:
     std::shared_ptr<TextureManager> runTexture;
     std::shared_ptr<TextureManager> attack1Texture;
     std::shared_ptr<TextureManager> attack2Texture;
+    std::shared_ptr<TextureManager> attack3Texture;
     std::shared_ptr<TextureManager> hitTexture;
     std::shared_ptr<TextureManager> deadTexture;
 

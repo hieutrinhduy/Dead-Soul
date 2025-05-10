@@ -81,7 +81,7 @@ void EnemyController::TakeDamage(int damage)
         Die();
     }
     else {
-        int currentFrame = m_enemy->GetCurrentFrame();
+        int currentFrame = m_enemy->GetCurrentFrame(); 
         if (m_isAttacking && attackIndex == 1 && currentFrame >= 3) return;
         if (m_isAttacking && attackIndex == 2 && currentFrame >= 4) return;
         if (!m_isAttacking) {

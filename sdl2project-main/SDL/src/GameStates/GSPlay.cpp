@@ -96,7 +96,7 @@ void GSPlay::Init()
 
     //Boss1
     m_boss1 = std::make_shared<Boss1>();
-    m_boss1->Init(600, 1900, 1000);
+    m_boss1->Init(600, 1900, 960);
 
     // Enemy đặc biệt: EvilCreature
     m_evilCreature = std::make_shared<EvilCreature>();
@@ -131,10 +131,11 @@ void GSPlay::Init()
     m_ghostWarrior->SetPlayerCollider(&m_playerController->GetCollider());
     m_ghostWarriorRed->SetPlayerCollider(&m_playerController->GetCollider());
     m_rangedEnemy->SetPlayerCollider(&m_playerController->GetCollider());
+    m_rangedEnemy->SetPlayerController(m_playerController.get());
+
     m_boss1->SetPlayerCollider(&m_playerController->GetCollider());
 
     // Lấy danh sách collider của enemy
-    std::vector<SDL_Rect*> enemyColliders;
     enemyColliders.push_back(m_enemyController->GetEnemyCollider());
     enemyColliders.push_back(m_enemyController2->GetEnemyCollider());
     enemyColliders.push_back(m_evilCreature->GetCollider());
@@ -166,30 +167,30 @@ void GSPlay::Init()
     m_boss1->SetOnHitPlayerCallback([this](int damage) {
         m_playerController->TakeDamage(damage);
         });
+
     // Callback khi player đánh trúng enemy
-    std::vector<std::function<void(int)>> hitEnemyCallbacks;
-    hitEnemyCallbacks.push_back([this](int damage) {
+    m_hitEnemyCallbacks.push_back([this](int damage) {
         m_enemyController->TakeDamage(damage);
         });
-    hitEnemyCallbacks.push_back([this](int damage) {
+    m_hitEnemyCallbacks.push_back([this](int damage) {
         m_enemyController2->TakeDamage(damage);
         });
-    hitEnemyCallbacks.push_back([this](int damage) {
+    m_hitEnemyCallbacks.push_back([this](int damage) {
         m_evilCreature->TakeDamage(damage);
         });
-    hitEnemyCallbacks.push_back([this](int damage) {
+    m_hitEnemyCallbacks.push_back([this](int damage) {
         m_ghostWarrior->TakeDamage(damage);
         });
-    hitEnemyCallbacks.push_back([this](int damage) {
+    m_hitEnemyCallbacks.push_back([this](int damage) {
         m_ghostWarriorRed->TakeDamage(damage);
         });
-    hitEnemyCallbacks.push_back([this](int damage) {
+    m_hitEnemyCallbacks.push_back([this](int damage) {
         m_rangedEnemy->TakeDamage(damage);
         });
-    hitEnemyCallbacks.push_back([this](int damage) {
+    m_hitEnemyCallbacks.push_back([this](int damage) {
         m_boss1->TakeDamage(damage);
         });
-    m_playerController->SetOnHitEnemyCallbacks(hitEnemyCallbacks);
+    m_playerController->SetOnHitEnemyCallbacks(m_hitEnemyCallbacks);
 
     // Rung màn hình khi đánh trúng enemy
     m_playerController->SetOnScreenShakeCallback([]() {
@@ -282,13 +283,15 @@ void GSPlay::Update(float deltaTime)
     {
         auto& bullet = g_playerBullets[i];
         bullet->Update(deltaTime);
+        std::cout << "[DEBUG] Bullet update: total enemyColliders = " << enemyColliders.size() << std::endl;
 
         bool hit = false;
         for (size_t j = 0; j < enemyColliders.size(); ++j)
         {
             if (bullet->HasHitEnemy(enemyColliders[j]))
             {
-                std::cout << bullet->GetDamage() << std::endl;
+                std::cout << "[DEBUG] bullet damage = " << bullet->GetDamage() << std::endl;
+                std::cout << m_hitEnemyCallbacks.size()<< std::endl;
                 if (j < m_hitEnemyCallbacks.size())
                     m_hitEnemyCallbacks[j](bullet->GetDamage());
                 hit = true;

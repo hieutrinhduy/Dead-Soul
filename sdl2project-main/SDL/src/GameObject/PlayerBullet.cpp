@@ -64,7 +64,11 @@ bool PlayerBullet::IsOutOfScreen()
 
 bool PlayerBullet::HasHitEnemy(const SDL_Rect* enemyCollider)
 {
-    if (!enemyCollider || m_destroyed) return false;
+
+    if (!enemyCollider || m_destroyed) {
+        std::cout << "dont have enemyCollider" << std::endl;
+        return false;
+    } 
 
     if (SDL_HasIntersection(&m_collider, enemyCollider)) {
         m_destroyed = true;
