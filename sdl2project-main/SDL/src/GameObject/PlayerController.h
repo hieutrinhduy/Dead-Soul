@@ -34,14 +34,32 @@ public:
     bool OnTheGround() const { return m_isGrounded; };
 
     // get player's stats data:
-    int GetHpLose() const { return m_HpLose; };
-    int GetSpLose() const { return m_SpLose; };
-    int GetMpLose() const { return m_MpLose; }; 
-    int GetExpGained() const { return m_ExpGained; }; 
-    int GetGoldGained() const { return m_GoldGained; };
+    int GetHpLose() {
+        std::lock_guard<std::mutex> lock(mtx);
+        return m_HpLose;
+    };
+    int GetSpLose() {
+        std::lock_guard<std::mutex> lock(mtx);
+        return m_SpLose;
+    };
+    int GetMpLose() {
+        std::lock_guard<std::mutex> lock(mtx);
+        return m_MpLose;
+    };
+    int GetExpGained() {
+        std::lock_guard<std::mutex> lock(mtx);
+        return m_ExpGained;
+    }; 
+    int GetGoldGained() {
+        std::lock_guard<std::mutex> lock(mtx);
+        return m_GoldGained;
+    };
 
     // get weapon index:
-    int GetWeaponIndex() { return m_currentWeaponIndex; };
+    int GetWeaponIndex() {
+        std::lock_guard<std::mutex> lock(mtx);
+        return m_currentWeaponIndex;
+    };
 
     /* -------- SETTER: -------- */
     // set movement ability data:
@@ -56,9 +74,11 @@ public:
 
     // set player status:
     void SetSpStatus(bool enoughSp) {
+        std::lock_guard<std::mutex> lock(mtx);
         m_enoughSP = enoughSp;
     };
     void SetMpStatus(bool enoughMp) {
+        std::lock_guard<std::mutex> lock(mtx);
         m_enoughMP = enoughMp;
     };
     void SetHpLose(int damage) {
@@ -78,10 +98,12 @@ public:
     };
 
     void SetExpGained(int amount) {
+        std::lock_guard<std::mutex> lock(mtx);
         m_ExpGained += amount;
     }
 
     void SetGoldGained(int amount) {
+        std::lock_guard<std::mutex> lock(mtx);
         m_GoldGained += amount;
     }
 
@@ -94,7 +116,8 @@ public:
 
     // set Weapon Index:
     void SetWeaponIndex(int index) 
-    { 
+    {
+        std::lock_guard<std::mutex> lock(mtx);
         m_currentWeaponIndex = index; 
         switch (index)
         {
