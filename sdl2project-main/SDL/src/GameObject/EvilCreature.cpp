@@ -8,10 +8,18 @@
 
 int devilCreatureAttackIndex = 0;
 
-EvilCreature::EvilCreature() {}
+
+EvilCreature::EvilCreature()
+    : m_gravityForce(150.0f), m_velocityY(0.0f), m_speed(200.0f),
+    m_direction(1), m_isAttacking(false), m_attackTimer(0.0f), m_attackCooldown(0.0f),
+    m_isHit(false), m_hitTimer(0.0f), m_isDead(false), m_groundCollider(nullptr),
+    m_playerCollider(nullptr), m_lostPlayerTimer(0.0f), m_state(EvilCreatureState::Patrol),
+    m_maxHP(100), m_currentHP(100), m_damage(1), m_flip(SDL_FLIP_NONE) {
+}
+
 EvilCreature::~EvilCreature() {}
 
-void EvilCreature::Init(float pointA, float pointB)
+void EvilCreature::Init(float pointA, float pointB, float posY)
 {
     idleTexture = ResourceManagers::GetInstance()->GetTexture("EvilCreature-Idle.png");
     runTexture = ResourceManagers::GetInstance()->GetTexture("EvilCreature-Walk.png");
@@ -22,31 +30,20 @@ void EvilCreature::Init(float pointA, float pointB)
 
     m_sprite = std::make_shared<SpriteAnimation>(runTexture, 1, 10, 1, 0.05f);
     m_sprite->SetSize(96 * 2, 64 * 2);
-    m_sprite->Set2DPosition(pointA, -500);
+    m_sprite->Set2DPosition(pointA, posY);
     m_collider = { (int)m_sprite->GetPosition().x + 50, (int)m_sprite->GetPosition().y, m_sprite->GetWidth() / 2, m_sprite->GetHeight() };
 
     m_pointA = pointA;
     m_pointB = pointB;
-    m_flip = SDL_FLIP_NONE;
+    m_flip = SDL_FLIP_HORIZONTAL;
 
     m_hpBarBg = { 0, 0, m_barWidth, m_barHeight };
     m_hpBarFill = m_hpBarBg;
 }
 
-void EvilCreature::SetGroundCollider(SDL_Rect* ground)
-{
-    m_groundCollider = ground;
-}
-
-void EvilCreature::SetPlayerCollider(const SDL_Rect* player)
-{
-    m_playerCollider = player;
-}
-
-SDL_Rect* EvilCreature::GetCollider()
-{
-    return &m_collider;
-}
+void EvilCreature::SetGroundCollider(SDL_Rect* ground) { m_groundCollider = ground; }
+void EvilCreature::SetPlayerCollider(const SDL_Rect* player) { m_playerCollider = player; }
+SDL_Rect* EvilCreature::GetCollider() { return &m_collider; }
 
 void EvilCreature::TakeDamage(int damage)
 {
@@ -56,19 +53,15 @@ void EvilCreature::TakeDamage(int damage)
     m_currentHP -= damage;
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
     m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
-     
+
     if (m_currentHP <= 0) {
         m_currentHP = 0;
-        std::cout << "[EvilCreature] ĐÃ CHẾT\n";
         Die();
     }
-    else {
-        if (!m_isAttacking) {
-            m_isAttacking = false;
-            m_isHit = true;
-            m_hitTimer = 0.2f;
-            ChangeAnimation(hitTexture, 5, 0.05f);
-        }
+    else if (!m_isAttacking) {
+        m_isHit = true;
+        m_hitTimer = 0.2f;
+        ChangeAnimation(hitTexture, 5, 0.05f);
     }
 }
 
@@ -97,8 +90,7 @@ void EvilCreature::Update(float deltaTime)
                 Destroy();
             }
         }
-        if (m_sprite)
-            m_sprite->Update(deltaTime);
+        if (m_sprite) m_sprite->Update(deltaTime);
         return;
     }
 
@@ -126,6 +118,7 @@ void EvilCreature::Update(float deltaTime)
             m_flip = SDL_FLIP_NONE;
         }
         posX += m_direction * m_speed * deltaTime;
+
         if (m_direction == 1 && posX > m_pointB) {
             m_direction = -1;
             m_flip = SDL_FLIP_NONE;
@@ -134,11 +127,13 @@ void EvilCreature::Update(float deltaTime)
             m_direction = 1;
             m_flip = SDL_FLIP_HORIZONTAL;
         }
-        if (DetectPlayer()) {
+
+        if (!m_recentlyReturnedFromChase && DetectPlayer()) {
             m_state = EvilCreatureState::Chase;
             m_lostPlayerTimer = 0.0f;
         }
         break;
+
     case EvilCreatureState::Chase:
         if (DetectPlayer()) {
             m_lostPlayerTimer = 0.0f;
@@ -148,26 +143,45 @@ void EvilCreature::Update(float deltaTime)
             if (m_lostPlayerTimer >= 0.1f) {
                 m_state = EvilCreatureState::Patrol;
                 ChangeAnimation(runTexture, 10, 0.05f);
-                m_flip = (m_direction == 1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+                m_recentlyReturnedFromChase = true;
                 break;
             }
         }
+
         if (m_playerCollider) {
             float distanceX = m_playerCollider->x - posX;
-            if (distanceX > 0) {
-                m_flip = SDL_FLIP_HORIZONTAL;  // → hướng phải
-                posX += m_speed * 2 * deltaTime;
+            float moveDir = (distanceX > 0) ? 1.0f : -1.0f;
+            m_flip = (moveDir > 0) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+
+            float nextPosX = posX + moveDir * m_speed * 2 * deltaTime;
+            if (nextPosX < m_pointA || nextPosX > m_pointB) {
+                m_state = EvilCreatureState::Patrol;
+                ChangeAnimation(runTexture, 10, 0.05f);
+                m_recentlyReturnedFromChase = true;
+
+                if (posX < m_pointA + 10) {
+                    m_direction = 1;
+                    m_flip = SDL_FLIP_HORIZONTAL;
+                }
+                else if (posX > m_pointB - 10) {
+                    m_direction = -1;
+                    m_flip = SDL_FLIP_NONE;
+                }
+                break;
             }
-            else {
-                m_flip = SDL_FLIP_NONE;       // ← hướng trái
-                posX -= m_speed * 2 * deltaTime;
-            }
-            int attackDistance = 150;
-            if (m_flip == SDL_FLIP_NONE) attackDistance = 50;
-            if (!m_isAttacking && abs(distanceX) < attackDistance) {
+
+            posX = nextPosX;
+
+            float enemyCenterX = posX + m_sprite->GetWidth() / 2;
+            float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2;
+            float dx = playerCenterX - enemyCenterX;
+
+            int attackDistance = 130;
+            if (!m_isAttacking && std::abs(dx) < attackDistance) {
                 m_state = EvilCreatureState::Attack;
                 m_attackFlip = m_flip;
                 m_isAttacking = true;
+
                 if (rand() % 2 == 0) {
                     ChangeAnimation(attack1Texture, 14, 0.1f);
                     devilCreatureAttackIndex = 1;
@@ -181,6 +195,7 @@ void EvilCreature::Update(float deltaTime)
             }
         }
         break;
+
     case EvilCreatureState::Attack:
         m_attackTimer -= deltaTime;
         if (m_sprite) {
@@ -202,40 +217,59 @@ void EvilCreature::Update(float deltaTime)
         if (m_attackTimer <= 0.0f) {
             m_isAttacking = false;
             m_didDamage = false;
-            m_state = DetectPlayer() ? EvilCreatureState::Chase : EvilCreatureState::Patrol;
-            ChangeAnimation(runTexture, 10, 0.05f);
+            if (DetectPlayer()) {
+                m_state = EvilCreatureState::Chase;
+                ChangeAnimation(runTexture, 10, 0.05f);
+                m_flip = (m_playerCollider->x > m_sprite->Get2DPosition().x) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+            }
+            else {
+                m_state = EvilCreatureState::Patrol;
+                ChangeAnimation(runTexture, 10, 0.05f);
+                m_flip = (m_direction == 1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+            }
         }
         break;
+    }
+
+    if (m_lostPlayerTimer > 0.0f)
+        m_lostPlayerTimer -= deltaTime;
+
+    if (m_recentlyReturnedFromChase) {
+        m_recentlyReturnedTimer += deltaTime;
+        if (m_recentlyReturnedTimer >= 0.3f) {
+            m_recentlyReturnedFromChase = false;
+            m_recentlyReturnedTimer = 0.0f;
+        }
     }
 
     m_sprite->Set2DPosition(posX, posY);
     m_sprite->SetFlip((m_state == EvilCreatureState::Attack) ? m_attackFlip : m_flip);
     m_collider.x = (int)posX;
 
-    if (!m_isGrounded) m_airTime += deltaTime;
-    else m_airTime = 0.0f;
+    //m_velocityY += m_gravityForce * deltaTime;
+    //if (m_velocityY > 800) m_velocityY = 800;
+    //posY += m_velocityY * deltaTime;
 
-    m_velocityY += m_gravityForce * (1.0f + m_airTime * 10.0f) * deltaTime;
-    if (m_velocityY > 800) m_velocityY = 800;
-    posY += m_velocityY * deltaTime;
-
-    m_collider = { (int)posX + 50, (int)posY, m_sprite->GetWidth() / 2, m_sprite->GetHeight() };
-    m_isGrounded = GroundCheck();
-    if (m_isGrounded) {
-        m_velocityY = 0;
-        posY = m_groundCollider->y - m_sprite->GetHeight() + 2;
-    }
+    //m_isGrounded = GroundCheck();
+    //if (m_isGrounded) {
+    //    m_velocityY = 0;
+    //    posY = m_groundCollider->y - m_sprite->GetHeight() + 2;
+    //}
 
     m_sprite->Set2DPosition(posX, posY);
     m_collider = { (int)posX + 50, (int)posY, m_sprite->GetWidth() / 2, m_sprite->GetHeight() };
+
     m_hpBarBg.x = m_collider.x + m_collider.w / 2 - m_barWidth / 2;
     m_hpBarBg.y = m_collider.y - 10;
+
     m_hpBarFill = m_hpBarBg;
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
     m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
 
     m_sprite->Update(deltaTime);
 }
+
+
 
 void EvilCreature::Draw(SDL_Renderer* renderer)
 {
@@ -244,17 +278,18 @@ void EvilCreature::Draw(SDL_Renderer* renderer)
     if (m_sprite) m_sprite->Draw(renderer);
 
     Vector2 camPos = Camera::GetInstance()->GetPosition();
+
     SDL_Rect drawCollider = m_collider;
     drawCollider.x -= (int)camPos.x;
     drawCollider.y -= (int)camPos.y;
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     SDL_RenderDrawRect(renderer, &drawCollider);
 
-    SDL_Rect drawBox = m_attackBox;
-    drawBox.x -= (int)camPos.x;
-    drawBox.y -= (int)camPos.y;
+    SDL_Rect drawAttackBox = m_attackBox;
+    drawAttackBox.x -= (int)camPos.x;
+    drawAttackBox.y -= (int)camPos.y;
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &drawBox);
+    SDL_RenderDrawRect(renderer, &drawAttackBox);
 
     SDL_Rect drawBg = m_hpBarBg;
     drawBg.x -= (int)camPos.x;
@@ -266,6 +301,7 @@ void EvilCreature::Draw(SDL_Renderer* renderer)
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderFillRect(renderer, &drawBg);
+
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &drawFill);
 }
@@ -275,7 +311,7 @@ bool EvilCreature::DetectPlayer()
     if (!m_playerCollider) return false;
     float enemyCenterX = m_collider.x + m_collider.w / 2.0f;
     float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2.0f;
-    return std::abs(enemyCenterX - playerCenterX) < 500.0f;
+    return std::abs(enemyCenterX - playerCenterX) < 250;
 }
 
 void EvilCreature::ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime)

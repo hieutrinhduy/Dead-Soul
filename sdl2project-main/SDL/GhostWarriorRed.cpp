@@ -1,4 +1,4 @@
-#include "GhostWarriorRed.h"
+﻿#include "GhostWarriorRed.h"
 #include "ResourceManagers.h"
 #include "Camera.h"
 #include "Renderer.h"
@@ -11,7 +11,7 @@ int ghostWarriorRedAttackIndex = 0;
 GhostWarriorRed::GhostWarriorRed() {}
 GhostWarriorRed::~GhostWarriorRed() {}
 
-void GhostWarriorRed::Init(float pointA, float pointB)
+void GhostWarriorRed::Init(float pointA, float pointB, float posY)
 {
     idleTexture = ResourceManagers::GetInstance()->GetTexture("GhostWarriorRed-IdleFly.png");
     runTexture = ResourceManagers::GetInstance()->GetTexture("GhostWarriorRed-Fly.png");
@@ -22,7 +22,7 @@ void GhostWarriorRed::Init(float pointA, float pointB)
 
     m_sprite = std::make_shared<SpriteAnimation>(runTexture, 1, 8, 1, 0.05f);
     m_sprite->SetSize(96 * 2, 64 * 2);
-    m_sprite->Set2DPosition(pointA, -500);
+    m_sprite->Set2DPosition(pointA, posY);
     m_collider = { (int)m_sprite->GetPosition().x + 50, (int)m_sprite->GetPosition().y, m_sprite->GetWidth() / 2, m_sprite->GetHeight() };
 
     m_pointA = pointA;
@@ -95,32 +95,61 @@ void GhostWarriorRed::Update(float dt)
     case GhostWarriorRedState::Patrol:
         if (posX < m_pointA) { m_direction = 1; m_flip = SDL_FLIP_HORIZONTAL; }
         else if (posX > m_pointB) { m_direction = -1; m_flip = SDL_FLIP_NONE; }
+
         posX += m_direction * m_speed * dt;
-        if (m_direction == 1 && posX > m_pointB) { m_direction = -1; m_flip = SDL_FLIP_NONE; }
-        else if (m_direction == -1 && posX < m_pointA) { m_direction = 1; m_flip = SDL_FLIP_HORIZONTAL; }
-        if (DetectPlayer()) { m_state = GhostWarriorRedState::Chase; m_lostPlayerTimer = 0.0f; }
+
+        if (m_direction == 1 && posX > m_pointB) {
+            m_direction = -1; m_flip = SDL_FLIP_NONE;
+        }
+        else if (m_direction == -1 && posX < m_pointA) {
+            m_direction = 1; m_flip = SDL_FLIP_HORIZONTAL;
+        }
+
+        if (!m_recentlyReturnedFromChase && DetectPlayer()) {
+            m_state = GhostWarriorRedState::Chase;
+            m_lostPlayerTimer = 0.0f;
+        }
         break;
+
     case GhostWarriorRedState::Chase:
-        if (!DetectPlayer()) {
+        if (DetectPlayer()) {
+            m_lostPlayerTimer = 0.0f;
+        }
+        else {
             m_lostPlayerTimer += dt;
             if (m_lostPlayerTimer >= 0.1f) {
                 m_state = GhostWarriorRedState::Patrol;
                 ChangeAnimation(runTexture, 8, 0.05f);
+                m_recentlyReturnedFromChase = true;
                 break;
             }
         }
-        else m_lostPlayerTimer = 0.0f;
 
         if (m_playerCollider) {
             float dx = m_playerCollider->x - posX;
-            m_flip = (dx > 0) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
-            posX += ((dx > 0) ? 1 : -1) * m_speed * 2 * dt;
+            float moveDir = (dx > 0) ? 1.0f : -1.0f;
+            m_flip = (moveDir > 0) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
 
-            int attackDistance = 150;
-            if (m_flip == SDL_FLIP_NONE) {
-                attackDistance = 50;
+            float nextPosX = posX + moveDir * m_speed * 2 * dt;
+            if (nextPosX < m_pointA || nextPosX > m_pointB) {
+                m_state = GhostWarriorRedState::Patrol;
+                ChangeAnimation(runTexture, 8, 0.05f);
+                m_recentlyReturnedFromChase = true;
+                if (posX < m_pointA + 10) {
+                    m_direction = 1; m_flip = SDL_FLIP_HORIZONTAL;
+                }
+                else if (posX > m_pointB - 10) {
+                    m_direction = -1; m_flip = SDL_FLIP_NONE;
+                }
+                break;
             }
-            if (!m_isAttacking && abs(dx) < attackDistance) {
+            posX = nextPosX;
+
+            float ecx = posX + m_sprite->GetWidth() / 2;
+            float pcx = m_playerCollider->x + m_playerCollider->w / 2;
+            float dx2 = pcx - ecx;
+
+            if (!m_isAttacking && std::abs(dx2) < 130) {
                 m_state = GhostWarriorRedState::Attack;
                 m_attackFlip = m_flip;
                 m_isAttacking = true;
@@ -132,6 +161,7 @@ void GhostWarriorRed::Update(float dt)
             }
         }
         break;
+
     case GhostWarriorRedState::Attack:
         m_attackTimer -= dt;
         if (m_sprite && !m_didDamage &&
@@ -147,31 +177,49 @@ void GhostWarriorRed::Update(float dt)
         if (m_attackTimer <= 0.0f) {
             m_isAttacking = false;
             m_didDamage = false;
-            m_state = DetectPlayer() ? GhostWarriorRedState::Chase : GhostWarriorRedState::Patrol;
-            ChangeAnimation(runTexture, 8, 0.05f);
+            if (DetectPlayer()) {
+                m_state = GhostWarriorRedState::Chase;
+                ChangeAnimation(runTexture, 8, 0.05f);
+                m_flip = (m_playerCollider->x > m_sprite->Get2DPosition().x) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+            }
+            else {
+                m_state = GhostWarriorRedState::Patrol;
+                ChangeAnimation(runTexture, 8, 0.05f);
+                m_flip = (m_direction == 1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+            }
         }
+
         break;
+    }
+
+    if (m_lostPlayerTimer > 0.0f)
+        m_lostPlayerTimer -= dt;
+
+    if (m_recentlyReturnedFromChase) {
+        m_recentlyReturnedTimer += dt;
+        if (m_recentlyReturnedTimer >= 0.3f) {
+            m_recentlyReturnedFromChase = false;
+            m_recentlyReturnedTimer = 0.0f;
+        }
     }
 
     m_sprite->Set2DPosition(posX, posY);
     m_sprite->SetFlip((m_state == GhostWarriorRedState::Attack) ? m_attackFlip : m_flip);
     m_collider.x = (int)posX;
 
-    if (!m_isGrounded) m_airTime += dt;
-    else m_airTime = 0.0f;
+    //m_velocityY += m_gravityForce * dt;
+    //if (m_velocityY > 800) m_velocityY = 800;
+    //posY += m_velocityY * dt;
 
-    m_velocityY += m_gravityForce * (1.0f + m_airTime * 10.0f) * dt;
-    if (m_velocityY > 800) m_velocityY = 800;
-    posY += m_velocityY * dt;
-
-    m_isGrounded = GroundCheck();
-    if (m_isGrounded) {
-        m_velocityY = 0;
-        posY = m_groundCollider->y - m_sprite->GetHeight() + 2;
-    }
+    //m_isGrounded = GroundCheck();
+    //if (m_isGrounded) {
+    //    m_velocityY = 0;
+    //    posY = m_groundCollider->y - m_sprite->GetHeight() + 2;
+    //}
 
     m_sprite->Set2DPosition(posX, posY);
     m_collider = { (int)posX + 50, (int)posY, m_sprite->GetWidth() / 2, m_sprite->GetHeight() };
+
     m_hpBarBg.x = m_collider.x + m_collider.w / 2 - m_barWidth / 2;
     m_hpBarBg.y = m_collider.y - 10;
     m_hpBarFill = m_hpBarBg;
@@ -179,6 +227,7 @@ void GhostWarriorRed::Update(float dt)
 
     m_sprite->Update(dt);
 }
+
 
 void GhostWarriorRed::Draw(SDL_Renderer* renderer)
 {
@@ -217,7 +266,7 @@ bool GhostWarriorRed::DetectPlayer()
     if (!m_playerCollider) return false;
     float ex = m_collider.x + m_collider.w / 2.0f;
     float px = m_playerCollider->x + m_playerCollider->w / 2.0f;
-    return std::abs(ex - px) < 500.0f;
+    return std::abs(ex - px) < 250;
 }
 
 void GhostWarriorRed::ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime)

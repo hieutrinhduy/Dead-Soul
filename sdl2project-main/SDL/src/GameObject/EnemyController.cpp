@@ -212,7 +212,7 @@ void EnemyController::Update(float deltaTime)
             float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2;
             float dx = playerCenterX - enemyCenterX;
 
-            int attackDistance = 150;
+            int attackDistance = 130;
             if (!m_isAttacking && std::abs(dx) < attackDistance) {
                 m_currentState = EnemyState::Attack;
                 m_attackFlip = m_enemyFlip;

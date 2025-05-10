@@ -13,7 +13,7 @@ extern std::vector<std::shared_ptr<Bullet>> g_bullets;
 RangedEnemy::RangedEnemy() {}
 RangedEnemy::~RangedEnemy() {}
 
-void RangedEnemy::Init(float pointA, float pointB)
+void RangedEnemy::Init(float pointA, float pointB, float posY)
 {
     idleTexture = ResourceManagers::GetInstance()->GetTexture("FlyEnemyIDLE.png");
     runTexture = ResourceManagers::GetInstance()->GetTexture("FlyEnemyFLYING.png");
@@ -23,12 +23,12 @@ void RangedEnemy::Init(float pointA, float pointB)
 
     m_sprite = std::make_shared<SpriteAnimation>(runTexture, 1, 4, 1, 0.05f);
     m_sprite->SetSize(96 * 2, 64 * 2);
-    m_sprite->Set2DPosition(pointA, -500);
+    m_sprite->Set2DPosition(pointA, posY);
     m_collider = { (int)m_sprite->GetPosition().x + 50, (int)m_sprite->GetPosition().y, m_sprite->GetWidth() / 2, m_sprite->GetHeight() };
 
     m_pointA = pointA;
     m_pointB = pointB;
-    m_flip = SDL_FLIP_NONE;
+    m_flip = SDL_FLIP_HORIZONTAL;
 
     m_hpBarBg = { 0, 0, m_barWidth, m_barHeight };
     m_hpBarFill = m_hpBarBg;
@@ -91,37 +91,87 @@ void RangedEnemy::Update(float dt)
 
     switch (m_state) {
     case RangedEnemyState::Patrol:
-        if (posX < m_pointA) { m_direction = 1; m_flip = SDL_FLIP_HORIZONTAL; }
-        else if (posX > m_pointB) { m_direction = -1; m_flip = SDL_FLIP_NONE; }
+        if (posX < m_pointA) {
+            m_direction = 1;
+            m_flip = SDL_FLIP_HORIZONTAL;
+        }
+        else if (posX > m_pointB) {
+            m_direction = -1;
+            m_flip = SDL_FLIP_NONE;
+        }
+
         posX += m_direction * m_speed * dt;
-        if (m_direction == 1 && posX > m_pointB) { m_direction = -1; m_flip = SDL_FLIP_NONE; }
-        else if (m_direction == -1 && posX < m_pointA) { m_direction = 1; m_flip = SDL_FLIP_HORIZONTAL; }
-        if (DetectPlayer()) { m_state = RangedEnemyState::Chase; m_lostPlayerTimer = 0.0f; }
+
+        if (m_direction == 1 && posX > m_pointB) {
+            m_direction = -1;
+            m_flip = SDL_FLIP_NONE;
+        }
+        else if (m_direction == -1 && posX < m_pointA) {
+            m_direction = 1;
+            m_flip = SDL_FLIP_HORIZONTAL;
+        }
+
+        if (!m_recentlyReturnedFromChase && DetectPlayer()) {
+            m_state = RangedEnemyState::Chase;
+            m_lostPlayerTimer = 0.0f;
+        }
         break;
+
     case RangedEnemyState::Chase:
-        if (!DetectPlayer()) {
+        if (DetectPlayer()) {
+            m_lostPlayerTimer = 0.0f;
+        }
+        else {
             m_lostPlayerTimer += dt;
             if (m_lostPlayerTimer >= 0.1f) {
                 m_state = RangedEnemyState::Patrol;
                 ChangeAnimation(runTexture, 4, 0.05f);
+                m_recentlyReturnedFromChase = true;
                 break;
             }
         }
-        else m_lostPlayerTimer = 0.0f;
 
         if (m_playerCollider) {
             float dx = m_playerCollider->x - posX;
-            m_flip = (dx > 0) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+            float moveDir = (dx > 0) ? 1.0f : -1.0f;
 
-            if (!m_isAttacking && abs(dx) <= m_attackRange) {
+            float nextPosX = posX + moveDir * m_speed * 2 * dt;
+            if (nextPosX < m_pointA || nextPosX > m_pointB) {
+                m_state = RangedEnemyState::Patrol;
+                ChangeAnimation(runTexture, 4, 0.05f);
+                m_recentlyReturnedFromChase = true;
+
+                if (posX < m_pointA + 10) {
+                    m_direction = 1;
+                    m_flip = SDL_FLIP_HORIZONTAL;
+                }
+                else if (posX > m_pointB - 10) {
+                    m_direction = -1;
+                    m_flip = SDL_FLIP_NONE;
+                }
+                break;
+            }
+
+            posX = nextPosX;
+
+            float enemyCenterX = posX + m_sprite->GetWidth() / 2;
+            float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2;
+            float dx2 = playerCenterX - enemyCenterX;
+
+            if (!m_isAttacking && std::abs(dx2) < m_attackRange) {
                 m_state = RangedEnemyState::Attack;
-                m_attackFlip = m_flip;
+                m_attackFlip = (dx2 > 0) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
                 m_isAttacking = true;
                 ChangeAnimation(attackTexture, 8, 0.1f);
                 m_attackTimer = 0.75f;
             }
+
+            // Flip nếu không đang tấn công
+            if (!m_isAttacking)
+                m_flip = (moveDir > 0) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
         }
         break;
+
     case RangedEnemyState::Attack:
         m_attackTimer -= dt;
         if (m_sprite && !m_didDamage && m_sprite->GetCurrentFrame() == 5 && !m_isHit) {
@@ -131,28 +181,34 @@ void RangedEnemy::Update(float dt)
         if (m_attackTimer <= 0.0f) {
             m_isAttacking = false;
             m_didDamage = false;
-            m_state = DetectPlayer() ? RangedEnemyState::Chase : RangedEnemyState::Patrol;
-            ChangeAnimation(runTexture, 4, 0.05f);
+            if (DetectPlayer()) {
+                m_state = RangedEnemyState::Chase;
+                ChangeAnimation(runTexture, 4, 0.05f);
+                m_flip = (m_playerCollider->x > m_sprite->Get2DPosition().x) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+            }
+            else {
+                m_state = RangedEnemyState::Patrol;
+                ChangeAnimation(runTexture, 4, 0.05f);
+                m_flip = (m_direction == 1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+            }
         }
         break;
+    }
+
+    if (m_lostPlayerTimer > 0.0f)
+        m_lostPlayerTimer -= dt;
+
+    if (m_recentlyReturnedFromChase) {
+        m_recentlyReturnedTimer += dt;
+        if (m_recentlyReturnedTimer >= 0.3f) {
+            m_recentlyReturnedFromChase = false;
+            m_recentlyReturnedTimer = 0.0f;
+        }
     }
 
     m_sprite->Set2DPosition(posX, posY);
     m_sprite->SetFlip((m_state == RangedEnemyState::Attack) ? m_attackFlip : m_flip);
     m_collider.x = (int)posX;
-
-    if (!m_isGrounded) m_airTime += dt;
-    else m_airTime = 0.0f;
-
-    m_velocityY += m_gravityForce * (1.0f + m_airTime * 10.0f) * dt;
-    if (m_velocityY > 800) m_velocityY = 800;
-    posY += m_velocityY * dt;
-
-    m_isGrounded = GroundCheck();
-    if (m_isGrounded) {
-        m_velocityY = 0;
-        posY = m_groundCollider->y - m_sprite->GetHeight() + 2;
-    }
 
     m_sprite->Set2DPosition(posX, posY);
     m_collider = { (int)posX + 50, (int)posY, m_sprite->GetWidth() / 2, m_sprite->GetHeight() };
@@ -164,6 +220,8 @@ void RangedEnemy::Update(float dt)
     m_sprite->Update(dt);
 }
 
+
+
 void RangedEnemy::Draw(SDL_Renderer* renderer)
 {
     if (m_isDead && m_finishDead) return;
@@ -173,7 +231,7 @@ void RangedEnemy::Draw(SDL_Renderer* renderer)
     SDL_Rect drawBg = m_hpBarBg;
 
     int rightPos = 32;
-    if (m_flip == SDL_FLIP_HORIZONTAL) {
+    if (m_flip == SDL_FLIP_NONE) {
         rightPos -= 32 * 2;
     }
     drawBg.x -= static_cast<int>(camPos.x) + rightPos;

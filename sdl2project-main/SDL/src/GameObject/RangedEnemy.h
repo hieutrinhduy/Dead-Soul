@@ -22,7 +22,7 @@ public:
     RangedEnemy();
     ~RangedEnemy();
 
-    void Init(float pointA, float pointB);
+    void Init(float pointA, float pointB, float posY);
     void Update(float dt);
     void Draw(SDL_Renderer* renderer);
 
@@ -83,10 +83,13 @@ private:
 
     bool m_didFire = false;
 
-    float m_attackRange = 700;
+    float m_attackRange = 500;
     bool m_didDamage = false;
     bool m_isGrounded = false;
     float m_detectRange = 700;
+
+    bool m_recentlyReturnedFromChase = false;
+    float m_recentlyReturnedTimer = 0.0f;
 
 private:
     void ShootProjectile();

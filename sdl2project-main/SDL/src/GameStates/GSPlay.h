@@ -10,6 +10,7 @@
 #include "GhostWarrior.h"
 #include "GhostWarriorRed.h"
 #include "RangedEnemy.h"
+#include "Boss1.h"
 
 
 class Sprite2D;
@@ -47,6 +48,7 @@ private:
 	std::shared_ptr<UIManager> m_uiManager;
 	std::shared_ptr<PlayerController> m_playerController;
 
+	std::shared_ptr<Boss1> m_boss1;
 	std::shared_ptr<EnemyController> m_enemyController;
 	std::shared_ptr<EnemyController> m_enemyController2;
 	std::shared_ptr<EnemyController> m_enemyController3;

@@ -172,6 +172,7 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GameManager\DataSaver.cpp" />
     <ClCompile Include="src\GameManager\ResourceManagers.cpp" />
+    <ClCompile Include="src\GameObject\Boss1.cpp" />
     <ClCompile Include="src\GameObject\Bullet.cpp" />
     <ClCompile Include="src\GameObject\Camera.cpp" />
     <ClCompile Include="src\GameObject\CMath.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="src\GameManager\ResourceManagers.h" />
     <ClInclude Include="src\GameManager\Singleton.h" />
     <ClInclude Include="src\GameObject\BaseObject.h" />
+    <ClInclude Include="src\GameObject\Boss1.h" />
     <ClInclude Include="src\GameObject\Bullet.h" />
     <ClInclude Include="src\GameObject\Camera.h" />
     <ClInclude Include="src\GameObject\CMath.h" />
