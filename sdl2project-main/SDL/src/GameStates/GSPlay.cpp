@@ -8,6 +8,7 @@
 #include "GSPlay.h"
 
 #include <iostream>
+#include <thread>
 
 #include "ResourceManagers.h"
 #include "GameObject/MouseButton.h"
@@ -35,17 +36,17 @@ std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 GSPlay::GSPlay()
 {
     timeScale = std::make_shared<int>(-2);
+
     m_uiManager = std::make_shared<UIManager>(timeScale);
 
-    m_playerController = std::make_shared<PlayerController>();
-
-    m_tileMapLoaded = false;
     m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output.bin", "Data/Textures/Map/tiles", 32);
+
+    m_playerController = std::make_shared<PlayerController>();
+    m_playerController->Init();
 }
 
 
 GSPlay::~GSPlay() {}
-
 
 
 
@@ -83,10 +84,6 @@ void GSPlay::Init()
         m_tileMap->GetWidth() * m_tileMap->GetTileSize(),
         m_tileMap->GetHeight() * m_tileMap->GetTileSize()
     );
-
-    m_playerController->Init();
-    m_tileMap->SetPlayer(m_playerController);
-    m_tileMap->StartCheckingPlayerMovementAbility();
 
     // Enemy thường
     m_enemyController = std::make_shared<EnemyController>();
@@ -204,15 +201,11 @@ void GSPlay::Init()
     m_playerController->SetOnScreenShakeCallback([]() {
         int randomMagnitude = 5 + rand() % 2;
         Camera::GetInstance()->Shake(0.1f, randomMagnitude);
-        });
+    });
 
 
-    // SOUNDS:
-    Sound::GetInstance()->LoadSound("gameplay_music.mp3");
-    Sound::GetInstance()->PlaySound("gameplay_music.mp3");
-
-    // run game:
-    *timeScale = -2;
+    // sub-thread:
+    DisplayLoadingView();
 }
 
 
@@ -222,6 +215,10 @@ void GSPlay::Exit() {
     // stop thread at TileMap:
     m_tileMap->ClearThread();
     while(!m_tileMap->m_finishThread) {}
+
+    // stop thread at UIManager:
+    m_uiManager->ClearThread();
+    while(!m_uiManager->m_finishThread) {}
 }
 
 
@@ -239,8 +236,10 @@ void GSPlay::HandleEvents() {}
 
 void GSPlay::HandleKeyEvents(SDL_Event& e)
 {
-    m_playerController->HandleKeyEvents(e);
-    m_playerController->HandleMouseEvents(e);
+    if (*timeScale == 1) {
+        m_playerController->HandleKeyEvents(e);
+        m_playerController->HandleMouseEvents(e);
+    }
 }
 
 
@@ -260,6 +259,8 @@ void GSPlay::HandleMouseMoveEvents(SDL_Event& e) {}
 
 void GSPlay::Update(float deltaTime)
 {
+    m_uiManager->Update(deltaTime);
+
     // if the game is not running or hasn't resumed, not update:
     if (*timeScale != 1) return;
 
@@ -323,6 +324,8 @@ void GSPlay::Update(float deltaTime)
 
 void GSPlay::Draw(SDL_Renderer* renderer)
 {
+    m_uiManager->Draw(renderer);
+
     // if the game isn't running or hasn't resumed, stop draw:
     if (*timeScale != 1) {
         // draw UI:
@@ -397,4 +400,29 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
     // draw UI:
     m_uiManager->Draw(renderer);
+}
+
+
+
+void GSPlay::DisplayLoadingView() {
+    std::thread t([this]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+        // SOUNDS:
+        Sound::GetInstance()->LoadSound("gameplay_music.mp3");
+        Sound::GetInstance()->PlaySound("gameplay_music.mp3");
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1600));
+
+        // tilemap's SUB-THREAD:
+        m_tileMap->SetPlayer(m_playerController);
+        m_tileMap->StartCheckingPlayerMovementAbility();
+        // uiManager's SUB-THREAD:
+        m_uiManager->SetReferenceToPlayerController(m_playerController);
+        m_uiManager->UpdateStats();
+
+        *timeScale = 1;
+    });
+
+    t.detach();
 }

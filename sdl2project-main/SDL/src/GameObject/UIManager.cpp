@@ -8,6 +8,7 @@
 #include "UIManager.h"
 
 #include <thread>
+#include <mutex>
 
 #include "ResourceManagers.h"
 #include "Renderer.h"
@@ -19,6 +20,8 @@ constexpr int HP_BACKGROUND_BAR_WIDTH_IN_SPRITE = 512;
 constexpr int BACKGROUND_BAR_HEIGHT = 16;
 constexpr int BAR_LEFT = 10;
 constexpr int BAR_GAP = 8;
+
+constexpr int LOADING_TEXT_WIDTH = 300, LOADING_TEXT_HEIGHT = 48;
 
 constexpr int STAT_TEXT_WIDTH = 100;
 constexpr int HP_BACKGROUND_BAR_POSITION_X = BAR_LEFT, HP_BACKGROUND_BAR_POSITION_Y = 4;
@@ -33,9 +36,10 @@ constexpr int MP_BACKGROUND_BAR_POSITION_X = BAR_LEFT,
 #pragma region Constructor && Deconstructor
 UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	m_renderer(Renderer::GetInstance()->GetRenderer()), m_timeScale(timeScale),
-	hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 })
+	hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 }),
+	timer(0)
 {
-	TTF_Font* font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 36);
+	TTF_Font* font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 48);
 
 	// LOADING SCENE:
 	loadingBackground = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("bg_settings.png"), SDL_FLIP_NONE);
@@ -43,9 +47,9 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	loadingBackground->Set2DPosition(0, 0);
 	loadingBackground->Draw(m_renderer);
 
-	txtLoading = std::make_shared<Text>("LOADING", font, expTextColor);
-	txtLoading->SetSize(300, 36);
-	txtLoading->Set2DPosition((SCREEN_WIDTH - txtLoading->GetWidth()) / 2.0f, SCREEN_HEIDHT - txtLoading->GetHeight() - 20);
+	txtLoading = std::make_shared<Text>("LOADING", font, hpTextColor);
+	txtLoading->SetSize(LOADING_TEXT_WIDTH, LOADING_TEXT_HEIGHT);
+	txtLoading->Set2DPosition( (SCREEN_WIDTH - LOADING_TEXT_WIDTH) / 2.0f, SCREEN_HEIDHT - LOADING_TEXT_HEIGHT - 36 );
 
 
 	std::string loadingText = "LOADING";
@@ -150,12 +154,52 @@ UIManager::~UIManager() {}
 
 
 void UIManager::Update(float deltaTime) {
+	if (*m_timeScale == -2) {
+		timer += deltaTime;
+		
+		std::string loadingText = "LOADING";
+		int dotCount = timer / 0.2f;
+		if (dotCount == 4) {
+			dotCount = 0;
+			timer = 0;
+		}
+		for (int i = 0; i < dotCount; i++) loadingText += ".";
+		txtLoading->SetText(loadingText);
+		txtLoading->SetSize(LOADING_TEXT_WIDTH + dotCount * 10, LOADING_TEXT_HEIGHT);
+		txtLoading->Set2DPosition( (SCREEN_WIDTH - txtLoading->GetWidth()) / 2.0f, txtLoading->Get2DPosition().y );
 
+		return;
+	}
 }
 
 
 
 void UIManager::Draw(SDL_Renderer* renderer) {
+	if (*m_timeScale == -2) {
+		loadingBackground->Draw(renderer);
+		txtLoading->Draw(renderer);
+
+		return;
+	}
 	for (auto& it : uiElements) it->Draw(renderer);
 	for (auto& it : texts) it->Draw(renderer);
+}
+
+
+// sub-thread
+void UIManager::UpdateStats() {
+	std::thread t([this]() {
+		m_finishThread = false;
+		while (m_isPlaying) {
+
+		}
+
+		m_finishThread = true;
+	});
+
+	t.detach();
+}
+
+void UIManager::ClearThread() {
+	m_isPlaying = false;
 }

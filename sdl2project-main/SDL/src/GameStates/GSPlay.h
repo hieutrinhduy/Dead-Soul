@@ -34,7 +34,10 @@ public:
 	void	HandleTouchEvents(SDL_Event& e) override;
 	void	HandleMouseMoveEvents(SDL_Event& e) override;
 	void	Update(float deltaTime) override;
-	void	Draw(SDL_Renderer* renderer);
+	void	Draw(SDL_Renderer* renderer) override;
+
+	// sub-thread:
+	void DisplayLoadingView();
 
 	int m_KeyPress;
 

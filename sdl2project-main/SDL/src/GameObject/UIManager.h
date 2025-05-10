@@ -19,12 +19,15 @@ public:
 	void SetReferenceToPlayerController(std::shared_ptr<PlayerController> playerController) {
 		m_playerController = playerController;
 	}
+	void ResetTimer() { timer = 0; };
 
+	// sub-thread:
+	void UpdateStats();
+	void ClearThread();
+	bool m_finishThread;
 
 private:
-	SDL_Renderer* m_renderer;
-	std::shared_ptr<int> m_timeScale;
-
+	#pragma region UI
 	std::shared_ptr<Sprite2D> loadingBackground;
 
 	std::shared_ptr<Sprite2D> hpBar, spBar, mpBar, expBar;
@@ -43,6 +46,12 @@ private:
 	std::list<std::shared_ptr<Text>> texts;
 
 	SDL_Color hpTextColor, expTextColor;
+	#pragma endregion
 
+	SDL_Renderer* m_renderer;
+	std::shared_ptr<int> m_timeScale;
 	std::shared_ptr<PlayerController> m_playerController;
+
+	bool m_isPlaying;
+	float timer;
 };
