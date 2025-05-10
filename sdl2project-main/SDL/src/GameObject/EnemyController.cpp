@@ -19,7 +19,7 @@ EnemyController::EnemyController()
     m_lostPlayerTimer(0.0f),
     m_currentState(EnemyState::Patrol),
     m_drawRay(false),
-    m_maxHP(100), m_currentHP(100), m_damage(1),
+    m_maxHP(100), m_currentHP(100), m_damage(30),
     m_attackFlip(SDL_FLIP_NONE)
 {
 }
