@@ -61,7 +61,7 @@ private:
 	std::string hpStat, spStat, mpStat, expStat;
 
 
-	int mousewheelSensitivity;
+	int mousewheelSensitivity, changeInWheelValue;
 
 
 	SDL_Renderer* m_renderer;

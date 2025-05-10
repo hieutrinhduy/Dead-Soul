@@ -41,7 +41,8 @@ constexpr int FRAGMENT_COUNT = 20;
 UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	m_renderer(Renderer::GetInstance()->GetRenderer()), m_timeScale(timeScale),
 	hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 }),
-	timer(0), spTimer(0), mpTimer(0)
+	timer(0), spTimer(0), mpTimer(0),
+	changeInWheelValue(0)
 {
 	m_isPlaying = true; m_finishThread = false;
 	TTF_Font* font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 48);
@@ -56,7 +57,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	txtLoading->SetSize(LOADING_TEXT_WIDTH, LOADING_TEXT_HEIGHT);
 	txtLoading->Set2DPosition( (SCREEN_WIDTH - LOADING_TEXT_WIDTH) / 2.0f, SCREEN_HEIDHT - LOADING_TEXT_HEIGHT - 36 );
 
-	m_inventorySlot = 1;
+	m_inventorySlot = 0;
 	
 
 	// get data from save file:
@@ -172,9 +173,9 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 void UIManager::HandleMouseEvents(SDL_Event& e) {
 	if (*m_timeScale == 1) {
 		if (e.type == SDL_MOUSEWHEEL) {
-			timer = 300;
 			std::lock_guard<std::mutex> lock(mtx);
-			m_inventorySlot += e.wheel.y;
+			if (timer <= 0) timer = 500;
+			changeInWheelValue += e.wheel.y;
 		}
 	}
 }
@@ -272,6 +273,7 @@ void UIManager::UpdateStats() {
 	std::thread t([this]() {
 		while (m_isPlaying) {
 			if (*m_timeScale == 1) {
+				#pragma region Check Player stats
 				// check HP_STATUS:
 				int lossAmount = m_playerController->GetHpLose();
 				if (lossAmount) {
@@ -288,7 +290,7 @@ void UIManager::UpdateStats() {
 					spChangePerFrame = spLoss / FRAGMENT_COUNT;
 				}
 
-				spTimer += 0.005f;
+				spTimer += 0.01f;
 				if (spTimer >= 0.01f) {
 					spTimer = 0;
 					sp += 0.5;
@@ -305,7 +307,7 @@ void UIManager::UpdateStats() {
 					mpChangePerFrame = mpLoss / FRAGMENT_COUNT;
 				}
 
-				mpTimer += 0.005f;
+				mpTimer += 0.01f;
 				if (mpTimer >= 2.0f) {
 					mpTimer = 0;
 					mp += 20;
@@ -317,24 +319,31 @@ void UIManager::UpdateStats() {
 
 				// reset change in value:
 				m_playerController->ResetChangeInValue();
+				#pragma endregion
+
 
 				#pragma region Update Inventory slot
-				if (timer > 0) timer -= 5;
+				if (timer <= 0) m_inventorySlot = m_playerController->GetWeaponIndex() * mousewheelSensitivity;
 				else {
-					m_inventorySlot = m_inventorySlot / mousewheelSensitivity * mousewheelSensitivity;
-					printf("result: %d\n\n", m_inventorySlot);
-					m_inventorySlot++;
-					if (m_inventorySlot > 2) m_inventorySlot = 2;
-					else if (m_inventorySlot < 1) m_inventorySlot = 1;
-					/*if (m_inventorySlot != m_playerController->GetWeaponIndex()) {
-						m_playerController->SetWeaponIndex(m_inventorySlot);
-						printf("Weapon Index: %d\n", m_playerController->GetWeaponIndex());
-					}*/
+				int maxSlotNumber = mousewheelSensitivity;
+				m_inventorySlot += changeInWheelValue;
+				changeInWheelValue = 0;
+				if (m_inventorySlot > maxSlotNumber) m_inventorySlot = maxSlotNumber;
+				else if (m_inventorySlot < 0) m_inventorySlot = 0;
+
+				int slot = m_inventorySlot / mousewheelSensitivity;
+
+				if (m_inventorySlot / mousewheelSensitivity != m_playerController->GetWeaponIndex()) {
+					m_playerController->SetWeaponIndex(m_inventorySlot / mousewheelSensitivity);
+				}
+
+				timer -= 10;
+				if (timer <= 0) m_inventorySlot = m_inventorySlot / mousewheelSensitivity * mousewheelSensitivity;
 				}
 				#pragma endregion
 			}
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 
 		m_finishThread = true;
