@@ -18,13 +18,16 @@ public:
 	// SETTER:
 	void SetReferenceToPlayerController(std::shared_ptr<PlayerController> playerController) {
 		m_playerController = playerController;
-	}
+	};
 	void ResetTimer() { timer = 0; };
 
 	// sub-thread:
 	void UpdateStats();
 	void ClearThread();
 	bool m_finishThread;
+
+	bool FloatEquals(float a, float b, float epsilon = 1e-5f);
+
 
 private:
 	#pragma region UI
@@ -47,6 +50,13 @@ private:
 
 	SDL_Color hpTextColor, expTextColor;
 	#pragma endregion
+
+	// Player's Stats:
+	float hp, maxHP, sp, maxSP, mp, maxMP, exp, maxEXP;
+	float hpLoss, spLoss, mpLoss, expGained;
+	float hpChangePerFrame, spChangePerFrame, mpChangePerFrame, expChangePerFrame;
+	std::string hpStat, spStat, mpStat, expStat;
+
 
 	SDL_Renderer* m_renderer;
 	std::shared_ptr<int> m_timeScale;

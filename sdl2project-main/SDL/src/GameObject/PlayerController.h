@@ -25,7 +25,7 @@ public:
     /* -------- GETTER: -------- */
     const SDL_Rect& GetCollider() const { return m_playerCollider; }
 
-    //get movement ability data:
+    // get movement ability data:
     bool IsJumping() const { return m_velocityY < 0; };
     bool IsFalling() const { return m_velocityY > 0; };
     bool CanGoLeft() const { return m_canGoLeft; };
@@ -33,9 +33,11 @@ public:
     bool BumpTheHead() const { return m_bumpTheHead; };
     bool OnTheGround() const { return m_isGrounded; };
 
+    // get player's stats data:
     int GetHpLose() const { return m_HpLose; };
     int GetSpLose() const { return m_SpLose; };
     int GetMpLose() const { return m_MpLose; }; 
+
 
     /* -------- SETTER: -------- */
     // set movement ability data:
@@ -46,39 +48,39 @@ public:
     void SetMovementLimit(float left, float right, float top, float bottom) {
         leftLimit = left; rightLimit = right;
         topLimit = top; bottomLimit = bottom;
-    }
+    };
 
-    // set player status
+    // set player status:
     void SetSpStatus(bool enoughSp) {
         m_enoughSP = enoughSp;
-    }
-
+    };
     void SetMpStatus(bool enoughMp) {
         m_enoughMP = enoughMp;
-    }
-
+    };
     void SetHpLose(int damage) {
         std::lock_guard<std::mutex> lock(mtx);
         m_HpLose += damage;
         std::cout << "Hp Lose: " << m_HpLose << std::endl;
-    }
-
+    };
     void SetMpLose(int mpLose) {
         std::lock_guard<std::mutex> lock(mtx);
         m_MpLose += mpLose;
         std::cout << "Mp Lose: " << m_MpLose << std::endl;
-    }
-
+    };
     void SetSpLose(int spLose) {
         std::lock_guard<std::mutex> lock(mtx);
         m_SpLose += spLose;
         std::cout << "Sp Lose: " << m_SpLose << std::endl;
-    }
+    };
+    void ResetChangeInValue() {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_HpLose = 0;
+        m_SpLose = 0;
+        m_MpLose = 0;
+    };
 
-    //Set Weapon Index
-    void SetWeaponIndex(int index) {
-        m_currentWeaponIndex = index;
-    }
+    // set Weapon Index:
+    void SetWeaponIndex(int index) { m_currentWeaponIndex = index; };
 
     // set collider:
     void SetGroundCollider(SDL_Rect* ground);

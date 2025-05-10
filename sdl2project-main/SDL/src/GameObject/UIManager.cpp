@@ -9,6 +9,7 @@
 
 #include <thread>
 #include <mutex>
+#include <cmath>
 
 #include "ResourceManagers.h"
 #include "Renderer.h"
@@ -29,6 +30,8 @@ constexpr int SP_BACKGROUND_BAR_POSITION_X = BAR_LEFT,
 			  SP_BACKGROUND_BAR_POSITION_Y = HP_BACKGROUND_BAR_POSITION_Y + BACKGROUND_BAR_HEIGHT + BAR_GAP;
 constexpr int MP_BACKGROUND_BAR_POSITION_X = BAR_LEFT,
 			  MP_BACKGROUND_BAR_POSITION_Y = SP_BACKGROUND_BAR_POSITION_Y + BACKGROUND_BAR_HEIGHT + BAR_GAP;
+
+constexpr int FRAGMENT_COUNT = 20;
 #pragma endregion
 
 
@@ -39,6 +42,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 }),
 	timer(0)
 {
+	m_isPlaying = true; m_finishThread = false;
 	TTF_Font* font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 48);
 
 	// LOADING SCENE:
@@ -58,12 +62,16 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	
 
 	// get player's stats from save file:
-	int hp = 100, sp = 100, mp = 100, exp = 100;
-	int maxHP = 100, maxSP = 100, maxMP = 100, maxEXP = 100;
-	std::string hpStat = "HP: " + std::to_string(hp) + "/" + std::to_string(maxHP);
-	std::string spStat = "SP: " + std::to_string(sp) + "/" + std::to_string(maxSP);
-	std::string mpStat = "MP: " + std::to_string(mp) + "/" + std::to_string(maxMP);
-	std::string expStat = "EXP: " + std::to_string(exp) + "/" + std::to_string(maxEXP);
+	hp = 100; sp = 100; mp = 100; exp = 100;
+	maxHP = 100; maxSP = 100; maxMP = 100; maxEXP = 100;
+	hpStat = "HP: " + std::to_string((int)hp) + "/" + std::to_string((int)maxHP);
+	spStat = "SP: " + std::to_string((int)sp) + "/" + std::to_string((int)maxSP);
+	mpStat = "MP: " + std::to_string((int)mp) + "/" + std::to_string((int)maxMP);
+	expStat = "EXP: " + std::to_string((int)exp) + "/" + std::to_string((int)maxEXP);
+
+	hpLoss = 0; spLoss = 0; mpLoss = 0; expGained = 0;
+	hpChangePerFrame = 0; spChangePerFrame = 0; mpChangePerFrame = 0; expChangePerFrame = 0;
+
 
 	fullHpBarWidth = SCREEN_WIDTH / 3.0f;
 	float widthScaling = fullHpBarWidth / HP_BACKGROUND_BAR_WIDTH_IN_SPRITE;
@@ -154,6 +162,57 @@ UIManager::~UIManager() {}
 
 
 void UIManager::Update(float deltaTime) {
+	if (*m_timeScale == 1) {
+		// update HP:
+		if (!FloatEquals(hpChangePerFrame, 0.0f) && !FloatEquals(hpLoss, 0.0f)) {
+			hp -= hpChangePerFrame;
+			hpLoss -= hpChangePerFrame;
+
+			// set the text displaying the HP amount:
+			hpStat = "HP: " + std::to_string((int)hp) + "/" + std::to_string((int)maxHP);
+			txtHP->SetText(hpStat);
+			// set the HP bar
+			hpBar->SetSize(hp / maxHP * fullHpBarWidth, hpBar->GetHeight());
+			
+			// get rid of accumulated error
+			if (FloatEquals(hpLoss, 0.0f)) hpLoss = 0;
+		}
+
+
+		// update SP:
+		if (!FloatEquals(spChangePerFrame, 0.0f) && !FloatEquals(spLoss, 0.0f)) {
+			sp -= spChangePerFrame;
+			spLoss -= spChangePerFrame;
+
+			// set the text displaying the SP amount:
+			spStat = "SP: " + std::to_string((int)sp) + "/" + std::to_string((int)maxSP);
+			txtSP->SetText(spStat);
+			// set the SP bar
+			spBar->SetSize(sp / maxSP * fullSpBarWidth, spBar->GetHeight());
+
+			// get rid of accumulated error
+			if (FloatEquals(spLoss, 0.0f)) spLoss = 0;
+		}
+
+
+		// update MP:
+		if (!FloatEquals(mpChangePerFrame, 0.0f) && !FloatEquals(mpLoss, 0.0f)) {
+			mp -= mpChangePerFrame;
+			mpLoss -= mpChangePerFrame;
+
+			// set the text displaying the MP amount:
+			mpStat = "MP: " + std::to_string((int)mp) + "/" + std::to_string((int)maxMP);
+			txtMP->SetText(mpStat);
+			// set the MP bar
+			mpBar->SetSize(mp / maxMP * fullMpBarWidth, mpBar->GetHeight());
+
+			// get rid of accumulated error
+			if (FloatEquals(mpLoss, 0.0f)) mpLoss = 0;
+		}
+	}
+
+
+
 	if (*m_timeScale == -2) {
 		timer += deltaTime;
 		
@@ -175,23 +234,50 @@ void UIManager::Update(float deltaTime) {
 
 
 void UIManager::Draw(SDL_Renderer* renderer) {
+	if (*m_timeScale == 1) {
+		for (auto& it : uiElements) it->Draw(renderer);
+		for (auto& it : texts) it->Draw(renderer);
+		return;
+	}
+
 	if (*m_timeScale == -2) {
 		loadingBackground->Draw(renderer);
 		txtLoading->Draw(renderer);
 
 		return;
 	}
-	for (auto& it : uiElements) it->Draw(renderer);
-	for (auto& it : texts) it->Draw(renderer);
 }
 
 
 // sub-thread
 void UIManager::UpdateStats() {
 	std::thread t([this]() {
-		m_finishThread = false;
 		while (m_isPlaying) {
+			if (*m_timeScale == 1) {
+				int lossAmount = m_playerController->GetHpLose();
+				if (lossAmount) {
+					hpLoss += lossAmount;
+					hpChangePerFrame = hpLoss / FRAGMENT_COUNT;
 
+				}
+
+				lossAmount = m_playerController->GetSpLose();
+				if (lossAmount) {
+					spLoss += lossAmount;
+					spChangePerFrame = spLoss / FRAGMENT_COUNT;
+				}
+
+				lossAmount = m_playerController->GetMpLose();
+				if (lossAmount) {
+					mpLoss += lossAmount;
+					mpChangePerFrame = mpLoss / FRAGMENT_COUNT;
+				}
+
+				m_playerController->ResetChangeInValue();
+			}
+
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 
 		m_finishThread = true;
@@ -202,4 +288,9 @@ void UIManager::UpdateStats() {
 
 void UIManager::ClearThread() {
 	m_isPlaying = false;
+}
+
+
+bool UIManager::FloatEquals(float a, float b, float epsilon) {
+	return std::fabs(a - b) < epsilon;
 }

@@ -418,6 +418,7 @@ void GSPlay::DisplayLoadingView() {
         m_uiManager->UpdateStats();
 
         *timeScale = 1;
+        m_uiManager->ResetTimer();
     });
 
     t.detach();
