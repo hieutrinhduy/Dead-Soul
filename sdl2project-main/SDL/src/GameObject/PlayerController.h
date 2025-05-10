@@ -3,8 +3,10 @@
 #include <memory>
 #include <SDL.h>
 #include <functional>
-
+#include <thread>
+#include <mutex> 
 #include "SpriteAnimation.h"
+#include "iostream"
 
 
 class PlayerController
@@ -31,6 +33,9 @@ public:
     bool BumpTheHead() const { return m_bumpTheHead; };
     bool OnTheGround() const { return m_isGrounded; };
 
+    int GetHpLose() const { return m_HpLose; };
+    int GetSpLose() const { return m_SpLose; };
+    int GetMpLose() const { return m_MpLose; }; 
 
     /* -------- SETTER: -------- */
     // set movement ability data:
@@ -41,6 +46,38 @@ public:
     void SetMovementLimit(float left, float right, float top, float bottom) {
         leftLimit = left; rightLimit = right;
         topLimit = top; bottomLimit = bottom;
+    }
+
+    // set player status
+    void SetSpStatus(bool enoughSp) {
+        m_enoughSP = enoughSp;
+    }
+
+    void SetMpStatus(bool enoughMp) {
+        m_enoughMP = enoughMp;
+    }
+
+    void SetHpLose(int damage) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_HpLose += damage;
+        std::cout << "Hp Lose: " << m_HpLose << std::endl;
+    }
+
+    void SetMpLose(int mpLose) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_MpLose += mpLose;
+        std::cout << "Mp Lose: " << m_MpLose << std::endl;
+    }
+
+    void SetSpLose(int spLose) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_SpLose += spLose;
+        std::cout << "Sp Lose: " << m_SpLose << std::endl;
+    }
+
+    //Set Weapon Index
+    void SetWeaponIndex(int index) {
+        m_currentWeaponIndex = index;
     }
 
     // set collider:
@@ -58,13 +95,7 @@ public:
 
     bool IsDead() const { return m_isDead; }
 
-    const int UI_HP_X = 50;
-    const int UI_HP_Y = 50;
-    const int UI_HP_WIDTH = 200;
-    const int UI_HP_HEIGHT = 20;
-
     void LoseTheirFooting();
-
 
 
 private:
@@ -114,14 +145,26 @@ private:
     SDL_Rect* m_groundCollider;
     std::vector<SDL_Rect*> m_enemyColliders;
 
-    // HP và trạng thái chiến đấu
-    int m_maxHP = 5;
-    int m_currentHP = 5;
+    //// HP và trạng thái chiến đấu
+    //int m_maxHP = 5;
+    //int m_currentHP = 5;
+
     bool m_isDead = false;
     bool m_isHit = false;
     float m_hitTimer = 0.0f;
     bool m_didDamage = false;
     bool m_canDealDamage;
+
+    //MP and SP
+    bool m_enoughSP;
+    bool m_enoughMP;
+
+    //Ingame HP lose, SP, MP
+    int m_HpLose = 0;
+    int m_SpLose = 0;
+    int m_MpLose = 0;
+    int m_ExpEarn = 0;
+    public: std::mutex mtx;
 
     // TEXTURES:
     std::shared_ptr<TextureManager> idleTexture;

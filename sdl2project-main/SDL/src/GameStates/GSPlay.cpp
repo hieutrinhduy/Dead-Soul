@@ -169,31 +169,24 @@ void GSPlay::Init()
     // Callback khi player đánh trúng enemy
     std::vector<std::function<void(int)>> hitEnemyCallbacks;
     hitEnemyCallbacks.push_back([this](int damage) {
-        std::cout << "Enemy 0 nhận damage = " << damage << std::endl;
         m_enemyController->TakeDamage(damage);
         });
     hitEnemyCallbacks.push_back([this](int damage) {
-        std::cout << "Enemy 1 nhận damage = " << damage << std::endl;
         m_enemyController2->TakeDamage(damage);
         });
     hitEnemyCallbacks.push_back([this](int damage) {
-        std::cout << "EvilCreature nhận damage = " << damage << std::endl;
         m_evilCreature->TakeDamage(damage);
         });
     hitEnemyCallbacks.push_back([this](int damage) {
-        std::cout << "GhostWarrior nhận damage = " << damage << std::endl;
         m_ghostWarrior->TakeDamage(damage);
         });
     hitEnemyCallbacks.push_back([this](int damage) {
-        std::cout << "GhostWarriorRed nhận damage = " << damage << std::endl;
         m_ghostWarriorRed->TakeDamage(damage);
         });
     hitEnemyCallbacks.push_back([this](int damage) {
-        std::cout << "RangedEnemy nhận damage = " << damage << std::endl;
         m_rangedEnemy->TakeDamage(damage);
         });
     hitEnemyCallbacks.push_back([this](int damage) {
-        std::cout << "RangedEnemy nhận damage = " << damage << std::endl;
         m_boss1->TakeDamage(damage);
         });
     m_playerController->SetOnHitEnemyCallbacks(hitEnemyCallbacks);

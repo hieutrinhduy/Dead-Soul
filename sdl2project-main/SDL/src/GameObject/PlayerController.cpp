@@ -33,7 +33,7 @@ PlayerController::PlayerController()
     m_isAttacking(false), m_attackTimer(0.0f), m_attackDuration(0.39f), m_lastAttackTime(-999.0f), m_justDidAttack2(false), m_justDidAttack3(false),
     m_isRolling(false), m_rollTimer(0.0f), m_rollDuration(0.35f), m_rollSpeed(900.0f),
     m_groundCollider(nullptr),
-    m_maxHP(5), m_currentHP(100),
+    /*m_maxHP(5), m_currentHP(100),*/
     m_isDead(false),
     m_isHit(false), m_hitTimer(0.0f)
 {
@@ -82,6 +82,9 @@ void PlayerController::Init()
         (int)(PLAYER_SIZE * COLLIDER_H),
     };
 
+    m_enoughMP = true;
+    m_enoughSP = true;
+
     // set CAMERA'S TARGET:
     Camera::GetInstance()->SetTarget(m_player);
 }
@@ -108,18 +111,20 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
             }
             break;
         case SDLK_LSHIFT:
-            if (!m_isAttacking && !m_isRolling && m_isGrounded && !m_isHit) {
+            if (!m_isAttacking && !m_isRolling && m_isGrounded && !m_isHit && m_enoughSP) {
+                //Giả sử lộn mất 30Sp
+                SetSpLose(30);
                 ChangeAnimation(rollTexture, 12, 0.03f);
                 m_isRolling = true;
                 m_rollTimer = m_rollDuration;
             }
             break;
         case SDLK_1:
-            m_currentWeaponIndex = 0;
+            SetWeaponIndex(0);
             m_attackDuration = 0.39f;
             break;
         case SDLK_2:
-            m_currentWeaponIndex = 1;
+            SetWeaponIndex(1);
             m_attackDuration = 0.5;
         }
     }
@@ -140,20 +145,26 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
             switch (m_currentWeaponIndex)
             {
             case 0:
-                if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit) {
+                if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit && m_enoughMP) {
                     float now = SDL_GetTicks() / 1000.0f;
                     //Cac don danh cach nhau 1s
                     if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
+                        // Giá sử mất 30 MP khi tấn công
+                        SetMpLose(30);
                         ChangeAnimation(attack2Texture, 4, 0.1f);
                         m_justDidAttack2 = true;
                         m_justDidAttack3 = false;
                     }
                     else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
+                        // Giá sử mất 30 MP khi tấn công
+                        SetMpLose(30);
                         ChangeAnimation(attack3Texture, 4, 0.1f);
                         m_justDidAttack3 = true;
                         m_justDidAttack2 = false;
                     }
                     else {
+                        // Giá sử mất 30 MP khi tấn công
+                        SetMpLose(30);
                         ChangeAnimation(attackTexture, 4, 0.1f);
                         m_justDidAttack2 = false;
                         m_justDidAttack3 = false;
@@ -164,11 +175,13 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
                 }
                 break;
             case 1:
-                if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit) {
+                if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit && m_enoughMP) {
                     float now = SDL_GetTicks() / 1000.0f;
                     //Cac don danh cach nhau 1s
                     //if (now - m_lastAttackTime <= 1.0f) {
                     //}
+                    // Giá sử mất 30 SP khi tấn công
+                    SetMpLose(30);
                     ChangeAnimation(arrowAttackTexture, 11, 0.05f);
                     m_isAttacking = true;
                     m_attackTimer = m_attackDuration;
@@ -329,7 +342,6 @@ void PlayerController::Update(float deltaTime)
     m_player->Set2DPosition(posX, posY);
     //Cap nhat velocity X
     m_velocityX = (newPos.x - oldPos.x) / deltaTime;
-    std::cout << m_velocityX << std::endl;
     if (m_playerFlip == SDL_FLIP_NONE) {
         m_playerCollider = { (int)posX + 40, (int)posY, m_player->GetWidth() - 100, m_player->GetHeight() };
     }
@@ -503,47 +515,7 @@ void PlayerController::Draw(SDL_Renderer* renderer)
             }
         }
     }
-
-    // === HUD: Thanh máu ===
-    SDL_Rect hpBarBg = { UI_HP_X, UI_HP_Y, UI_HP_WIDTH, UI_HP_HEIGHT };
-
-    // Tính phần máu hiện tại
-    float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
-    SDL_Rect hpBarFill = hpBarBg;
-    hpBarFill.w = static_cast<int>(UI_HP_WIDTH * hpPercent);
-
-    // Vẽ nền (đen)
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &hpBarBg);
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &hpBarFill);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderDrawRect(renderer, &hpBarBg);
-
-    // === HUD TEXT: "25/100" ở giữa thanh máu ===
-    //std::string hpText = std::to_string(m_currentHP) + "/" + std::to_string(m_maxHP);
-    //SDL_Color white = { 255, 255, 255, 255 };
-
-    //SDL_Surface* textSurface = TTF_RenderText_Solid(m_font, hpText.c_str(), white);
-    //if (textSurface) {
-    //    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-
-    //    SDL_Rect textRect;
-
-    //    // Canh giữa text trên thanh máu
-    //    textRect.w = textSurface->w;
-    //    textRect.h = textSurface->h;
-    //    textRect.x = UI_HP_X + (UI_HP_WIDTH - textRect.w) / 2;
-    //    textRect.y = UI_HP_Y + (UI_HP_HEIGHT - textRect.h) / 2;
-
-    //    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-
-    //    SDL_FreeSurface(textSurface);
-    //    SDL_DestroyTexture(textTexture);
-    //}
 }
-
-
 
 
 /* ------------------------- */
@@ -554,13 +526,14 @@ void PlayerController::TakeDamage(int damage)
 {
     if (m_isDead || m_isHit || m_isRolling) return;
 
-    m_currentHP -= damage;
-    if (m_currentHP <= 0)
-    {
-        m_currentHP = 0;
-        Die();
-        return;
-    }
+    SetHpLose(damage);
+    //m_currentHP -= damage;
+    //if (m_currentHP <= 0)
+    //{
+    //    m_currentHP = 0;
+    //    Die();
+    //    return;
+    //}
 
     // Bị hit
     m_isHit = true;
