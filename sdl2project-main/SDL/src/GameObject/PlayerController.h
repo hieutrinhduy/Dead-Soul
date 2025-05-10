@@ -37,10 +37,11 @@ public:
     int GetHpLose() const { return m_HpLose; };
     int GetSpLose() const { return m_SpLose; };
     int GetMpLose() const { return m_MpLose; }; 
+    int GetExpGained() const { return m_ExpGained; }; 
+    int GetGoldGained() const { return m_GoldGained; };
 
     // get weapon index:
     int GetWeaponIndex() { return m_currentWeaponIndex; };
-
 
     /* -------- SETTER: -------- */
     // set movement ability data:
@@ -75,6 +76,15 @@ public:
         m_SpLose += spLose;
         std::cout << "Sp Lose: " << m_SpLose << std::endl;
     };
+
+    void SetExpGained(int amount) {
+        m_ExpGained += amount;
+    }
+
+    void SetGoldGained(int amount) {
+        m_GoldGained += amount;
+    }
+
     void ResetChangeInValue() {
         std::lock_guard<std::mutex> lock(mtx);
         m_HpLose = 0;
@@ -83,7 +93,19 @@ public:
     };
 
     // set Weapon Index:
-    void SetWeaponIndex(int index) { m_currentWeaponIndex = index; };
+    void SetWeaponIndex(int index) 
+    { 
+        m_currentWeaponIndex = index; 
+        switch (index)
+        {
+        case 0://Default Sword
+            m_attackDuration = 0.39f;
+            break;
+        case 1://Arrow
+            m_attackDuration = 0.5;
+            break;
+        }
+    };
 
     // set collider:
     void SetGroundCollider(SDL_Rect* ground);
@@ -168,7 +190,8 @@ private:
     int m_HpLose = 0;
     int m_SpLose = 0;
     int m_MpLose = 0;
-    int m_ExpEarn = 0;
+    int m_ExpGained = 0;
+    int m_GoldGained = 0;
     public: std::mutex mtx;
 
     // TEXTURES:

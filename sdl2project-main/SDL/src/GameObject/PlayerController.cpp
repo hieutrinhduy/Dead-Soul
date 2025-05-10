@@ -121,11 +121,9 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
             break;
         case SDLK_1:
             SetWeaponIndex(0);
-            m_attackDuration = 0.39f;
             break;
         case SDLK_2:
             SetWeaponIndex(1);
-            m_attackDuration = 0.5;
         }
     }
     else if (e.type == SDL_KEYUP) {
