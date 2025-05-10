@@ -38,6 +38,9 @@ public:
     int GetSpLose() const { return m_SpLose; };
     int GetMpLose() const { return m_MpLose; }; 
 
+    // get weapon index:
+    int GetWeaponIndex() { return m_currentWeaponIndex; };
+
 
     /* -------- SETTER: -------- */
     // set movement ability data:

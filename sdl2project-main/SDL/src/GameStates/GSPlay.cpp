@@ -240,13 +240,16 @@ void GSPlay::HandleKeyEvents(SDL_Event& e)
 
 void GSPlay::HandleTouchEvents(SDL_Event& e)
 {
+    m_uiManager->HandleTouchEvents(e);
+    m_uiManager->HandleMouseEvents(e);
     for (auto& button : m_listButton)
         if (button->HandleTouchEvent(&e)) break;
 }
 
 
 
-void GSPlay::HandleMouseMoveEvents(SDL_Event& e) {}
+void GSPlay::HandleMouseMoveEvents(SDL_Event& e) {
+}
 
 
 

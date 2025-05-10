@@ -12,6 +12,9 @@ public:
 	UIManager(std::shared_ptr<int> timeScale);
 	~UIManager();
 
+	void HandleTouchEvents(SDL_Event& e);
+	void HandleMouseEvents(SDL_Event& e);
+
 	void Update(float deltaTime);
 	void Draw(SDL_Renderer* renderer);
 
@@ -58,10 +61,13 @@ private:
 	std::string hpStat, spStat, mpStat, expStat;
 
 
+	int mousewheelSensitivity;
+
+
 	SDL_Renderer* m_renderer;
 	std::shared_ptr<int> m_timeScale;
 	std::shared_ptr<PlayerController> m_playerController;
 
 	bool m_isPlaying;
-	float timer;
+	float timer, spTimer, mpTimer;
 };

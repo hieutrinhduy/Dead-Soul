@@ -1,4 +1,4 @@
-/*
+﻿/*
 	m_timeScale == -2 => LOADING SCENE
 	m_timeScale == -1 => CHANGE LEVEL
 	m_timeScale == 0 => PAUSE GAME (just is pause, or level up, die, victory<complete all levels>) 
@@ -15,6 +15,8 @@
 #include "Renderer.h"
 #include "Define.h"
 
+
+std::mutex mtx;
 
 #pragma region Constant expression evaluation
 constexpr int HP_BACKGROUND_BAR_WIDTH_IN_SPRITE = 512;
@@ -35,12 +37,11 @@ constexpr int FRAGMENT_COUNT = 20;
 #pragma endregion
 
 
-
 #pragma region Constructor && Deconstructor
 UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	m_renderer(Renderer::GetInstance()->GetRenderer()), m_timeScale(timeScale),
 	hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 }),
-	timer(0)
+	timer(0), spTimer(0), mpTimer(0)
 {
 	m_isPlaying = true; m_finishThread = false;
 	TTF_Font* font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 48);
@@ -55,15 +56,15 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	txtLoading->SetSize(LOADING_TEXT_WIDTH, LOADING_TEXT_HEIGHT);
 	txtLoading->Set2DPosition( (SCREEN_WIDTH - LOADING_TEXT_WIDTH) / 2.0f, SCREEN_HEIDHT - LOADING_TEXT_HEIGHT - 36 );
 
-
-	std::string loadingText = "LOADING";
-
 	m_inventorySlot = 1;
 	
 
-	// get player's stats from save file:
+	// get data from save file:
+	mousewheelSensitivity = 3;
 	hp = 100; sp = 100; mp = 100; exp = 100;
 	maxHP = 100; maxSP = 100; maxMP = 100; maxEXP = 100;
+
+
 	hpStat = "HP: " + std::to_string((int)hp) + "/" + std::to_string((int)maxHP);
 	spStat = "SP: " + std::to_string((int)sp) + "/" + std::to_string((int)maxSP);
 	mpStat = "MP: " + std::to_string((int)mp) + "/" + std::to_string((int)maxMP);
@@ -160,10 +161,29 @@ UIManager::~UIManager() {}
 #pragma endregion
 
 
+#pragma region Handle events
+void UIManager::HandleTouchEvents(SDL_Event& e)
+{
+	
+}
+
+
+
+void UIManager::HandleMouseEvents(SDL_Event& e) {
+	if (*m_timeScale == 1) {
+		if (e.type == SDL_MOUSEWHEEL) {
+			timer = 300;
+			std::lock_guard<std::mutex> lock(mtx);
+			m_inventorySlot += e.wheel.y;
+		}
+	}
+}
+#pragma endregion
+
 
 void UIManager::Update(float deltaTime) {
 	if (*m_timeScale == 1) {
-		// update HP:
+		// UPDATE HP:
 		if (!FloatEquals(hpChangePerFrame, 0.0f) && !FloatEquals(hpLoss, 0.0f)) {
 			hp -= hpChangePerFrame;
 			hpLoss -= hpChangePerFrame;
@@ -179,36 +199,34 @@ void UIManager::Update(float deltaTime) {
 		}
 
 
-		// update SP:
+		// UPDATE SP:
 		if (!FloatEquals(spChangePerFrame, 0.0f) && !FloatEquals(spLoss, 0.0f)) {
 			sp -= spChangePerFrame;
 			spLoss -= spChangePerFrame;
 
-			// set the text displaying the SP amount:
-			spStat = "SP: " + std::to_string((int)sp) + "/" + std::to_string((int)maxSP);
-			txtSP->SetText(spStat);
-			// set the SP bar
-			spBar->SetSize(sp / maxSP * fullSpBarWidth, spBar->GetHeight());
-
 			// get rid of accumulated error
 			if (FloatEquals(spLoss, 0.0f)) spLoss = 0;
 		}
+		// set the text displaying the SP amount:
+		spStat = "SP: " + std::to_string((int)sp) + "/" + std::to_string((int)maxSP);
+		txtSP->SetText(spStat);
+		// set the SP bar
+		spBar->SetSize(sp / maxSP * fullSpBarWidth, spBar->GetHeight());
 
 
-		// update MP:
+		// UPDATE MP:
 		if (!FloatEquals(mpChangePerFrame, 0.0f) && !FloatEquals(mpLoss, 0.0f)) {
 			mp -= mpChangePerFrame;
 			mpLoss -= mpChangePerFrame;
 
-			// set the text displaying the MP amount:
-			mpStat = "MP: " + std::to_string((int)mp) + "/" + std::to_string((int)maxMP);
-			txtMP->SetText(mpStat);
-			// set the MP bar
-			mpBar->SetSize(mp / maxMP * fullMpBarWidth, mpBar->GetHeight());
-
 			// get rid of accumulated error
 			if (FloatEquals(mpLoss, 0.0f)) mpLoss = 0;
 		}
+		// set the text displaying the MP amount:
+		mpStat = "MP: " + std::to_string((int)mp) + "/" + std::to_string((int)maxMP);
+		txtMP->SetText(mpStat);
+		// set the MP bar
+		mpBar->SetSize(mp / maxMP * fullMpBarWidth, mpBar->GetHeight());
 	}
 
 
@@ -254,6 +272,7 @@ void UIManager::UpdateStats() {
 	std::thread t([this]() {
 		while (m_isPlaying) {
 			if (*m_timeScale == 1) {
+				// check HP_STATUS:
 				int lossAmount = m_playerController->GetHpLose();
 				if (lossAmount) {
 					hpLoss += lossAmount;
@@ -261,21 +280,59 @@ void UIManager::UpdateStats() {
 
 				}
 
+
+				// check SP_STATUS:
 				lossAmount = m_playerController->GetSpLose();
 				if (lossAmount) {
 					spLoss += lossAmount;
 					spChangePerFrame = spLoss / FRAGMENT_COUNT;
 				}
 
+				spTimer += 0.005f;
+				if (spTimer >= 0.01f) {
+					spTimer = 0;
+					sp += 0.5;
+					if (sp > maxSP) sp = maxSP;
+				}
+				if (sp - lossAmount < 30 ) m_playerController->SetSpStatus(false);
+				else m_playerController->SetSpStatus(true);
+
+
+				// check MP_STATUS:
 				lossAmount = m_playerController->GetMpLose();
 				if (lossAmount) {
 					mpLoss += lossAmount;
 					mpChangePerFrame = mpLoss / FRAGMENT_COUNT;
 				}
 
-				m_playerController->ResetChangeInValue();
-			}
+				mpTimer += 0.005f;
+				if (mpTimer >= 2.0f) {
+					mpTimer = 0;
+					mp += 20;
+					if (mp > maxMP) mp = maxMP;
+				}
+				if (mp - lossAmount < 30) m_playerController->SetMpStatus(false);
+				else m_playerController->SetMpStatus(true);
 
+
+				// reset change in value:
+				m_playerController->ResetChangeInValue();
+
+				#pragma region Update Inventory slot
+				if (timer > 0) timer -= 5;
+				else {
+					m_inventorySlot = m_inventorySlot / mousewheelSensitivity * mousewheelSensitivity;
+					printf("result: %d\n\n", m_inventorySlot);
+					m_inventorySlot++;
+					if (m_inventorySlot > 2) m_inventorySlot = 2;
+					else if (m_inventorySlot < 1) m_inventorySlot = 1;
+					/*if (m_inventorySlot != m_playerController->GetWeaponIndex()) {
+						m_playerController->SetWeaponIndex(m_inventorySlot);
+						printf("Weapon Index: %d\n", m_playerController->GetWeaponIndex());
+					}*/
+				}
+				#pragma endregion
+			}
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
