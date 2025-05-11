@@ -89,7 +89,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	fullMpBarWidth = fullHpBarWidth / 2;
 
 
-	#pragma region GAME RUN UI
+	#pragma region UI OF GAME RUNNING
 	// HP BAR:
 	auto texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\hp_background_bar.png");
 	hpBgBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
