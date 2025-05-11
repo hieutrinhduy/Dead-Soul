@@ -40,7 +40,6 @@ constexpr int FRAGMENT_COUNT = 20;
 constexpr int SLOT_SIZE = 75, SLOT_GAP = 5;
 constexpr int SLOT_0_POSITION_X = 10;
 constexpr int SLOT_1_POSITION_X = SLOT_0_POSITION_X + SLOT_SIZE + SLOT_GAP;
-constexpr int SLOT_2_POSITION_X = SLOT_1_POSITION_X + SLOT_SIZE + SLOT_GAP;
 constexpr int SLOT_Y = EXP_BAR_HEIGHT + SLOT_SIZE + 5;
 #pragma endregion
 
@@ -176,19 +175,10 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	});
 	slots.push_back(slot);
 
-	texture = ResourceManagers::GetInstance()->GetTexture("slot_dualsword.png");
-	slot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
-	slot->SetSize(SLOT_SIZE, SLOT_SIZE);
-	slot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
-	slot->SetOnClick([this]() {
-		m_playerController->SetWeaponIndex(0);
-		});
-	slots.push_back(slot);
-
 	texture = ResourceManagers::GetInstance()->GetTexture("slot_bow.png");
 	slot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	slot->SetSize(SLOT_SIZE, SLOT_SIZE);
-	slot->Set2DPosition(SLOT_2_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	slot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
 	slot->SetOnClick([this]() {
 		m_playerController->SetWeaponIndex(1);
 		});
@@ -382,8 +372,7 @@ void UIManager::UpdateStats() {
 						m_inventorySlot = slot * mousewheelSensitivity;
 
 						if (slot == 0) selectedSlot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
-						else if (slot == 1) selectedSlot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
-						else selectedSlot->Set2DPosition(SLOT_2_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+						else selectedSlot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
 
 						Sound::GetInstance()->PlaySfx("ui_pop.wav");
 					}
@@ -400,8 +389,7 @@ void UIManager::UpdateStats() {
 					if (slot != m_playerController->GetWeaponIndex()) {
 						m_playerController->SetWeaponIndex(slot);
 						if (slot == 0) selectedSlot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
-						else if (slot == 1) selectedSlot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
-						else selectedSlot->Set2DPosition(SLOT_2_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+						else selectedSlot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
 						Sound::GetInstance()->PlaySfx("ui_pop.wav");
 					}
 
