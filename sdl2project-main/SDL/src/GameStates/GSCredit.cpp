@@ -47,10 +47,10 @@ void GSCredit::Init()
 
 	
 	// BUTTON:
-	texture = ResourceManagers::GetInstance()->GetTexture("btn_close.tga");
+	texture = ResourceManagers::GetInstance()->GetTexture("btn_close_credit.png");
 	auto button = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
-	button->SetSize(50, 50);
-	button->Set2DPosition(SCREEN_WIDTH - 50, 10);
+	button->SetSize(250, 80);
+	button->Set2DPosition(10, SCREEN_HEIDHT - 100);
 	button->SetOnClick([this]() {
 		Sound::GetInstance()->PlaySfx("book_close_sound.wav");
 		GameStateMachine::GetInstance()->PopState();

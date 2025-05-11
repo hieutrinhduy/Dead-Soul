@@ -48,14 +48,14 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	TTF_Font* font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 48);
 
 	// LOADING SCENE:
-	loadingBackground = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("bg_settings.png"), SDL_FLIP_NONE);
+	loadingBackground = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("bg_loading.png"), SDL_FLIP_NONE);
 	loadingBackground->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	loadingBackground->Set2DPosition(0, 0);
 	loadingBackground->Draw(m_renderer);
 
 	txtLoading = std::make_shared<Text>("LOADING", font, hpTextColor);
 	txtLoading->SetSize(LOADING_TEXT_WIDTH, LOADING_TEXT_HEIGHT);
-	txtLoading->Set2DPosition( (SCREEN_WIDTH - LOADING_TEXT_WIDTH) / 2.0f, SCREEN_HEIDHT - LOADING_TEXT_HEIGHT - 36 );
+	txtLoading->Set2DPosition( (SCREEN_WIDTH - LOADING_TEXT_WIDTH) / 2.0f, SCREEN_HEIDHT - LOADING_TEXT_HEIGHT - 75 );
 
 	m_inventorySlot = 0;
 	

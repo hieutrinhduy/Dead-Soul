@@ -115,10 +115,10 @@ void GSSettings::Init()
 
 
 	// button EXIT:
-	texture = ResourceManagers::GetInstance()->GetTexture("btn_close.tga");
+	texture = ResourceManagers::GetInstance()->GetTexture("btn_close_settings.png");
 	auto btnExit = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
-	btnExit->SetSize(50, 50);
-	btnExit->Set2DPosition(SCREEN_WIDTH - 50, 10);
+	btnExit->SetSize(RESET_BUTTON_HEIGHT * 2, RESET_BUTTON_HEIGHT);
+	btnExit->Set2DPosition(SCREEN_WIDTH - RESET_BUTTON_HEIGHT * 2 - 50, SCREEN_HEIDHT - RESET_BUTTON_HEIGHT - 30);
 	btnExit->SetOnClick([this]() {
 		Sound::GetInstance()->PlaySfx("book_close_sound.wav");
 		GameStateMachine::GetInstance()->PopState();

@@ -13,8 +13,8 @@ constexpr int BTN_CREDIT_POS_X = 4, BTN_CREDIT_POS_Y = 65, BTN_CREDIT_WIDTH = 13
 constexpr int BTN_SETTINGS_POS_X = 108, BTN_SETTINGS_POS_Y = 61, BTN_SETTINGS_WIDTH = 19, BTN_SETTINGS_HEIGHT = 19;
 
 #define BTN_PLAY_POSITION (SCREEN_WIDTH - btnPlay->GetWidth())/2, SCREEN_HEIDHT - 100
-#define BTN_EXIT_SIZE 50,50
-#define BTN_EXIT_POSITION SCREEN_WIDTH - btnExit->GetWidth(), 10
+#define BTN_EXIT_SIZE 75,75
+#define BTN_EXIT_POSITION SCREEN_WIDTH - 80, 16
 
 
 GSMenu::GSMenu() : GameStateBase(StateType::STATE_MENU),
@@ -62,7 +62,7 @@ void GSMenu::Init()
 
 
 	// EXIT button
-	texture = ResourceManagers::GetInstance()->GetTexture("btn_close.tga");
+	texture = ResourceManagers::GetInstance()->GetTexture("btn_close.png");
 	btnExit = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	//btnClose = std::make_shared<MouseButton>(texture);
 	btnExit->SetSize(BTN_EXIT_SIZE);
