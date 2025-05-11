@@ -24,15 +24,16 @@
 #include "Bullet.h"
 #include "PlayerBullet.h"
 #include "Boss1.h"
+#include "SecretBoss.h"
+#include "BossBullet.h"
 
 
 
 SDL_Rect groundCollider;
 SDL_Rect enemyCollider;
 std::vector<std::shared_ptr<Bullet>> g_bullets;
+std::vector<std::shared_ptr<BossBullet>> g_bossBullets;
 std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
-
-
 
 GSPlay::GSPlay()
 {
@@ -98,6 +99,10 @@ void GSPlay::Init()
     m_boss1 = std::make_shared<Boss1>();
     m_boss1->Init(600, 1900, 960);
 
+    //Boss2
+    m_boss2 = std::make_shared<ScecretBoss>();
+    m_boss2->Init(600, 1900, 1030);
+
     // Enemy đặc biệt: EvilCreature
     m_evilCreature = std::make_shared<EvilCreature>();
     m_evilCreature->Init(1300, 2000, 300);
@@ -123,6 +128,7 @@ void GSPlay::Init()
     m_ghostWarriorRed->SetGroundCollider(&groundCollider);
     m_rangedEnemy->SetGroundCollider(&groundCollider);
     m_boss1->SetGroundCollider(&groundCollider);
+    m_boss2->SetGroundCollider(&groundCollider);
 
     // Set player collider cho tất cả
     m_enemyController->SetPlayerCollider(&m_playerController->GetCollider());
@@ -134,6 +140,7 @@ void GSPlay::Init()
     m_rangedEnemy->SetPlayerController(m_playerController.get());
 
     m_boss1->SetPlayerCollider(&m_playerController->GetCollider());
+    m_boss2->SetPlayerCollider(&m_playerController->GetCollider());
 
     // Lấy danh sách collider của enemy
     enemyColliders.push_back(m_enemyController->GetEnemyCollider());
@@ -143,6 +150,7 @@ void GSPlay::Init()
     enemyColliders.push_back(m_ghostWarriorRed->GetCollider());
     enemyColliders.push_back(m_rangedEnemy->GetCollider());
     enemyColliders.push_back(m_boss1->GetEnemyCollider());
+    enemyColliders.push_back(m_boss2->GetEnemyCollider());
     m_playerController->SetEnemyColliders(enemyColliders);
 
     // Callback khi enemy đánh player
@@ -167,6 +175,9 @@ void GSPlay::Init()
     m_boss1->SetOnHitPlayerCallback([this](int damage) {
         m_playerController->TakeDamage(damage);
         });
+    m_boss2->SetOnHitPlayerCallback([this](int damage) {
+        m_playerController->TakeDamage(damage);
+        });
 
     // Callback khi player đánh trúng enemy
     m_hitEnemyCallbacks.push_back([this](int damage) {
@@ -189,6 +200,9 @@ void GSPlay::Init()
         });
     m_hitEnemyCallbacks.push_back([this](int damage) {
         m_boss1->TakeDamage(damage);
+        });
+    m_hitEnemyCallbacks.push_back([this](int damage) {
+        m_boss2->TakeDamage(damage);
         });
     m_playerController->SetOnHitEnemyCallbacks(m_hitEnemyCallbacks);
 
@@ -271,6 +285,7 @@ void GSPlay::Update(float deltaTime)
     m_ghostWarriorRed->Update(deltaTime);
     m_rangedEnemy->Update(deltaTime);
     m_boss1->Update(deltaTime);
+    m_boss2->Update(deltaTime);
 
 
     for (auto it = g_bullets.begin(); it != g_bullets.end(); )
@@ -278,6 +293,15 @@ void GSPlay::Update(float deltaTime)
         (*it)->Update(deltaTime);
         if ((*it)->HasHitPlayer(&m_playerController->GetCollider()) || (*it)->IsOutOfScreen())
             it = g_bullets.erase(it);
+        else
+            ++it;
+    }
+
+    for (auto it = g_bossBullets.begin(); it != g_bossBullets.end(); )
+    {
+        (*it)->Update(deltaTime);
+        if ((*it)->HasHitPlayer(&m_playerController->GetCollider()))
+            it = g_bossBullets.erase(it);
         else
             ++it;
     }
@@ -371,8 +395,14 @@ void GSPlay::Draw(SDL_Renderer* renderer)
     m_ghostWarriorRed->Draw(renderer);
     m_rangedEnemy->Draw(renderer);
     m_boss1->Draw(renderer);
+    m_boss2->Draw(renderer);
 
     for (auto& bullet : g_bullets)
+    {
+        bullet->Draw(Renderer::GetInstance()->GetRenderer());
+    }
+
+    for (auto& bullet : g_bossBullets)
     {
         bullet->Draw(Renderer::GetInstance()->GetRenderer());
     }

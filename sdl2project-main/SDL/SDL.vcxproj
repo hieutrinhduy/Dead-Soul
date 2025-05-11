@@ -173,6 +173,7 @@
     <ClCompile Include="src\GameManager\DataSaver.cpp" />
     <ClCompile Include="src\GameManager\ResourceManagers.cpp" />
     <ClCompile Include="src\GameObject\Boss1.cpp" />
+    <ClCompile Include="src\GameObject\BossBullet.cpp" />
     <ClCompile Include="src\GameObject\Bullet.cpp" />
     <ClCompile Include="src\GameObject\Camera.cpp" />
     <ClCompile Include="src\GameObject\CMath.cpp" />
@@ -183,6 +184,7 @@
     <ClCompile Include="src\GameObject\PlayerBullet.cpp" />
     <ClCompile Include="src\GameObject\PlayerController.cpp" />
     <ClCompile Include="src\GameObject\Renderer.cpp" />
+    <ClCompile Include="src\GameObject\SecretBoss.cpp" />
     <ClCompile Include="src\GameObject\SliderIcon.cpp" />
     <ClCompile Include="src\GameObject\Sound.cpp" />
     <ClCompile Include="src\GameObject\Sprite2D.cpp" />
@@ -210,6 +212,7 @@
     <ClInclude Include="src\GameManager\Singleton.h" />
     <ClInclude Include="src\GameObject\BaseObject.h" />
     <ClInclude Include="src\GameObject\Boss1.h" />
+    <ClInclude Include="src\GameObject\BossBullet.h" />
     <ClInclude Include="src\GameObject\Bullet.h" />
     <ClInclude Include="src\GameObject\Camera.h" />
     <ClInclude Include="src\GameObject\CMath.h" />
@@ -223,6 +226,7 @@
     <ClInclude Include="src\GameObject\PlayerController.h" />
     <ClInclude Include="src\GameObject\RangedEnemy.h" />
     <ClInclude Include="src\GameObject\Renderer.h" />
+    <ClInclude Include="src\GameObject\SecretBoss.h" />
     <ClInclude Include="src\GameObject\SliderIcon.h" />
     <ClInclude Include="src\GameObject\Sound.h" />
     <ClInclude Include="src\GameObject\Sprite2D.h" />
