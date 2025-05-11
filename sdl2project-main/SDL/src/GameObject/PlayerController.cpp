@@ -59,14 +59,14 @@ void PlayerController::Init()
     landTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerLand.png");
     fallTexture = ResourceManagers::GetInstance()->GetTexture("_Fall.png");
     rollTexture = ResourceManagers::GetInstance()->GetTexture("_Roll.png");
-    hurtTexture = ResourceManagers::GetInstance()->GetTexture("_Hit.png");
+    hurtTexture = ResourceManagers::GetInstance()->GetTexture("player_is_hit.png");
     deadTexture = ResourceManagers::GetInstance()->GetTexture("_Death.png");
     //For Default Weapon (m_currentWeaponIndex = 0)
     attackTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack1.png");
     attack2Texture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack2.png");
     attack3Texture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack3.png");
     //For Weapon Arrow (m_currentWeaponIndex = 1)
-    arrowAttackTexture = ResourceManagers::GetInstance()->GetTexture("ArrowAttack.png");
+    arrowAttackTexture = ResourceManagers::GetInstance()->GetTexture("bow_attack.png");
 
     // SPRITE:
     m_player = std::make_shared<SpriteAnimation>(idleTexture, 1, 2, 1, 0.5f);
@@ -180,7 +180,7 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
                     //}
                     // Giá sử mất 30 SP khi tấn công
                     SetMpLose(30);
-                    ChangeAnimation(arrowAttackTexture, 11, 0.05f);
+                    ChangeAnimation(arrowAttackTexture, 6, 0.1f);
                     m_isAttacking = true;
                     m_attackTimer = m_attackDuration;
                     m_lastAttackTime = now;
@@ -435,7 +435,7 @@ void PlayerController::Update(float deltaTime)
         }
         break;
     case 1:
-        if (currentFrame == 9 && !m_didDamage && m_isAttacking) {
+        if (currentFrame == 5 && !m_didDamage && m_isAttacking) {
             ShootProjectile();
             m_didDamage = true;
         }
@@ -536,7 +536,7 @@ void PlayerController::TakeDamage(int damage)
     // Bị hit
     m_isHit = true;
     m_hitTimer = 0.1f;
-    ChangeAnimation(hurtTexture, 1, 0.1f);
+    ChangeAnimation(hurtTexture, 3, 0.01f);
 }
 
 void PlayerController::Die()
@@ -603,7 +603,6 @@ void PlayerController::ShootProjectile()
     Vector2 pos = { static_cast<float>(m_playerCollider.x), static_cast<float>(m_playerCollider.y) };
     int direction = (m_playerFlip == SDL_FLIP_NONE) ? 1 : -1;
     pos.x += (direction == 1) ? m_playerCollider.w : -32;
-    pos.y += 32;
 
     auto bullet = std::make_shared<PlayerBullet>(pos, 1500, direction, 1);
 

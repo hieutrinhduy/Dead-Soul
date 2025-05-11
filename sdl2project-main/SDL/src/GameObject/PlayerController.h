@@ -125,7 +125,7 @@ public:
             m_attackDuration = 0.39f;
             break;
         case 1://Arrow
-            m_attackDuration = 0.5;
+            m_attackDuration = 0.59;
             break;
         }
     };
