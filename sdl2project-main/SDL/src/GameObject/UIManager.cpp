@@ -14,6 +14,7 @@
 #include "ResourceManagers.h"
 #include "Renderer.h"
 #include "Define.h"
+#include "Sound.h"
 
 
 std::mutex mtx;
@@ -32,8 +33,15 @@ constexpr int SP_BACKGROUND_BAR_POSITION_X = BAR_LEFT,
 			  SP_BACKGROUND_BAR_POSITION_Y = HP_BACKGROUND_BAR_POSITION_Y + BACKGROUND_BAR_HEIGHT + BAR_GAP;
 constexpr int MP_BACKGROUND_BAR_POSITION_X = BAR_LEFT,
 			  MP_BACKGROUND_BAR_POSITION_Y = SP_BACKGROUND_BAR_POSITION_Y + BACKGROUND_BAR_HEIGHT + BAR_GAP;
+constexpr int EXP_BAR_HEIGHT = 20;
 
 constexpr int FRAGMENT_COUNT = 20;
+
+constexpr int SLOT_SIZE = 75, SLOT_GAP = 5;
+constexpr int SLOT_0_POSITION_X = 10;
+constexpr int SLOT_1_POSITION_X = SLOT_0_POSITION_X + SLOT_SIZE + SLOT_GAP;
+constexpr int SLOT_2_POSITION_X = SLOT_1_POSITION_X + SLOT_SIZE + SLOT_GAP;
+constexpr int SLOT_Y = EXP_BAR_HEIGHT + SLOT_SIZE + 5;
 #pragma endregion
 
 
@@ -81,6 +89,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	fullMpBarWidth = fullHpBarWidth / 2;
 
 
+	#pragma region GAME RUN UI
 	// HP BAR:
 	auto texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\hp_background_bar.png");
 	hpBgBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
@@ -148,13 +157,48 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\exp_bar.png");
 	expBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	expBar->Set2DPosition(0, SCREEN_HEIDHT - 20);
-	expBar->SetSize(SCREEN_WIDTH, 20);
+	expBar->SetSize(SCREEN_WIDTH, EXP_BAR_HEIGHT);
 	uiElements.push_back(expBar);
 
 	txtEXP = std::make_shared<Text>(expStat, font, expTextColor);
 	txtEXP->SetSize(STAT_TEXT_WIDTH + 5, expBar->GetHeight());
 	txtEXP->Set2DPosition( (SCREEN_WIDTH - txtEXP->GetWidth()) / 2.0f, expBar->Get2DPosition().y - 2 );
 	texts.push_back(txtEXP);
+
+
+	// INVENTORY:
+	texture = ResourceManagers::GetInstance()->GetTexture("slot_greatsword.png");
+	auto slot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
+	slot->SetSize(SLOT_SIZE, SLOT_SIZE);
+	slot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	slot->SetOnClick([this]() {
+		m_playerController->SetWeaponIndex(0);
+	});
+	slots.push_back(slot);
+
+	texture = ResourceManagers::GetInstance()->GetTexture("slot_dualsword.png");
+	slot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
+	slot->SetSize(SLOT_SIZE, SLOT_SIZE);
+	slot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	slot->SetOnClick([this]() {
+		m_playerController->SetWeaponIndex(0);
+		});
+	slots.push_back(slot);
+
+	texture = ResourceManagers::GetInstance()->GetTexture("slot_bow.png");
+	slot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
+	slot->SetSize(SLOT_SIZE, SLOT_SIZE);
+	slot->Set2DPosition(SLOT_2_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	slot->SetOnClick([this]() {
+		m_playerController->SetWeaponIndex(1);
+		});
+	slots.push_back(slot);
+
+	texture = ResourceManagers::GetInstance()->GetTexture("slot_selected.png");
+	selectedSlot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
+	selectedSlot->SetSize(SLOT_SIZE, SLOT_SIZE);
+	selectedSlot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	#pragma endregion
 }
 
 
@@ -165,7 +209,13 @@ UIManager::~UIManager() {}
 #pragma region Handle events
 void UIManager::HandleTouchEvents(SDL_Event& e)
 {
-	
+	for (auto slot : slots)
+	{
+		if (slot->HandleTouchEvent(&e))
+		{
+			break;
+		}
+	}
 }
 
 
@@ -256,6 +306,8 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 	if (*m_timeScale == 1) {
 		for (auto& it : uiElements) it->Draw(renderer);
 		for (auto& it : texts) it->Draw(renderer);
+		for (auto & it : slots) it->Draw(renderer);
+		selectedSlot->Draw(renderer);
 		return;
 	}
 
@@ -291,9 +343,9 @@ void UIManager::UpdateStats() {
 				}
 
 				spTimer += 0.01f;
-				if (spTimer >= 0.01f) {
+				if (spTimer >= 0.1f) {
 					spTimer = 0;
-					sp += 0.5;
+					sp += 1;
 					if (sp > maxSP) sp = maxSP;
 				}
 				if (sp - lossAmount < 30 ) m_playerController->SetSpStatus(false);
@@ -308,9 +360,9 @@ void UIManager::UpdateStats() {
 				}
 
 				mpTimer += 0.01f;
-				if (mpTimer >= 2.0f) {
+				if (mpTimer >= 1.0f) {
 					mpTimer = 0;
-					mp += 20;
+					mp += 30;
 					if (mp > maxMP) mp = maxMP;
 				}
 				if (mp - lossAmount < 30) m_playerController->SetMpStatus(false);
@@ -323,22 +375,38 @@ void UIManager::UpdateStats() {
 
 
 				#pragma region Update Inventory slot
-				if (timer <= 0) m_inventorySlot = m_playerController->GetWeaponIndex() * mousewheelSensitivity;
-				else {
-				int maxSlotNumber = mousewheelSensitivity;
-				m_inventorySlot += changeInWheelValue;
-				changeInWheelValue = 0;
-				if (m_inventorySlot > maxSlotNumber) m_inventorySlot = maxSlotNumber;
-				else if (m_inventorySlot < 0) m_inventorySlot = 0;
+				if (timer <= 0) {
+					int slot = m_playerController->GetWeaponIndex();
 
-				int slot = m_inventorySlot / mousewheelSensitivity;
+					if (slot != m_inventorySlot / mousewheelSensitivity) {
+						m_inventorySlot = slot * mousewheelSensitivity;
 
-				if (m_inventorySlot / mousewheelSensitivity != m_playerController->GetWeaponIndex()) {
-					m_playerController->SetWeaponIndex(m_inventorySlot / mousewheelSensitivity);
+						if (slot == 0) selectedSlot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+						else if (slot == 1) selectedSlot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+						else selectedSlot->Set2DPosition(SLOT_2_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+
+						Sound::GetInstance()->PlaySfx("ui_pop.wav");
+					}
 				}
+				else {
+					int maxSlotNumber = mousewheelSensitivity;
+					m_inventorySlot += changeInWheelValue;
+					changeInWheelValue = 0;
+					if (m_inventorySlot > maxSlotNumber) m_inventorySlot = maxSlotNumber;
+					else if (m_inventorySlot < 0) m_inventorySlot = 0;
 
-				timer -= 10;
-				if (timer <= 0) m_inventorySlot = m_inventorySlot / mousewheelSensitivity * mousewheelSensitivity;
+					int slot = m_inventorySlot / mousewheelSensitivity;
+
+					if (slot != m_playerController->GetWeaponIndex()) {
+						m_playerController->SetWeaponIndex(slot);
+						if (slot == 0) selectedSlot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+						else if (slot == 1) selectedSlot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+						else selectedSlot->Set2DPosition(SLOT_2_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+						Sound::GetInstance()->PlaySfx("ui_pop.wav");
+					}
+
+					timer -= 10;
+					if (timer <= 0) m_inventorySlot = m_inventorySlot / mousewheelSensitivity * mousewheelSensitivity;
 				}
 				#pragma endregion
 			}

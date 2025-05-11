@@ -5,6 +5,7 @@
 #include "Sprite2D.h"
 #include "Text.h"
 #include "PlayerController.h"
+#include "MouseButton.h"
 
 
 class UIManager {
@@ -42,8 +43,8 @@ private:
 
 	std::shared_ptr<Sprite2D> iconCoin;
 
-	std::list<std::shared_ptr<Sprite2D>> items;
-	std::list<std::shared_ptr<Sprite2D>> itemBgs;
+	std::list<std::shared_ptr<MouseButton>> slots;
+	std::shared_ptr<Sprite2D> selectedSlot;
 	int m_inventorySlot;
 
 	std::shared_ptr<Text> txtLoading, txtHP, txtSP, txtMP, txtEXP, txtCoin;
