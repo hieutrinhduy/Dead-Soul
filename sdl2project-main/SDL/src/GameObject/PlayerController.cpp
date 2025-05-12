@@ -60,7 +60,7 @@ void PlayerController::Init()
     fallTexture = ResourceManagers::GetInstance()->GetTexture("_Fall.png");
     rollTexture = ResourceManagers::GetInstance()->GetTexture("_Roll.png");
     hurtTexture = ResourceManagers::GetInstance()->GetTexture("player_is_hit.png");
-    deadTexture = ResourceManagers::GetInstance()->GetTexture("_Death.png");
+    deadTexture = ResourceManagers::GetInstance()->GetTexture("player_is_dead.png");
     //For Default Weapon (m_currentWeaponIndex = 0)
     attackTexture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack1.png");
     attack2Texture = ResourceManagers::GetInstance()->GetTexture("NewPlayerAttack2.png");
@@ -108,6 +108,7 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
                 }
                 m_jumpCount++;
                 m_isGrounded = false;
+                std::cout << topLimit << std::endl;
             }
             break;
         case SDLK_LSHIFT:
@@ -246,7 +247,7 @@ void PlayerController::Update(float deltaTime)
             m_isRolling = false;
             ChangeAnimation(idleTexture, 2, 0.5f);
         }
-    }
+    } 
 
     //Tốc độ nhân vật
     m_speed = 500.0f;
@@ -535,16 +536,16 @@ void PlayerController::TakeDamage(int damage)
 
     // Bị hit
     m_isHit = true;
-    m_hitTimer = 0.1f;
-    ChangeAnimation(hurtTexture, 3, 0.01f);
+    m_hitTimer = 0.20f;
+    ChangeAnimation(hurtTexture, 3, 0.07f);
 }
 
 void PlayerController::Die()
 {
     m_isDead = true;
-    m_deadTimer = 0.3f;
+    m_deadTimer = 0.29f;
     m_finishDead = false;
-    ChangeAnimation(deadTexture, 10, 0.05f);
+    ChangeAnimation(deadTexture, 6, 0.05f);
 }
 
 
