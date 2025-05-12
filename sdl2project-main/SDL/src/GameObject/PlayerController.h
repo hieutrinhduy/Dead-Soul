@@ -84,17 +84,14 @@ public:
     void SetHpLose(int damage) {
         std::lock_guard<std::mutex> lock(mtx);
         m_HpLose += damage;
-        std::cout << "Hp Lose: " << m_HpLose << std::endl;
     };
     void SetMpLose(int mpLose) {
         std::lock_guard<std::mutex> lock(mtx);
         m_MpLose += mpLose;
-        std::cout << "Mp Lose: " << m_MpLose << std::endl;
     };
     void SetSpLose(int spLose) {
         std::lock_guard<std::mutex> lock(mtx);
         m_SpLose += spLose;
-        std::cout << "Sp Lose: " << m_SpLose << std::endl;
     };
 
     void SetExpGained(int amount) {

@@ -27,7 +27,7 @@ void GhostWarriorRed::Init(float pointA, float pointB, float posY)
 
     m_pointA = pointA;
     m_pointB = pointB;
-    m_flip = SDL_FLIP_NONE;
+    m_flip = SDL_FLIP_HORIZONTAL;
 
     m_hpBarBg = { 0, 0, m_barWidth, m_barHeight };
     m_hpBarFill = m_hpBarBg;
@@ -63,13 +63,13 @@ void GhostWarriorRed::Die()
 
 void GhostWarriorRed::Destroy()
 {
-    m_collider = { 0, 0, 0, 0 };
     m_sprite = nullptr;
 }
 
 void GhostWarriorRed::Update(float dt)
 {
     if (m_isDead) {
+        m_collider = { 0, 0, 0, 0 };
         if (!m_finishDead) {
             m_deadTimer -= dt;
             if (m_deadTimer <= 0.0f) { m_finishDead = true; Destroy(); }
@@ -250,17 +250,17 @@ void GhostWarriorRed::Draw(SDL_Renderer* renderer)
     if (m_sprite) m_sprite->Draw(renderer);
 
     Vector2 camPos = Camera::GetInstance()->GetPosition();
-    SDL_Rect drawCollider = m_collider;
-    drawCollider.x -= (int)camPos.x;
-    drawCollider.y -= (int)camPos.y;
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderDrawRect(renderer, &drawCollider);
+    //SDL_Rect drawCollider = m_collider;
+    //drawCollider.x -= (int)camPos.x;
+    //drawCollider.y -= (int)camPos.y;
+    //SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    //SDL_RenderDrawRect(renderer, &drawCollider);
 
-    SDL_Rect drawBox = m_attackBox;
-    drawBox.x -= (int)camPos.x;
-    drawBox.y -= (int)camPos.y;
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &drawBox);
+    //SDL_Rect drawBox = m_attackBox;
+    //drawBox.x -= (int)camPos.x;
+    //drawBox.y -= (int)camPos.y;
+    //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    //SDL_RenderDrawRect(renderer, &drawBox);
 
     SDL_Rect drawBg = m_hpBarBg;
     drawBg.x -= (int)camPos.x;

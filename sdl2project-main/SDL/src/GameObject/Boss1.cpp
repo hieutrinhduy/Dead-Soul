@@ -71,8 +71,6 @@ void Boss1::TakeDamage(int damage)
 {
     if (m_isDead) return;
 
-    std::cout << "[EnemyController] Bị trúng đòn: -" << damage << " HP\n";
-
     m_currentHP -= damage;
 
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
@@ -80,7 +78,6 @@ void Boss1::TakeDamage(int damage)
 
     if (m_currentHP <= 0) {
         m_currentHP = 0;
-        std::cout << "[EnemyController] ĐÃ CHẾT\n";
         Die();
     }
     else {
@@ -106,17 +103,13 @@ void Boss1::Die()
 
 void Boss1::DestroyEnemy()
 {
-    m_enemyCollider = { 0, 0, 0, 0 };
     m_enemy = nullptr;
-    std::cout << "Enemy destroyed!\n";
 }
-
-// Cập nhật Boss1::Update giống EnemyController để xử lý flip ổn định
-// Boss1.cpp - Đã chỉnh sửa phần Update để giống logic EnemyController hoàn toàn, bao gồm flip, moveDir và detect hướng chính xác
 
 void Boss1::Update(float deltaTime)
 {
     if (m_isDead) {
+        m_enemyCollider = { 0, 0, 0, 0 };
         if (!m_finishDead) {
             m_deadTimer -= deltaTime;
             if (m_deadTimer <= 0.0f) {

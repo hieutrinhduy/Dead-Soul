@@ -296,15 +296,12 @@ void GSPlay::Update(float deltaTime)
     {
         auto& bullet = g_playerBullets[i];
         bullet->Update(deltaTime);
-        std::cout << "[DEBUG] Bullet update: total enemyColliders = " << enemyColliders.size() << std::endl;
 
         bool hit = false;
         for (size_t j = 0; j < enemyColliders.size(); ++j)
         {
             if (bullet->HasHitEnemy(enemyColliders[j]))
             {
-                std::cout << "[DEBUG] bullet damage = " << bullet->GetDamage() << std::endl;
-                std::cout << m_hitEnemyCallbacks.size()<< std::endl;
                 if (j < m_hitEnemyCallbacks.size())
                     m_hitEnemyCallbacks[j](bullet->GetDamage());
                 hit = true;

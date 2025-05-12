@@ -75,7 +75,6 @@ void EvilCreature::Die()
 
 void EvilCreature::Destroy()
 {
-    m_collider = { 0, 0, 0, 0 };
     m_sprite = nullptr;
     std::cout << "EvilCreature destroyed!\n";
 }
@@ -83,6 +82,7 @@ void EvilCreature::Destroy()
 void EvilCreature::Update(float deltaTime)
 {
     if (m_isDead) {
+        m_collider = { INT_MAX, INT_MAX, 0, 0 };
         if (!m_finishDead) {
             m_deadTimer -= deltaTime;
             if (m_deadTimer <= 0.0f) {
@@ -279,17 +279,17 @@ void EvilCreature::Draw(SDL_Renderer* renderer)
 
     Vector2 camPos = Camera::GetInstance()->GetPosition();
 
-    SDL_Rect drawCollider = m_collider;
-    drawCollider.x -= (int)camPos.x;
-    drawCollider.y -= (int)camPos.y;
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderDrawRect(renderer, &drawCollider);
+    //SDL_Rect drawCollider = m_collider;
+    //drawCollider.x -= (int)camPos.x;
+    //drawCollider.y -= (int)camPos.y;
+    //SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    //SDL_RenderDrawRect(renderer, &drawCollider);
 
-    SDL_Rect drawAttackBox = m_attackBox;
-    drawAttackBox.x -= (int)camPos.x;
-    drawAttackBox.y -= (int)camPos.y;
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &drawAttackBox);
+    //SDL_Rect drawAttackBox = m_attackBox;
+    //drawAttackBox.x -= (int)camPos.x;
+    //drawAttackBox.y -= (int)camPos.y;
+    //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    //SDL_RenderDrawRect(renderer, &drawAttackBox);
 
     SDL_Rect drawBg = m_hpBarBg;
     drawBg.x -= (int)camPos.x;

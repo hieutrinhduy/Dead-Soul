@@ -81,8 +81,6 @@ void ScecretBoss::TakeDamage(int damage)
 {
     if (m_isDead) return;
 
-    std::cout << "[EnemyController] Bị trúng đòn: -" << damage << " HP\n";
-
     m_currentHP -= damage;
 
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
@@ -90,7 +88,6 @@ void ScecretBoss::TakeDamage(int damage)
 
     if (m_currentHP <= 0) {
         m_currentHP = 0;
-        std::cout << "[EnemyController] ĐÃ CHẾT\n";
         Die();
     }
     else {
@@ -116,9 +113,7 @@ void ScecretBoss::Die()
 
 void ScecretBoss::DestroyEnemy()
 {
-    m_enemyCollider = { 0, 0, 0, 0 };
     m_enemy = nullptr;
-    std::cout << "Enemy destroyed!\n";
 }
 
 // Cập nhật Boss1::Update giống EnemyController để xử lý flip ổn định
@@ -127,6 +122,7 @@ void ScecretBoss::DestroyEnemy()
 void ScecretBoss::Update(float deltaTime)
 {
     if (m_isDead) {
+        m_enemyCollider = { 0, 0, 0, 0 };
         if (!m_finishDead) {
             m_deadTimer -= deltaTime;
             if (m_deadTimer <= 0.0f) {
@@ -457,17 +453,17 @@ void ScecretBoss::Draw(SDL_Renderer* renderer)
 
     Vector2 camPos = Camera::GetInstance()->GetPosition();
 
-    SDL_Rect drawCollider = m_enemyCollider;
-    drawCollider.x -= (int)camPos.x;
-    drawCollider.y -= (int)camPos.y;
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderDrawRect(renderer, &drawCollider);
+    //SDL_Rect drawCollider = m_enemyCollider;
+    //drawCollider.x -= (int)camPos.x;
+    //drawCollider.y -= (int)camPos.y;
+    //SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    //SDL_RenderDrawRect(renderer, &drawCollider);
 
-    SDL_Rect drawAttackBox = m_attackBox;
-    drawAttackBox.x -= (int)camPos.x;
-    drawAttackBox.y -= (int)camPos.y;
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &drawAttackBox);
+    //SDL_Rect drawAttackBox = m_attackBox;
+    //drawAttackBox.x -= (int)camPos.x;
+    //drawAttackBox.y -= (int)camPos.y;
+    //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    //SDL_RenderDrawRect(renderer, &drawAttackBox);
 
     SDL_Rect drawBg = m_hpBarBg;
     drawBg.x -= static_cast<int>(camPos.x);
@@ -524,7 +520,6 @@ bool ScecretBoss::GroundCheck()
 void ScecretBoss::ShootInAngle(float angleRad)
 {
     Vector2 dir = { cosf(angleRad), -sinf(angleRad) };
-    std::cout << "Angle: " << angleRad << ", dir: (" << dir.x << ", " << dir.y << ")\n";
 
     float speed = 600.0f;
     Vector2 spawnPos = {

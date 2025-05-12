@@ -15,8 +15,6 @@ BossBullet::BossBullet(Vector2 position, Vector2 direction, float speed, int dam
     m_sprite->SetRotation(angleDeg);
 
     m_collider = { (int)position.x, (int)position.y, 64, 64 };
-
-    std::cout<<"Create Bullet"<<std::endl;
 }
 
 void BossBullet::Update(float dt)
@@ -50,7 +48,6 @@ bool BossBullet::HasHitPlayer(const SDL_Rect* playerCollider)
     if (!playerCollider || m_destroyed) return false;
 
     if (SDL_HasIntersection(&m_collider, playerCollider)) {
-        std::cout << "Boss bullet hit player!\n";
         if (m_onHitPlayer) m_onHitPlayer(m_damage);
         m_destroyed = true;
         return true;

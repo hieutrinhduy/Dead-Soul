@@ -109,6 +109,7 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
                 m_jumpCount++;
                 m_isGrounded = false;
                 std::cout << topLimit << std::endl;
+                std::cout << m_velocityY << std::endl;
             }
             break;
         case SDLK_LSHIFT:
@@ -408,7 +409,7 @@ void PlayerController::Update(float deltaTime)
             //Attack1
             if (!m_justDidAttack2 && !m_justDidAttack3)
             {
-                if (currentFrame == 3 && !m_didDamage) {
+                if (currentFrame == 2 && !m_didDamage) {
                     m_canDealDamage = true;
                     m_didDamage = true;
                 }
@@ -416,7 +417,7 @@ void PlayerController::Update(float deltaTime)
             //Attack2
             else if(!m_justDidAttack3)
             {
-                if (currentFrame == 3 && !m_didDamage) {
+                if (currentFrame == 2 && !m_didDamage) {
                     m_canDealDamage = true;
                     m_didDamage = true;
                 }
@@ -424,7 +425,7 @@ void PlayerController::Update(float deltaTime)
             //Attack3
             else
             {
-                if (currentFrame == 3 && !m_didDamage) {
+                if (currentFrame == 2 && !m_didDamage) {
                     m_canDealDamage = true;
                     m_didDamage = true;
                 }
@@ -461,12 +462,12 @@ void PlayerController::Draw(SDL_Renderer* renderer)
 
     Vector2 camPos = Camera::GetInstance()->GetPosition();
 
-    SDL_Rect drawCollider = m_playerCollider;
-    drawCollider.x -= (int)camPos.x;
-    drawCollider.y -= (int)camPos.y;
+    //SDL_Rect drawCollider = m_playerCollider;
+    //drawCollider.x -= (int)camPos.x;
+    //drawCollider.y -= (int)camPos.y;
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderDrawRect(renderer, &drawCollider);
+    //SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    //SDL_RenderDrawRect(renderer, &drawCollider);
 
     if (m_canDealDamage)
     {
@@ -483,11 +484,10 @@ void PlayerController::Draw(SDL_Renderer* renderer)
         attackBox.x -= (int)camPos.x;
         attackBox.y -= (int)camPos.y;
 
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderDrawRect(renderer, &attackBox);
+        //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        //SDL_RenderDrawRect(renderer, &attackBox);
 
         int damageAmount = 10;
-        std::cout << "[DEBUG] m_onHitEnemyList.size() = " << m_onHitEnemyList.size() << std::endl;
         for (size_t i = 0; i < m_enemyColliders.size(); ++i)
         {
             SDL_Rect enemyScreen = *m_enemyColliders[i];
@@ -498,15 +498,8 @@ void PlayerController::Draw(SDL_Renderer* renderer)
             {
                 if (i < m_onHitEnemyList.size()) {
                     if (m_onHitEnemyList[i]) {
-                        std::cout << ">> Callback tồn tại. GỌI...\n";
                         m_onHitEnemyList[i](damageAmount);
                     }
-                    else {
-                        std::cout << ">> Callback bị nullptr!\n";
-                    }
-                }
-                else {
-                    std::cout << ">> Chỉ số callback KHÔNG TỒN TẠI\n";
                 }
 
                 if (m_onScreenShake)
@@ -595,7 +588,6 @@ void PlayerController::DestroyPlayer()
 
 void PlayerController::SetOnHitEnemyCallbacks(const std::vector<std::function<void(int)>>& callbacks)
 {
-    std::cout << "[PlayerController] SetOnHitEnemyCallbacks gọi với " << callbacks.size() << " callback(s)\n";
     m_onHitEnemyList = callbacks;
 }
 

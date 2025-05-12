@@ -82,8 +82,7 @@ void EnemyController::TakeDamage(int damage)
     }
     else {
         int currentFrame = m_enemy->GetCurrentFrame(); 
-        if (m_isAttacking && attackIndex == 1 && currentFrame >= 3) return;
-        if (m_isAttacking && attackIndex == 2 && currentFrame >= 4) return;
+        if (m_isAttacking) return;
         if (!m_isAttacking) {
             m_isAttacking = false;
             m_isHit = true;
@@ -104,7 +103,6 @@ void EnemyController::Die()
 
 void EnemyController::DestroyEnemy()
 {
-    m_enemyCollider = { 0, 0, 0, 0 };
     m_enemy = nullptr;
     std::cout << "Enemy destroyed!\n";
 }
@@ -112,6 +110,7 @@ void EnemyController::DestroyEnemy()
 void EnemyController::Update(float deltaTime)
 {
     if (m_isDead) {
+        m_enemyCollider = { INT_MAX, INT_MAX, 0, 0 };
         if (!m_finishDead) {
             m_deadTimer -= deltaTime;
             if (m_deadTimer <= 0.0f) {
@@ -351,17 +350,17 @@ void EnemyController::Draw(SDL_Renderer* renderer)
 
     Vector2 camPos = Camera::GetInstance()->GetPosition();
 
-    SDL_Rect drawCollider = m_enemyCollider;
-    drawCollider.x -= (int)camPos.x;
-    drawCollider.y -= (int)camPos.y;
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderDrawRect(renderer, &drawCollider);
+    //SDL_Rect drawCollider = m_enemyCollider;
+    //drawCollider.x -= (int)camPos.x;
+    //drawCollider.y -= (int)camPos.y;
+    //SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    //SDL_RenderDrawRect(renderer, &drawCollider);
 
-    SDL_Rect drawAttackBox = m_attackBox;
-    drawAttackBox.x -= (int)camPos.x;
-    drawAttackBox.y -= (int)camPos.y;
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderDrawRect(renderer, &drawAttackBox);
+    //SDL_Rect drawAttackBox = m_attackBox;
+    //drawAttackBox.x -= (int)camPos.x;
+    //drawAttackBox.y -= (int)camPos.y;
+    //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    //SDL_RenderDrawRect(renderer, &drawAttackBox);
 
     SDL_Rect drawBg = m_hpBarBg;
     drawBg.x -= static_cast<int>(camPos.x);
