@@ -279,9 +279,9 @@ void RangedEnemy::ShootProjectile()
 
     auto bullet = std::make_shared<Bullet>(pos, 500.0f, direction, m_damage);
 
-    bullet->SetOnHitPlayerCallback([this](int damage) {
+    bullet->SetOnHitPlayerCallback([this, direction](int damage) {
         if (m_playerController)
-            m_playerController->TakeDamage(damage);
+            m_playerController->TakeDamage(damage, direction);
         });
 
     g_bullets.push_back(bullet);

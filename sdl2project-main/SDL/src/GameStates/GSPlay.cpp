@@ -142,28 +142,36 @@ void GSPlay::Init()
 
     // Callback khi enemy đánh player
     m_enemyController->SetOnHitPlayerCallback([this](int damage) {
-        m_playerController->TakeDamage(damage);
+        int dir = (m_enemyController->GetEnemyCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
+        m_playerController->TakeDamage(damage, dir);
         });
     m_enemyController2->SetOnHitPlayerCallback([this](int damage) {
-        m_playerController->TakeDamage(damage);
+        int dir = (m_enemyController2->GetEnemyCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
+        m_playerController->TakeDamage(damage, dir);
         });
     m_evilCreature->SetOnHitPlayerCallback([this](int damage) {
-        m_playerController->TakeDamage(damage);
+        int dir = (m_evilCreature->GetCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
+        m_playerController->TakeDamage(damage, dir);
         });
     m_ghostWarrior->SetOnHitPlayerCallback([this](int damage) {
-        m_playerController->TakeDamage(damage);
+        int dir = (m_ghostWarrior->GetCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
+        m_playerController->TakeDamage(damage, dir);
         });
     m_ghostWarriorRed->SetOnHitPlayerCallback([this](int damage) {
-        m_playerController->TakeDamage(damage);
+        int dir = (m_ghostWarriorRed->GetCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
+        m_playerController->TakeDamage(damage, dir);
         });
     m_rangedEnemy->SetOnHitPlayerCallback([this](int damage) {
-        m_playerController->TakeDamage(damage);
+        int dir = (m_rangedEnemy->GetCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
+        m_playerController->TakeDamage(damage, dir);
         });
     m_boss1->SetOnHitPlayerCallback([this](int damage) {
-        m_playerController->TakeDamage(damage);
+        int dir = (m_boss1->GetEnemyCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
+        m_playerController->TakeDamage(damage, dir);
         });
     m_boss2->SetOnHitPlayerCallback([this](int damage) {
-        m_playerController->TakeDamage(damage);
+        int dir = (m_boss2->GetEnemyCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
+        m_playerController->TakeDamage(damage, dir);
         });
 
     // Callback khi player đánh trúng enemy

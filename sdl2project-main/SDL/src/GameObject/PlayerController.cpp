@@ -149,22 +149,19 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
                     float now = SDL_GetTicks() / 1000.0f;
                     //Cac don danh cach nhau 1s
                     if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
-                        // Giá sử mất 30 MP khi tấn công
-                        SetMpLose(30);
+                        SetMpLose(15);
                         ChangeAnimation(attack2Texture, 4, 0.1f);
                         m_justDidAttack2 = true;
                         m_justDidAttack3 = false;
                     }
                     else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
-                        // Giá sử mất 30 MP khi tấn công
-                        SetMpLose(30);
+                        SetMpLose(15);
                         ChangeAnimation(attack3Texture, 4, 0.1f);
                         m_justDidAttack3 = true;
                         m_justDidAttack2 = false;
                     }
                     else {
-                        // Giá sử mất 30 MP khi tấn công
-                        SetMpLose(30);
+                        SetMpLose(15);
                         ChangeAnimation(attackTexture, 4, 0.1f);
                         m_justDidAttack2 = false;
                         m_justDidAttack3 = false;
@@ -172,6 +169,15 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
                     m_isAttacking = true;
                     m_attackTimer = m_attackDuration;
                     m_lastAttackTime = now;
+                    // Nhích nhẹ theo hướng attack
+                    float moveDir = (m_playerFlip == SDL_FLIP_NONE) ? 1.0f : -1.0f;
+                    float attackMoveAmount = moveDir * 40.0f;
+
+                    auto currentPos = m_player->Get2DPosition();
+                    float maxMove = (moveDir > 0) ? rightLimit : -leftLimit;
+                    float clampedMove = std::clamp(attackMoveAmount, -leftLimit, rightLimit);
+                    currentPos.x += clampedMove;
+                    m_player->Set2DPosition(currentPos.x, currentPos.y);
                 }
                 break;
             case 1:
@@ -222,9 +228,31 @@ void PlayerController::Update(float deltaTime)
                 ChangeAnimation(idleTexture, 2, 0.5f);
             }
         }
-        m_player->Update(deltaTime);
+
+        // ❌ KHÔNG return nếu còn knockback
+        if (!m_isKnockback) {
+            m_player->Update(deltaTime);
+            return;
+        }
+    }
+
+
+    if (m_isKnockback) {
+        m_knockbackTimer -= deltaTime;
+
+        float moveAmount = m_knockbackDir * m_knockbackSpeed * deltaTime;
+        float clampedMove = std::clamp(moveAmount, -leftLimit, rightLimit);
+        auto pos = m_player->Get2DPosition();
+        pos.x += clampedMove;
+        m_player->Set2DPosition(pos.x, pos.y);
+        m_playerCollider.x = (int)pos.x;
+
+        if (m_knockbackTimer <= 0.0f) {
+            m_isKnockback = false;
+        }
         return;
     }
+
 
     //Sau khi tấn công 1 khoảng thời gian trở về trạng thái idle
     if (m_isAttacking) {
@@ -236,12 +264,19 @@ void PlayerController::Update(float deltaTime)
         }
     }
 
+
     //Khi đang lộn, nếu flip trái thì lộn trái, nếu đang flip phải thì lộn phải
     if (m_isRolling) {
         m_rollTimer -= deltaTime;
         float moveDir = (m_playerFlip == SDL_FLIP_NONE) ? 1.0f : -1.0f;
         float moveAmount = moveDir * m_rollSpeed * deltaTime;
-        m_player->MoveX(moveAmount);
+        float maxMove = (moveDir > 0) ? rightLimit : -leftLimit;
+        //Chặn lộn xuyên platform
+        moveAmount = std::clamp(moveAmount, -leftLimit, rightLimit);
+
+        auto pos = m_player->Get2DPosition();
+        pos.x += moveAmount;
+        m_player->Set2DPosition(pos.x, pos.y);
 
         //Lộn xong về idle
         if (m_rollTimer <= 0.0f) {
@@ -514,7 +549,7 @@ void PlayerController::Draw(SDL_Renderer* renderer)
 //      other FUNCTIONS
 /* ------------------------- */
 
-void PlayerController::TakeDamage(int damage)
+void PlayerController::TakeDamage(int damage, int knockbackDir)
 {
     if (m_isDead || m_isHit || m_isRolling) return;
 
@@ -531,6 +566,10 @@ void PlayerController::TakeDamage(int damage)
     m_isHit = true;
     m_hitTimer = 0.20f;
     ChangeAnimation(hurtTexture, 3, 0.07f);
+
+    m_isKnockback = true;
+    m_knockbackTimer = m_knockbackDuration;
+    m_knockbackDir = knockbackDir;
 }
 
 void PlayerController::Die()

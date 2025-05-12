@@ -137,7 +137,7 @@ public:
     void SetOnScreenShakeCallback(std::function<void()> callback) { m_onScreenShake = callback; }
 
 
-    void TakeDamage(int damage);
+    void TakeDamage(int damage, int knockbackDir);
     void Die();
 
     bool IsDead() const { return m_isDead; }
@@ -214,6 +214,13 @@ private:
     int m_GoldGained = 0;
     public: std::mutex mtx;
 
+    //Knock Back
+    bool m_isKnockback = false;
+    float m_knockbackTimer = 0.0f;
+    float m_knockbackDuration = 0.1f;
+    float m_knockbackSpeed = 1000.0f;
+    int m_knockbackDir = 0; // -1 = trái, 1 = phải
+
     // TEXTURES:
     std::shared_ptr<TextureManager> idleTexture;
     std::shared_ptr<TextureManager> runTexture;
@@ -231,6 +238,10 @@ private:
     //std::function<void(int damage)> m_onHitEnemy;
     std::vector<std::function<void(int)>> m_onHitEnemyList;
     std::function<void()> m_onScreenShake;
+
+    //Check Attack Move flag
+    bool m_didAttackMove = false;
+
 
     void ShootProjectile();
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);
