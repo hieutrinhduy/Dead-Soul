@@ -8,6 +8,17 @@
 
 int attackIndex = 0;
 
+const char* EnemyStateToString(EnemyState state) {
+    switch (state) {
+    case EnemyState::Patrol: return "Patrol";
+    case EnemyState::Chase: return "Chase";
+    case EnemyState::Attack: return "Attack";
+    case EnemyState::Hit: return "Hit";
+    case EnemyState::Dead: return "Dead";
+    default: return "Unknown";
+    }
+}
+
 EnemyController::EnemyController()
     : m_gravityForce(150.0f), m_velocityY(0.0f), m_speed(200.0f),
     m_direction(1),
@@ -64,32 +75,34 @@ SDL_Rect* EnemyController::GetEnemyCollider() {
     return &m_enemyCollider;
 }
 
-void EnemyController::TakeDamage(int damage)
+void EnemyController::TakeDamage(int damage, int knockbackDir)
 {
     if (m_isDead) return;
 
     std::cout << "[EnemyController] Bị trúng đòn: -" << damage << " HP\n";
 
     m_currentHP -= damage;
-
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
     m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
-
+    m_isAttacking = false;
+    m_currentState = EnemyState::Patrol;
     if (m_currentHP <= 0) {
         m_currentHP = 0;
         std::cout << "[EnemyController] ĐÃ CHẾT\n";
         Die();
     }
     else {
-        int currentFrame = m_enemy->GetCurrentFrame(); 
-        //if (!m_isAttacking) {
-            m_isAttacking = false;
-            m_isHit = true;
-            m_hitTimer = 0.2f;
-            ChangeAnimation(hitTexture, 5, 0.05f);
-        //}
+        m_isHit = true;
+        m_hitTimer = 0.2f;
+        ChangeAnimation(hitTexture, 5, 0.05f);
+
+        // Knockback setup
+        m_isKnockback = true;
+        m_knockbackTimer = m_knockbackDuration;
+        m_knockbackDir = knockbackDir;
     }
 }
+
 
 
 void EnemyController::Die()
@@ -121,6 +134,38 @@ void EnemyController::Update(float deltaTime)
             m_enemy->Update(deltaTime);
         return;
     }
+
+    std::cout << "[EnemyState] " << EnemyStateToString(m_currentState) << std::endl;
+
+    if (m_isKnockback) {
+        m_knockbackTimer -= deltaTime;
+
+        float knockbackAmount = m_knockbackDir * m_knockbackSpeed * deltaTime;
+        float nextX = m_enemy->Get2DPosition().x + knockbackAmount;
+
+        // Giới hạn trong khoảng pointA - pointB
+        if (nextX < m_pointA) nextX = m_pointA;
+        if (nextX > m_pointB) nextX = m_pointB;
+
+        m_enemy->Set2DPosition(nextX, m_enemy->Get2DPosition().y);
+        m_enemyCollider.x = (int)nextX + 50;
+
+        m_hpBarBg.x = m_enemyCollider.x + m_enemyCollider.w / 2 - m_barWidth / 2;
+        m_hpBarBg.y = m_enemyCollider.y - 10;
+        m_hpBarFill = m_hpBarBg;
+        float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
+        m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
+
+        if (m_knockbackTimer <= 0.0f) {
+            m_isKnockback = false;
+        }
+
+        m_enemy->Update(deltaTime);
+        if (!m_isHit) {
+            return;
+        }
+    }
+
 
     if (m_isHit) {
         m_hitTimer -= deltaTime;
@@ -383,6 +428,12 @@ bool EnemyController::DetectPlayer()
     if (!m_playerCollider) return false;
     float enemyCenterX = m_enemyCollider.x + m_enemyCollider.w / 2.0f;
     float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2.0f;
+
+    float enemyCenterY = m_enemyCollider.y + m_enemyCollider.h / 2.0f;
+    float playerCenterY = m_playerCollider->y + m_playerCollider->h / 2.0f;
+    float distanceY = std::abs(enemyCenterY - playerCenterY);
+    if (distanceY > 50) return false;
+
     float distance = std::abs(enemyCenterX - playerCenterX);
     return distance < 250.0f;
 }

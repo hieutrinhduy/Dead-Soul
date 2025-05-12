@@ -33,7 +33,7 @@ ScecretBoss::ScecretBoss()
     m_currentState(SecretBossState::Patrol),
     m_drawRay(false),
     m_maxHP(200), m_currentHP(200), m_damage(20),
-    m_attackFlip(SDL_FLIP_NONE)
+    m_attackFlip(SDL_FLIP_HORIZONTAL)
 {
 }
 
@@ -53,7 +53,7 @@ void ScecretBoss::Init(float pointA, float pointB, float posY)
 
     m_enemy = std::make_shared<SpriteAnimation>(runTexture, 1, 12, 1, 0.05f);
     m_enemy->SetSize(288 * 3, 160 * 3);
-    m_enemy->Set2DPosition(pointA, posY);
+    m_enemy->Set2DPosition(pointB, posY);
     m_enemyCollider = { (int)m_enemy->GetPosition().x + secretBossxAlign, (int)m_enemy->GetPosition().y + secretBossyAlign, m_enemy->GetWidth() / 5, m_enemy->GetHeight() / 2 };
 
     m_pointA = pointA;
@@ -488,6 +488,10 @@ bool ScecretBoss::DetectPlayer()
     float enemyCenterX = m_enemyCollider.x + m_enemyCollider.w / 2.0f;
     float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2.0f;
     float distance = std::abs(enemyCenterX - playerCenterX);
+    float enemyCenterY = m_enemyCollider.y + m_enemyCollider.h / 2.0f;
+    float playerCenterY = m_playerCollider->y + m_playerCollider->h / 2.0f;
+    float distanceY = std::abs(enemyCenterY - playerCenterY);
+    if (distanceY > 100) return false;
     return distance < 1000.0f;
 }
 

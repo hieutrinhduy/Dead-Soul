@@ -395,6 +395,10 @@ bool Boss1::DetectPlayer()
     float enemyCenterX = m_enemyCollider.x + m_enemyCollider.w / 2.0f;
     float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2.0f;
     float distance = std::abs(enemyCenterX - playerCenterX);
+    float enemyCenterY = m_enemyCollider.y + m_enemyCollider.h / 2.0f;
+    float playerCenterY = m_playerCollider->y + m_playerCollider->h / 2.0f;
+    float distanceY = std::abs(enemyCenterY - playerCenterY);
+    if (distanceY > 100) return false;
     return distance < 1000.0f;
 }
 

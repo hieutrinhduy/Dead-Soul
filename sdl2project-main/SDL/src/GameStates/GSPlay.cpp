@@ -87,11 +87,10 @@ void GSPlay::Init()
 
     // Enemy thường
     m_enemyController = std::make_shared<EnemyController>();
-    m_enemyController->Init(0, 800, 575);
+    m_enemyController->Init(0, 800, 450);
 
     m_enemyController2 = std::make_shared<EnemyController>();
-    m_enemyController2->Init(1060, 1210, 575);
-
+    m_enemyController2->Init(1220, 1790, 385);
 
     //Boss1
     m_boss1 = std::make_shared<Boss1>();
@@ -103,11 +102,11 @@ void GSPlay::Init()
 
     // Enemy đặc biệt: EvilCreature
     m_evilCreature = std::make_shared<EvilCreature>();
-    m_evilCreature->Init(1300, 2000, 300);
+    m_evilCreature->Init(1850, 3000, 325);
 
     // Enemy đặc biệt: GhostWarrior
     m_ghostWarrior = std::make_shared<GhostWarrior>();
-    m_ghostWarrior->Init(2500, 3300, 300);
+    m_ghostWarrior->Init(1850, 3000, 325);
 
     // Enemy đặc biệt: GhostWarriorRed
     m_ghostWarriorRed = std::make_shared<GhostWarriorRed>();
@@ -176,22 +175,29 @@ void GSPlay::Init()
 
     // Callback khi player đánh trúng enemy
     m_hitEnemyCallbacks.push_back([this](int damage) {
-        m_enemyController->TakeDamage(damage);
+        int dir = (m_playerController->GetCollider().x > m_enemyController->GetEnemyCollider()->x) ? -1 : 1;
+        m_enemyController->TakeDamage(damage, dir);
+        });
+
+    m_hitEnemyCallbacks.push_back([this](int damage) {
+        int dir = (m_playerController->GetCollider().x > m_enemyController2->GetEnemyCollider()->x) ? -1 : 1;
+        m_enemyController2->TakeDamage(damage, dir);
         });
     m_hitEnemyCallbacks.push_back([this](int damage) {
-        m_enemyController2->TakeDamage(damage);
+        int dir = (m_playerController->GetCollider().x > m_evilCreature->GetCollider()->x) ? -1 : 1;
+        m_evilCreature->TakeDamage(damage, dir);
         });
     m_hitEnemyCallbacks.push_back([this](int damage) {
-        m_evilCreature->TakeDamage(damage);
+        int dir = (m_playerController->GetCollider().x > m_ghostWarrior->GetCollider()->x) ? -1 : 1;
+        m_ghostWarrior->TakeDamage(damage, dir);
         });
     m_hitEnemyCallbacks.push_back([this](int damage) {
-        m_ghostWarrior->TakeDamage(damage);
+        int dir = (m_playerController->GetCollider().x > m_ghostWarriorRed->GetCollider()->x) ? -1 : 1;
+        m_ghostWarriorRed->TakeDamage(damage, dir);
         });
     m_hitEnemyCallbacks.push_back([this](int damage) {
-        m_ghostWarriorRed->TakeDamage(damage);
-        });
-    m_hitEnemyCallbacks.push_back([this](int damage) {
-        m_rangedEnemy->TakeDamage(damage);
+        int dir = (m_playerController->GetCollider().x > m_rangedEnemy->GetCollider()->x) ? -1 : 1;
+        m_rangedEnemy->TakeDamage(damage, dir);
         });
     m_hitEnemyCallbacks.push_back([this](int damage) {
         m_boss1->TakeDamage(damage);

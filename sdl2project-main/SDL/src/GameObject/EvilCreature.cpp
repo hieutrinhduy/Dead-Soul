@@ -45,23 +45,31 @@ void EvilCreature::SetGroundCollider(SDL_Rect* ground) { m_groundCollider = grou
 void EvilCreature::SetPlayerCollider(const SDL_Rect* player) { m_playerCollider = player; }
 SDL_Rect* EvilCreature::GetCollider() { return &m_collider; }
 
-void EvilCreature::TakeDamage(int damage)
+void EvilCreature::TakeDamage(int damage, int knockbackDir)
 {
     if (m_isDead) return;
-    std::cout << "[EvilCreature] Bị trúng đòn: -" << damage << " HP\n";
+
+    std::cout << "[EnemyController] Bị trúng đòn: -" << damage << " HP\n";
 
     m_currentHP -= damage;
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
-    m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent );
-
+    m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
+    m_isAttacking = false;
+    m_state = EvilCreatureState::Patrol;
     if (m_currentHP <= 0) {
         m_currentHP = 0;
+        std::cout << "[EnemyController] ĐÃ CHẾT\n";
         Die();
     }
     else {
         m_isHit = true;
-        m_hitTimer = 0.2f;
+        m_hitTimer = 0.1f;
         ChangeAnimation(hitTexture, 5, 0.05f);
+
+        // Knockback setup
+        m_isKnockback = true;
+        m_knockbackTimer = m_knockbackDuration;
+        m_knockbackDir = knockbackDir;
     }
 }
 
@@ -92,6 +100,35 @@ void EvilCreature::Update(float deltaTime)
         }
         if (m_sprite) m_sprite->Update(deltaTime);
         return;
+    }
+
+    if (m_isKnockback) {
+        m_knockbackTimer -= deltaTime;
+
+        float knockbackAmount = m_knockbackDir * m_knockbackSpeed * deltaTime;
+        float nextX = m_sprite->Get2DPosition().x + knockbackAmount;
+
+        // Giới hạn trong khoảng pointA - pointB
+        if (nextX < m_pointA) nextX = m_pointA;
+        if (nextX > m_pointB) nextX = m_pointB;
+
+        m_sprite->Set2DPosition(nextX, m_sprite->Get2DPosition().y);
+        m_collider.x = (int)nextX + 50;
+
+        m_hpBarBg.x = m_collider.x + m_collider.w / 2 - m_barWidth / 2;
+        m_hpBarBg.y = m_collider.y - 10;
+        m_hpBarFill = m_hpBarBg;
+        float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
+        m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
+
+        if (m_knockbackTimer <= 0.0f) {
+            m_isKnockback = false;
+        }
+
+        m_sprite->Update(deltaTime);
+        if (!m_isHit) {
+            return;
+        }
     }
 
     if (m_isHit) {
@@ -311,6 +348,11 @@ bool EvilCreature::DetectPlayer()
     if (!m_playerCollider) return false;
     float enemyCenterX = m_collider.x + m_collider.w / 2.0f;
     float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2.0f;
+
+    float enemyCenterY = m_collider.y + m_collider.h / 2.0f;
+    float playerCenterY = m_playerCollider->y + m_playerCollider->h / 2.0f;
+    float distanceY = std::abs(enemyCenterY - playerCenterY);
+    if (distanceY > 50) return false;
     return std::abs(enemyCenterX - playerCenterX) < 250;
 }
 

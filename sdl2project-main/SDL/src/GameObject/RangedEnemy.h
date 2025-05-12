@@ -1,4 +1,4 @@
-// RangedEnemy.h
+﻿// RangedEnemy.h
 #pragma once
 
 #include "SpriteAnimation.h"
@@ -30,7 +30,7 @@ public:
     void SetPlayerCollider(const SDL_Rect* player);
     SDL_Rect* GetCollider();
 
-    void TakeDamage(int damage);
+    void TakeDamage(int damage, int knockbackDir);
     void SetOnHitPlayerCallback(std::function<void(int damage)> callback) { m_onHitPlayer = callback; }
     void SetPlayerController(PlayerController* player) { m_playerController = player; }
 
@@ -90,6 +90,13 @@ private:
 
     bool m_recentlyReturnedFromChase = false;
     float m_recentlyReturnedTimer = 0.0f;
+
+    //KnockBack
+    bool m_isKnockback = false;
+    float m_knockbackTimer = 0.0f;
+    float m_knockbackDuration = 0.2f;
+    float m_knockbackSpeed = 350.0f;
+    int m_knockbackDir = 0; // -1 trái, 1 phải
 
 private:
     void ShootProjectile();
