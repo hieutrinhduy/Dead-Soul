@@ -6,6 +6,7 @@
 #include "Text.h"
 #include "PlayerController.h"
 #include "MouseButton.h"
+#include "SliderIcon.h"
 
 
 class UIManager {
@@ -35,22 +36,26 @@ public:
 
 private:
 	#pragma region UI
+	// UI WHEN LOAD GAME:
 	std::shared_ptr<Sprite2D> loadingBackground;
+	std::shared_ptr<Text> txtLoading;
 
+	// UI WHEN RUN GAME:
 	std::shared_ptr<Sprite2D> hpBar, spBar, mpBar, expBar;
 	std::shared_ptr<Sprite2D> hpBgBar, spBgBar, mpBgBar, expBgBar;
 	float fullHpBarWidth, fullSpBarWidth, fullMpBarWidth;
-
 	std::shared_ptr<Sprite2D> iconCoin;
-
 	std::list<std::shared_ptr<MouseButton>> slots;
 	std::shared_ptr<Sprite2D> selectedSlot;
 	int m_inventorySlot;
+	std::shared_ptr<Text> txtHP, txtSP, txtMP, txtEXP, txtCoin;
 
-	std::shared_ptr<Text> txtLoading, txtHP, txtSP, txtMP, txtEXP, txtCoin;
+	// UI WHEN PAUSE GAME:
+	std::shared_ptr<Sprite2D> pauseMenuBg, musicForegroundBar, sfxForegroundBar;
+	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings;
 
-	std::list<std::shared_ptr<Sprite2D>> uiElements;
-	std::list<std::shared_ptr<Text>> texts;
+	std::list<std::shared_ptr<Sprite2D>> uiWhenRunGame;
+	std::list<std::shared_ptr<Sprite2D>> uiWhenPause;
 
 	SDL_Color hpTextColor, expTextColor;
 	#pragma endregion

@@ -88,24 +88,24 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	fullMpBarWidth = fullHpBarWidth / 2;
 
 
-	#pragma region UI OF GAME RUNNING
+	#pragma region UI WHEN RUN GAME
 	// HP BAR:
 	auto texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\hp_background_bar.png");
 	hpBgBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	hpBgBar->Set2DPosition(HP_BACKGROUND_BAR_POSITION_X, HP_BACKGROUND_BAR_POSITION_Y);
 	hpBgBar->SetSize(fullHpBarWidth, BACKGROUND_BAR_HEIGHT);
-	uiElements.push_back(hpBgBar);
+	uiWhenRunGame.push_back(hpBgBar);
 
 	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\hp_bar.png");
 	hpBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	hpBar->Set2DPosition(HP_BACKGROUND_BAR_POSITION_X + widthScaling, HP_BACKGROUND_BAR_POSITION_Y);
 	hpBar->SetSize(fullHpBarWidth, BACKGROUND_BAR_HEIGHT);
-	uiElements.push_back(hpBar);
+	uiWhenRunGame.push_back(hpBar);
 
 	txtHP = std::make_shared<Text>(hpStat, font, hpTextColor);
 	txtHP->SetSize(STAT_TEXT_WIDTH, BACKGROUND_BAR_HEIGHT);
 	txtHP->Set2DPosition( (fullHpBarWidth - txtHP->GetWidth()) / 2, HP_BACKGROUND_BAR_POSITION_Y - 2 );
-	texts.push_back(txtHP);
+	uiWhenRunGame.push_back(txtHP);
 
 	
 	// SP BAR:
@@ -113,18 +113,18 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	spBgBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	spBgBar->Set2DPosition(SP_BACKGROUND_BAR_POSITION_X, SP_BACKGROUND_BAR_POSITION_Y);
 	spBgBar->SetSize(fullSpBarWidth, BACKGROUND_BAR_HEIGHT);
-	uiElements.push_back(spBgBar);
+	uiWhenRunGame.push_back(spBgBar);
 
 	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\sp_bar.png");
 	spBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	spBar->Set2DPosition(SP_BACKGROUND_BAR_POSITION_X + widthScaling, SP_BACKGROUND_BAR_POSITION_Y);
 	spBar->SetSize(fullSpBarWidth, BACKGROUND_BAR_HEIGHT);
-	uiElements.push_back(spBar);
+	uiWhenRunGame.push_back(spBar);
 
 	txtSP = std::make_shared<Text>(spStat, font, hpTextColor);
 	txtSP->SetSize(STAT_TEXT_WIDTH, BACKGROUND_BAR_HEIGHT);
 	txtSP->Set2DPosition( (fullSpBarWidth - txtSP->GetWidth()) / 2, SP_BACKGROUND_BAR_POSITION_Y - 2 );
-	texts.push_back(txtSP);
+	uiWhenRunGame.push_back(txtSP);
 
 
 	// MP BAR:
@@ -132,18 +132,18 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	mpBgBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	mpBgBar->Set2DPosition(MP_BACKGROUND_BAR_POSITION_X, MP_BACKGROUND_BAR_POSITION_Y);
 	mpBgBar->SetSize(fullMpBarWidth, BACKGROUND_BAR_HEIGHT);
-	uiElements.push_back(mpBgBar);
+	uiWhenRunGame.push_back(mpBgBar);
 
 	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\mp_bar.png");
 	mpBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	mpBar->Set2DPosition(MP_BACKGROUND_BAR_POSITION_X + widthScaling, MP_BACKGROUND_BAR_POSITION_Y);
 	mpBar->SetSize(fullMpBarWidth, BACKGROUND_BAR_HEIGHT);
-	uiElements.push_back(mpBar);
+	uiWhenRunGame.push_back(mpBar);
 
 	txtMP = std::make_shared<Text>(mpStat, font, hpTextColor);
 	txtMP->SetSize(STAT_TEXT_WIDTH, BACKGROUND_BAR_HEIGHT);
 	txtMP->Set2DPosition( (fullMpBarWidth - txtMP->GetWidth()) / 2, MP_BACKGROUND_BAR_POSITION_Y - 2 );
-	texts.push_back(txtMP);
+	uiWhenRunGame.push_back(txtMP);
 
 
 	// EXP BAR:
@@ -151,18 +151,18 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	expBgBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	expBgBar->Set2DPosition(0, SCREEN_HEIDHT - 20);
 	expBgBar->SetSize(SCREEN_WIDTH, 20);
-	uiElements.push_back(expBgBar);
+	uiWhenRunGame.push_back(expBgBar);
 
 	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\exp_bar.png");
 	expBar = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	expBar->Set2DPosition(0, SCREEN_HEIDHT - 20);
 	expBar->SetSize(SCREEN_WIDTH, EXP_BAR_HEIGHT);
-	uiElements.push_back(expBar);
+	uiWhenRunGame.push_back(expBar);
 
 	txtEXP = std::make_shared<Text>(expStat, font, expTextColor);
 	txtEXP->SetSize(STAT_TEXT_WIDTH + 5, expBar->GetHeight());
 	txtEXP->Set2DPosition( (SCREEN_WIDTH - txtEXP->GetWidth()) / 2.0f, expBar->Get2DPosition().y - 2 );
-	texts.push_back(txtEXP);
+	uiWhenRunGame.push_back(txtEXP);
 
 
 	// INVENTORY:
@@ -173,7 +173,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	slot->SetOnClick([this]() {
 		m_playerController->SetWeaponIndex(0);
 	});
-	slots.push_back(slot);
+	uiWhenRunGame.push_back(slot);
 
 	texture = ResourceManagers::GetInstance()->GetTexture("slot_bow.png");
 	slot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
@@ -182,12 +182,17 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	slot->SetOnClick([this]() {
 		m_playerController->SetWeaponIndex(1);
 		});
-	slots.push_back(slot);
+	uiWhenRunGame.push_back(slot);
 
 	texture = ResourceManagers::GetInstance()->GetTexture("slot_selected.png");
 	selectedSlot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	selectedSlot->SetSize(SLOT_SIZE, SLOT_SIZE);
 	selectedSlot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	uiWhenRunGame.push_back(selectedSlot);
+	#pragma endregion
+
+	#pragma	region UI WHEN PAUSE GAME
+	//textur
 	#pragma endregion
 }
 
@@ -294,10 +299,7 @@ void UIManager::Update(float deltaTime) {
 
 void UIManager::Draw(SDL_Renderer* renderer) {
 	if (*m_timeScale == 1) {
-		for (auto& it : uiElements) it->Draw(renderer);
-		for (auto& it : texts) it->Draw(renderer);
-		for (auto & it : slots) it->Draw(renderer);
-		selectedSlot->Draw(renderer);
+		for (auto& it : uiWhenRunGame) it->Draw(renderer);
 		return;
 	}
 
