@@ -82,13 +82,12 @@ void EnemyController::TakeDamage(int damage)
     }
     else {
         int currentFrame = m_enemy->GetCurrentFrame(); 
-        if (m_isAttacking) return;
-        if (!m_isAttacking) {
+        //if (!m_isAttacking) {
             m_isAttacking = false;
             m_isHit = true;
             m_hitTimer = 0.2f;
             ChangeAnimation(hitTexture, 5, 0.05f);
-        }
+        //}
     }
 }
 
