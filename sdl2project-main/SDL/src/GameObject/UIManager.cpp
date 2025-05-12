@@ -15,6 +15,7 @@
 #include "DataSaver.h"
 #include "ResourceManagers.h"
 
+#include "Camera.h"
 #include "Renderer.h"
 #include "Define.h"
 #include "Sound.h"
@@ -269,6 +270,13 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	uiWhenPause.push_back(iconSensitivitySettings);
 	sliderIcons.push_back(iconSensitivitySettings);
 #pragma endregion
+
+	#pragma region UI WHEN CHANGE MAP
+	animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("NextLevelPortal.png"), 1, 6, 1, 0.5);
+	animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	animationMapTransition->Set2DPosition(0, 0);
+	#pragma endregion
+
 }
 
 
@@ -373,7 +381,21 @@ void UIManager::Update(float deltaTime) {
 		mpBar->SetSize(mp / maxMP * fullMpBarWidth, mpBar->GetHeight());
 	}
 
-
+	if (*m_timeScale == -1) {
+		animationMapTransition->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
+		animationMapTransition->Update(deltaTime);
+		if (animationMapTransition->GetCurrentFrame() == 0) {
+			m_playerController->ResetPlayerPosition();
+		}
+		else if (animationMapTransition->GetCurrentFrame() == 2) {
+			m_tileMap->LoadNewMap();
+			animationMapTransition->SetCurrentFrame(3);
+		}
+		else if (animationMapTransition->GetCurrentFrame() == 5) {
+			*m_timeScale = 1;
+			animationMapTransition->SetCurrentFrame(0);
+		}
+	}
 
 	if (*m_timeScale == -2) {
 		timer += deltaTime;
@@ -404,6 +426,10 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 			for (auto& it : uiWhenPause) it->Draw(renderer);
 		}
 		return;
+	}
+
+	if (*m_timeScale == -1) {
+		animationMapTransition->Draw(renderer);
 	}
 
 	if (*m_timeScale == -2) {
@@ -556,6 +582,9 @@ void UIManager::UpdateStats() {
 				DataSaver::GetInstance()->SaveGame("save.dat");
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			}
+
+			else if (*m_timeScale == -1) {
 			}
 		}
 		m_finishThread = true;

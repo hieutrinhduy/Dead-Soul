@@ -127,6 +127,8 @@ public:
         }
     };
 
+    void ResetPlayerPosition();
+
     // set collider:
     void SetGroundCollider(SDL_Rect* ground);
     void SetEnemyCollider(SDL_Rect* enemy);

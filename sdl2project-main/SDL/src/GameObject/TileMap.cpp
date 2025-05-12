@@ -12,9 +12,9 @@ constexpr int CHECK_SCOPE = 2; // scope of the object-terrain collision check
 
 
 #pragma region CONSTRUCTOR & DECONSTRUCTOR
-TileMap::TileMap(const char* tilemapFile, const char* tilesetFile, int tileSize) :
-    m_tileSize(tileSize), m_tilemapFile(tilemapFile), m_tilesetFile(tilesetFile),
-    m_mapHeight(0), m_mapWidth(0),
+TileMap::TileMap(const char* tilemapFile, const char* tilesFolder, int tileSize, std::shared_ptr<int> timeScale) :
+    m_tileSize(tileSize), m_tilemapFile(tilemapFile), m_tilesFolder(tilesFolder), m_timeScale(timeScale),
+    m_mapHeight(0), m_mapWidth(0), m_mapNumber(1),
     m_isPlaying(true)
 {
     GetTileIdFromTilemap();
@@ -62,7 +62,7 @@ void TileMap::GetTileIdFromTilemap()
 void TileMap::LoadTileTexturesFromTileset()
 {
     for (auto& texture : m_tileTextures) {
-        texture.second = ResourceManagers::GetInstance()->GetTexture("Map/map1_tileset/" + std::to_string(texture.first) + ".png");
+        texture.second = ResourceManagers::GetInstance()->GetTexture(m_tilesFolder + std::to_string(texture.first) + ".png");
     }
 }
 
@@ -94,6 +94,17 @@ void TileMap::DrawMap(SDL_Renderer* renderer)
         }
     }
 }
+
+
+void TileMap::LoadNewMap() {
+    m_mapNumber++;
+    if (m_mapNumber == 2) {
+        m_tilemapFile = "Data/Textures/Map/output2.bin";
+        m_tilesFolder = "Map/map2_tileset/";
+        GetTileIdFromTilemap();
+        LoadTileTexturesFromTileset();
+    }
+}
 #pragma endregion
 
 
@@ -116,10 +127,15 @@ void TileMap::StartCheckingPlayerMovementAbility() {
         bool canGoLeft = true, canGoRight = true, bumpTheHead = true, isGrounded = true;
         float leftLimit = 200, rightLimit = 200, topLimit = 200, bottomLimit = 200;
 
+        int portal_left = (m_mapWidth - 5) * m_tileSize;
+
         while (m_isPlaying) {
             SDL_Rect player = m_player->GetCollider();
             float playerRight = player.x + player.w;
             float playerBottom = player.y + player.h;
+
+            // check if player REACHES PORTAL:
+            if (playerRight >= portal_left) *m_timeScale = -1;
 
             int startColumn = player.x / m_tileSize;
             int endColumn = playerRight / m_tileSize;

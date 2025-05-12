@@ -17,13 +17,12 @@ constexpr float COLLIDER_X_FLIP = 1 - COLLIDER_X - COLLIDER_W;                  
 float PlayerController::m_airTime = 0.0f;
 float m_deadTimer;
 bool m_finishDead;
-//TTF_Font* m_font = nullptr;
 extern std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 
 /* ----------------------------------------------------------------------------------------------------------------------- */
 //      CONSTRUCTOR & DECONSTRUCTOR  ->  INIT  ->  HANDLE KEY_EVENTS  ->  HANDLE MOUSE_EVENTS  ->  UPDATE  ->  DRAW
 /* ----------------------------------------------------------------------------------------------------------------------- */
-
+#pragma region Predefined function
 PlayerController::PlayerController()
     : m_gravityForce(150.0f), m_jumpForce(-500.0f), m_velocityY(0.0f), m_speed(700.0f),
     m_jumpCount(0), m_maxJump(2), m_isGrounded(false),
@@ -39,13 +38,7 @@ PlayerController::PlayerController()
 {
 }
 
-PlayerController::~PlayerController()
-{
-    /*if (m_font) {
-        TTF_CloseFont(m_font);
-        m_font = nullptr;
-    }*/
-}
+PlayerController::~PlayerController() {}
 
 
 
@@ -543,6 +536,8 @@ void PlayerController::Draw(SDL_Renderer* renderer)
         }
     }
 }
+#pragma endregion
+
 
 
 /* ------------------------- */
@@ -643,6 +638,11 @@ void PlayerController::ShootProjectile()
     //    });
 
     g_playerBullets.push_back(bullet);
+}
+
+
+void PlayerController::ResetPlayerPosition() {
+    m_player->Set2DPosition(PLAYER_STARTING_POSITION_X, PLAYER_STARTING_POSITION_Y);
 }
 
 

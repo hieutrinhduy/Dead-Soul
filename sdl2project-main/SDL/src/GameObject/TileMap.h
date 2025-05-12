@@ -18,12 +18,13 @@
 class TileMap
 {
 public:
-    TileMap(const char* tileMapFile, const char* tilesetFile, int tileSize);
+    TileMap(const char* tileMapFile, const char* tilesetFile, int tileSize, std::shared_ptr<int> timeScale);
     ~TileMap();
 
     void GetTileIdFromTilemap();
     void LoadTileTexturesFromTileset();
     void DrawMap(SDL_Renderer* renderer);
+    void LoadNewMap();
 
     // GETTER:
     int GetWidth();
@@ -42,13 +43,14 @@ public:
 
 private:
     const char* m_tilemapFile;
-    const char* m_tilesetFile;
+    const char* m_tilesFolder;
+    std::shared_ptr<int> m_timeScale;
+    int m_mapNumber;
 
     int m_mapWidth, m_mapHeight;
 
     std::vector<std::vector<int>> m_tileIds;
     std::map<int, std::shared_ptr<TextureManager>> m_tileTextures;
-    std::string m_tilesFolder;
     int m_tileSize;
 
 

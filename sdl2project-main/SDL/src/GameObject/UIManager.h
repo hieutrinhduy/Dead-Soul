@@ -3,8 +3,10 @@
 #include <list>
 
 #include "Sprite2D.h"
+#include "SpriteAnimation.h"
 #include "Text.h"
 #include "PlayerController.h"
+#include "TileMap.h"
 #include "MouseButton.h"
 #include "SliderIcon.h"
 
@@ -24,6 +26,9 @@ public:
 	void SetReferenceToPlayerController(std::shared_ptr<PlayerController> playerController) {
 		m_playerController = playerController;
 	};
+	void SetReferenceToTileMap(std::shared_ptr<TileMap> tileMap) {
+		m_tileMap = tileMap;
+	}
 	void ResetTimer() { timer = 0; };
 
 	// sub-thread:
@@ -54,11 +59,17 @@ private:
 	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings, iconSensitivitySettings;
 	bool pressButtonWhenPause, releaseButtonWhenPause;
 
+	// UI WHEN CHANGE MAP:
+	std::shared_ptr<SpriteAnimation> animationMapTransition;
+	bool nextLevel = false;
+
 	std::list<std::shared_ptr<MouseButton>> buttons;
 	std::list<std::shared_ptr<Sprite2D>> uiWhenRunGame;
 
 	std::list<std::shared_ptr<SliderIcon>> sliderIcons;
 	std::list<std::shared_ptr<Sprite2D>> uiWhenPause;
+
+	
 
 	SDL_Color hpTextColor, expTextColor;
 	#pragma endregion
@@ -76,6 +87,7 @@ private:
 	SDL_Renderer* m_renderer;
 	std::shared_ptr<int> m_timeScale;
 	std::shared_ptr<PlayerController> m_playerController;
+	std::shared_ptr<TileMap> m_tileMap;
 
 	bool m_isPlaying;
 	float timer, spTimer, mpTimer;

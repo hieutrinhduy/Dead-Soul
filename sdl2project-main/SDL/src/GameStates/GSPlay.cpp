@@ -40,7 +40,7 @@ GSPlay::GSPlay()
 
     m_uiManager = std::make_shared<UIManager>(timeScale);
 
-    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output1.bin", "Data/Textures/Map/tiles", 32);
+    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output1.bin", "Map/map1_tileset/", 32, timeScale);
 
     m_playerController = std::make_shared<PlayerController>();
     m_playerController->Init();
@@ -430,6 +430,7 @@ void GSPlay::DisplayLoadingView() {
         m_tileMap->StartCheckingPlayerMovementAbility();
         // uiManager's SUB-THREAD:
         m_uiManager->SetReferenceToPlayerController(m_playerController);
+        m_uiManager->SetReferenceToTileMap(m_tileMap);
         m_uiManager->UpdateStats();
 
         *timeScale = 1;
