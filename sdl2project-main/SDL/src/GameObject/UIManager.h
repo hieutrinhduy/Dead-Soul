@@ -45,13 +45,13 @@ private:
 	std::shared_ptr<Sprite2D> hpBgBar, spBgBar, mpBgBar, expBgBar;
 	float fullHpBarWidth, fullSpBarWidth, fullMpBarWidth;
 	std::shared_ptr<Sprite2D> iconCoin;
-	std::list<std::shared_ptr<MouseButton>> slots;
+	std::list<std::shared_ptr<MouseButton>> buttons;
 	std::shared_ptr<Sprite2D> selectedSlot;
 	int m_inventorySlot;
 	std::shared_ptr<Text> txtHP, txtSP, txtMP, txtEXP, txtCoin;
 
 	// UI WHEN PAUSE GAME:
-	std::shared_ptr<Sprite2D> pauseMenuBg, musicForegroundBar, sfxForegroundBar;
+	std::shared_ptr<Sprite2D> musicForegroundBar, sfxForegroundBar;
 	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings;
 
 	std::list<std::shared_ptr<Sprite2D>> uiWhenRunGame;

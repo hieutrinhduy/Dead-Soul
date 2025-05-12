@@ -1,8 +1,9 @@
 ﻿/*
 	m_timeScale == -2 => LOADING SCENE
 	m_timeScale == -1 => CHANGE LEVEL
-	m_timeScale == 0 => PAUSE GAME (just is pause, or level up, die, victory<complete all levels>) 
+	m_timeScale == 0 => PAUSE GAME
 	m_timeScale == 1 => RESUME GAME
+	m_timeScale == 2 => LEVEL UP
 */
 
 #include "UIManager.h"
@@ -41,6 +42,12 @@ constexpr int SLOT_SIZE = 75, SLOT_GAP = 5;
 constexpr int SLOT_0_POSITION_X = 10;
 constexpr int SLOT_1_POSITION_X = SLOT_0_POSITION_X + SLOT_SIZE + SLOT_GAP;
 constexpr int SLOT_Y = EXP_BAR_HEIGHT + SLOT_SIZE + 5;
+
+constexpr int BACKGROUND_SPRITES_WIDTH = 128, BACKGROUND_SPRITES_HEIGHT = 72;
+constexpr int TXT_MUSIC_WIDTH = 23, TXT_MUSIC_HEIGHT = 7;
+constexpr int TXT_SFX_WIDTH = 13, TXT_SFX_HEIGHT = 11;
+constexpr int SETTINGS_BAR_WIDTH = 16, SETTINGS_BAR_HEIGHT = 5;
+constexpr int ICON_SIZE = 9; // altered compared to reality ( 19x19 px )
 #pragma endregion
 
 
@@ -166,33 +173,82 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 
 
 	// INVENTORY:
-	texture = ResourceManagers::GetInstance()->GetTexture("slot_greatsword.png");
+	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\slot_greatsword.png");
 	auto slot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	slot->SetSize(SLOT_SIZE, SLOT_SIZE);
 	slot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
 	slot->SetOnClick([this]() {
 		m_playerController->SetWeaponIndex(0);
 	});
-	uiWhenRunGame.push_back(slot);
+	buttons.push_back(slot);
 
-	texture = ResourceManagers::GetInstance()->GetTexture("slot_bow.png");
+	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\slot_bow.png");
 	slot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	slot->SetSize(SLOT_SIZE, SLOT_SIZE);
 	slot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
 	slot->SetOnClick([this]() {
 		m_playerController->SetWeaponIndex(1);
 		});
-	uiWhenRunGame.push_back(slot);
+	buttons.push_back(slot);
 
-	texture = ResourceManagers::GetInstance()->GetTexture("slot_selected.png");
+	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\slot_selected.png");
 	selectedSlot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
 	selectedSlot->SetSize(SLOT_SIZE, SLOT_SIZE);
 	selectedSlot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
 	uiWhenRunGame.push_back(selectedSlot);
+
+
+	// PAUSE BUTTON:
+	auto button = std::make_shared<MouseButton>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\btn_pause.png"), SDL_FLIP_NONE);
+	button->SetSize(50, 50);
+	button->Set2DPosition((SCREEN_WIDTH - 50) / 2.0f, HP_BACKGROUND_BAR_POSITION_Y);
+	button->SetOnClick([this]() {
+		*m_timeScale = 0;
+	});
+	buttons.push_back(button);
 	#pragma endregion
 
 	#pragma	region UI WHEN PAUSE GAME
-	//textur
+	// PAUSE BACKGROUND:
+	auto background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\pause_game.png"), SDL_FLIP_NONE);
+	background->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	background->Set2DPosition(0, 0);
+	uiWhenPause.push_back(background);
+
+
+	// TEXT SPRITE:
+	background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("txt_music.png"), SDL_FLIP_NONE);
+	background->SetSize(0, 0);
+	background->Set2DPosition(0, 0);
+	uiWhenPause.push_back(background);
+
+	background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("txt_sfx.png"), SDL_FLIP_NONE);
+	background->SetSize(0, 0);
+	background->Set2DPosition(0, 0);
+	uiWhenPause.push_back(background);
+	
+
+	// SETTINGS BACKGROUND_BAR:
+	background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("img_background_bar.png"), SDL_FLIP_NONE);
+	background->SetSize(0, 0);
+	background->Set2DPosition(0, 0);
+	uiWhenPause.push_back(background);
+
+	background->SetSize(0, 0);
+	background->Set2DPosition(0, 0);
+	uiWhenPause.push_back(background);
+
+
+	// SETTINGS FOREGROUND_ BAR:
+	musicForegroundBar = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("img_foreground_bar.png"), SDL_FLIP_NONE);
+	background->SetSize(0, 0);
+	background->Set2DPosition(0, 0);
+	uiWhenPause.push_back(musicForegroundBar);
+
+	sfxForegroundBar = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("img_foreground_bar.png"), SDL_FLIP_NONE);
+	background->SetSize(0, 0);
+	background->Set2DPosition(0, 0);
+	uiWhenPause.push_back(sfxForegroundBar);
 	#pragma endregion
 }
 
@@ -204,9 +260,9 @@ UIManager::~UIManager() {}
 #pragma region Handle events
 void UIManager::HandleTouchEvents(SDL_Event& e)
 {
-	for (auto slot : slots)
+	for (auto button : buttons)
 	{
-		if (slot->HandleTouchEvent(&e))
+		if (button->HandleTouchEvent(&e))
 		{
 			break;
 		}
@@ -228,7 +284,7 @@ void UIManager::HandleMouseEvents(SDL_Event& e) {
 
 
 void UIManager::Update(float deltaTime) {
-	if (*m_timeScale == 1) {
+	if (*m_timeScale >= 0) {
 		// UPDATE HP:
 		if (!FloatEquals(hpChangePerFrame, 0.0f) && !FloatEquals(hpLoss, 0.0f)) {
 			hp -= hpChangePerFrame;
@@ -298,8 +354,13 @@ void UIManager::Update(float deltaTime) {
 
 
 void UIManager::Draw(SDL_Renderer* renderer) {
-	if (*m_timeScale == 1) {
+	if (*m_timeScale >= 0) {
+		for (auto& it : buttons) it->Draw(renderer);
 		for (auto& it : uiWhenRunGame) it->Draw(renderer);
+
+		if (*m_timeScale == 0) {
+			for (auto& it : uiWhenPause) it->Draw(renderer);
+		}
 		return;
 	}
 
