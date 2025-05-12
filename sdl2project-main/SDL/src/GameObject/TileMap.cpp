@@ -139,7 +139,6 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             else {
                 for (int i = 1; i <= CHECK_SCOPE; i++) {
                     leftColumnLimit--;
-                    if (leftColumnLimit == 2) break;
                     for (int j = startRow; j <= endRow; j++) {
                         if (m_tileIds[j][leftColumnLimit] == 3 || m_tileIds[j][leftColumnLimit] == 7 ||
                             m_tileIds[j][leftColumnLimit] == 11 || m_tileIds[j][leftColumnLimit] == 15) {
@@ -167,7 +166,6 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             else {
                 for (int i = 1; i <= CHECK_SCOPE; i++) {
                     rightColumnLimit++;
-                    if (rightColumnLimit == m_mapWidth - 3) break;
                     for (int j = startRow; j <= endRow; j++) {
                         if (m_tileIds[j][rightColumnLimit] == 0 || m_tileIds[j][rightColumnLimit] == 4 ||
                             m_tileIds[j][rightColumnLimit] == 8 || m_tileIds[j][rightColumnLimit] == 12) {
@@ -190,7 +188,6 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             int topRowLimit = startRow;
             for (int i = 1; i <= CHECK_SCOPE; i++) {
                 topRowLimit--;
-                if (topRowLimit == -1) break;
                 for (int j = startColumn; j <= endColumn; j++) {
                     if (m_tileIds[topRowLimit][j] >= 12 && m_tileIds[topRowLimit][j] <= 15) {
                         finishCheck = true;
@@ -211,7 +208,6 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             int bottomRowLimit = endRow;
             for (int i = 1; i <= CHECK_SCOPE; i++) {
                 bottomRowLimit++;
-                if (bottomRowLimit == m_mapHeight) break;
                 for (int j = startColumn; j <= endColumn; j++) {
                     if (m_tileIds[bottomRowLimit][j] >= 0 && m_tileIds[bottomRowLimit][j] < 4) {
                         finishCheck = true;

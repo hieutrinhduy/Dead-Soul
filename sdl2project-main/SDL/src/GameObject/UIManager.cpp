@@ -317,7 +317,7 @@ void UIManager::HandleMouseEvents(SDL_Event& e) {
 	if (*m_timeScale == 1) {
 		if (e.type == SDL_MOUSEWHEEL) {
 			std::lock_guard<std::mutex> lock(mtx);
-			if (timer <= 0) timer = 400;
+			if (timer <= 0) timer = 300;
 			changeInWheelValue += e.wheel.y;
 		}
 	}
@@ -535,9 +535,7 @@ void UIManager::UpdateStats() {
 					else if (x >= SCREEN_WIDTH * QUIT_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * QUIT_BUTTON_RIGHT_RATIO &&
 							y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
 					{
-						printf("pop!\n");
-						//*m_timeScale = 3;
-						GameStateMachine::GetInstance()->PopState();
+						ClearThread();
 					}
 				}
 
@@ -560,8 +558,8 @@ void UIManager::UpdateStats() {
 				std::this_thread::sleep_for(std::chrono::milliseconds(20));
 			}
 		}
-
 		m_finishThread = true;
+		GameStateMachine::GetInstance()->PopState();
 	});
 
 	t.detach();

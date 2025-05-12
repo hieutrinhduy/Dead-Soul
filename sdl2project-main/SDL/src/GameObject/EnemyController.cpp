@@ -135,8 +135,6 @@ void EnemyController::Update(float deltaTime)
         return;
     }
 
-    std::cout << "[EnemyState] " << EnemyStateToString(m_currentState) << std::endl;
-
     if (m_isKnockback) {
         m_knockbackTimer -= deltaTime;
 
