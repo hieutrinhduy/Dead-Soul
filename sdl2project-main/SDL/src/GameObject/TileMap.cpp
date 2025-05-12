@@ -62,7 +62,7 @@ void TileMap::GetTileIdFromTilemap()
 void TileMap::LoadTileTexturesFromTileset()
 {
     for (auto& texture : m_tileTextures) {
-        texture.second = ResourceManagers::GetInstance()->GetTexture("Map/tiles/" + std::to_string(texture.first) + ".png");
+        texture.second = ResourceManagers::GetInstance()->GetTexture("Map/tileset_indexed/" + std::to_string(texture.first) + ".png");
     }
 }
 
@@ -132,8 +132,8 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             // LEFT LIMIT:
             bool finishCheck = false;
             int leftColumnLimit = startColumn;
-            if (m_player->IsJumping() && m_tileIds[startRow - 1][startColumn - 1] == 32 ||
-                m_player->IsFalling() && m_tileIds[endRow + 1][startColumn - 1] == 32) {
+            if (m_player->IsJumping() && m_tileIds[startRow - 1][startColumn - 1] == 15 ||
+                m_player->IsFalling() && m_tileIds[endRow + 1][startColumn - 1] == 3) {
                 leftColumnLimit--;
             }
             else {
@@ -141,7 +141,8 @@ void TileMap::StartCheckingPlayerMovementAbility() {
                     leftColumnLimit--;
                     if (leftColumnLimit == 2) break;
                     for (int j = startRow; j <= endRow; j++) {
-                        if (m_tileIds[j][leftColumnLimit] == 32) {
+                        if (m_tileIds[j][leftColumnLimit] == 3 || m_tileIds[j][leftColumnLimit] == 7 ||
+                            m_tileIds[j][leftColumnLimit] == 11 || m_tileIds[j][leftColumnLimit] == 15) {
                             finishCheck = true;
                             break;
                         }
@@ -159,8 +160,8 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             // RIGHT LIMIT:
             finishCheck = false;
             int rightColumnLimit = endColumn;
-            if (m_player->IsJumping() && m_tileIds[startRow - 1][startColumn + 1] == 32 ||
-                m_player->IsFalling() && m_tileIds[endRow + 1][endColumn + 1] == 32) {
+            if (m_player->IsJumping() && m_tileIds[startRow - 1][startColumn + 1] == 12 ||
+                m_player->IsFalling() && m_tileIds[endRow + 1][endColumn + 1] == 0) {
                 rightColumnLimit++;
             }
             else {
@@ -168,7 +169,8 @@ void TileMap::StartCheckingPlayerMovementAbility() {
                     rightColumnLimit++;
                     if (rightColumnLimit == m_mapWidth - 3) break;
                     for (int j = startRow; j <= endRow; j++) {
-                        if (m_tileIds[j][rightColumnLimit] == 32) {
+                        if (m_tileIds[j][rightColumnLimit] == 0 || m_tileIds[j][rightColumnLimit] == 4 ||
+                            m_tileIds[j][rightColumnLimit] == 8 || m_tileIds[j][rightColumnLimit] == 12) {
                             finishCheck = true;
                             break;
                         }
@@ -190,7 +192,7 @@ void TileMap::StartCheckingPlayerMovementAbility() {
                 topRowLimit--;
                 if (topRowLimit == -1) break;
                 for (int j = startColumn; j <= endColumn; j++) {
-                    if (m_tileIds[topRowLimit][j] == 32) {
+                    if (m_tileIds[topRowLimit][j] >= 12 && m_tileIds[topRowLimit][j] <= 15) {
                         finishCheck = true;
                         break;
                     }
@@ -211,7 +213,7 @@ void TileMap::StartCheckingPlayerMovementAbility() {
                 bottomRowLimit++;
                 if (bottomRowLimit == m_mapHeight) break;
                 for (int j = startColumn; j <= endColumn; j++) {
-                    if (m_tileIds[bottomRowLimit][j] >= 0 && m_tileIds[bottomRowLimit][j] < 6) {
+                    if (m_tileIds[bottomRowLimit][j] >= 0 && m_tileIds[bottomRowLimit][j] < 4) {
                         finishCheck = true;
                         break;
                     }

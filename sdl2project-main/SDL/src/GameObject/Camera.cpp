@@ -31,7 +31,7 @@ void Camera::Update(float deltaTime)
 		m_ViewBox.y = (m_target->GetPosition().y  - SCREEN_HEIDHT / 2) ;
 
 		//Lui 2 tiles
-		int marginTiles = 2;
+		int marginTiles = 3;
 		int tileSize = 32;
 
 		//Tinh toan gioi han

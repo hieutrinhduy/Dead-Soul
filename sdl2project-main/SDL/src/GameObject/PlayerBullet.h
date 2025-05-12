@@ -31,5 +31,4 @@ private:
 
     float m_velocityY = 0.0f;
     float m_gravityForce = 600.0f;
-
 };
