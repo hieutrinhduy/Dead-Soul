@@ -8,12 +8,14 @@ typedef struct SaveData {
 	int level;
 	int musicVolume; // from 0 - 128
 	int sfxVolume;   // from 0 - 128
+	int mousewheelSensitivity; // from 1 - 5
 
 	SaveData() {
 		isWatchedStory = false;
 		level = 1;
 		musicVolume = 128;
 		sfxVolume = 128;
+		mousewheelSensitivity = 3;
 	}
 } SaveData;
 

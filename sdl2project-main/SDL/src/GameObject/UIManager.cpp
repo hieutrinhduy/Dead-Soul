@@ -12,10 +12,14 @@
 #include <mutex>
 #include <cmath>
 
+#include "DataSaver.h"
 #include "ResourceManagers.h"
+
 #include "Renderer.h"
 #include "Define.h"
 #include "Sound.h"
+
+#include "GameStateMachine.h"
 
 
 std::mutex mtx;
@@ -43,11 +47,18 @@ constexpr int SLOT_0_POSITION_X = 10;
 constexpr int SLOT_1_POSITION_X = SLOT_0_POSITION_X + SLOT_SIZE + SLOT_GAP;
 constexpr int SLOT_Y = EXP_BAR_HEIGHT + SLOT_SIZE + 5;
 
-constexpr int BACKGROUND_SPRITES_WIDTH = 128, BACKGROUND_SPRITES_HEIGHT = 72;
-constexpr int TXT_MUSIC_WIDTH = 23, TXT_MUSIC_HEIGHT = 7;
-constexpr int TXT_SFX_WIDTH = 13, TXT_SFX_HEIGHT = 11;
-constexpr int SETTINGS_BAR_WIDTH = 16, SETTINGS_BAR_HEIGHT = 5;
-constexpr int ICON_SIZE = 9; // altered compared to reality ( 19x19 px )
+constexpr float SETTINGS_BAR_WIDTH_RATIO = 114.0f / 256, SETTINGS_BAR_HEIGHT_RATIO = 3.0f / 144;
+constexpr float SETTINGS_BAR_POSITION_X_RATIO = 87.0f / 256;
+constexpr float SETTINGS_BAR_1_POSITION_Y_RATIO = 45.0f / 144, SETTINGS_BAR_2_POSITION_Y_RATIO = 69.0f / 144;
+
+constexpr float SETTINGS_ICON_WIDTH_RATIO = 9.0f / 256, SETTINGS_ICON_HEIGHT_RATIO = 9.0f / 144;
+constexpr float SETTINGS_SOUND_START_X = 82.0f / 256, SETTINGS_SOUND_END_X = 197.0f / 256;
+constexpr float SETTINGS_SENSITIVITY_START_X = 51.0f / 256, SETTINGS_SENSITIVITY_END_X = 196.0f / 256;
+constexpr float SETTINGS_ICON_1_Y = 42.0f / 144, SETTINGS_ICON_2_Y = 66.0f /144, SETTINGS_ICON_3_Y = 97.0f / 144;
+
+constexpr float RESUME_BUTTON_LEFT_RATIO = 51.0f / 256, RESUME_BUTTON_RIGHT_RATIO = 97.0f / 256;
+constexpr float QUIT_BUTTON_LEFT_RATIO = 159.0f / 256, QUIT_BUTTON_RIGHT_RATIO = 205.0f / 256;
+constexpr float PAUSE_BUTTON_TOP_RATIO = 117.0f / 144, PAUSE_BUTTON_BOTTOM_RATIO = 131.0f / 144;
 #pragma endregion
 
 
@@ -75,7 +86,9 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	
 
 	// get data from save file:
-	mousewheelSensitivity = 3;
+	SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
+	float musicVolume = saveData.musicVolume / 128.0f, sfxVolume = saveData.sfxVolume / 128.0f;
+	mousewheelSensitivity = saveData.mousewheelSensitivity;//9 - 2a
 	hp = 100; sp = 100; mp = 100; exp = 100;
 	maxHP = 100; maxSP = 100; maxMP = 100; maxEXP = 100;
 
@@ -209,6 +222,9 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	#pragma endregion
 
 	#pragma	region UI WHEN PAUSE GAME
+	pressButtonWhenPause = false;
+	releaseButtonWhenPause = false;
+
 	// PAUSE BACKGROUND:
 	auto background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\pause_game.png"), SDL_FLIP_NONE);
 	background->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
@@ -216,40 +232,43 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	uiWhenPause.push_back(background);
 
 
-	// TEXT SPRITE:
-	background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("txt_music.png"), SDL_FLIP_NONE);
-	background->SetSize(0, 0);
-	background->Set2DPosition(0, 0);
-	uiWhenPause.push_back(background);
-
-	background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("txt_sfx.png"), SDL_FLIP_NONE);
-	background->SetSize(0, 0);
-	background->Set2DPosition(0, 0);
-	uiWhenPause.push_back(background);
-	
-
-	// SETTINGS BACKGROUND_BAR:
-	background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("img_background_bar.png"), SDL_FLIP_NONE);
-	background->SetSize(0, 0);
-	background->Set2DPosition(0, 0);
-	uiWhenPause.push_back(background);
-
-	background->SetSize(0, 0);
-	background->Set2DPosition(0, 0);
-	uiWhenPause.push_back(background);
-
-
-	// SETTINGS FOREGROUND_ BAR:
-	musicForegroundBar = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("img_foreground_bar.png"), SDL_FLIP_NONE);
-	background->SetSize(0, 0);
-	background->Set2DPosition(0, 0);
+	// SETTINGS FOREGROUND_BAR:
+	musicForegroundBar = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\settings_bar.png"), SDL_FLIP_NONE);
+	musicForegroundBar->SetSize(SCREEN_WIDTH * SETTINGS_BAR_WIDTH_RATIO * musicVolume, SCREEN_HEIDHT * SETTINGS_BAR_HEIGHT_RATIO);
+	musicForegroundBar->Set2DPosition(SCREEN_WIDTH * SETTINGS_BAR_POSITION_X_RATIO, SCREEN_HEIDHT * SETTINGS_BAR_1_POSITION_Y_RATIO);
 	uiWhenPause.push_back(musicForegroundBar);
 
-	sfxForegroundBar = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("img_foreground_bar.png"), SDL_FLIP_NONE);
-	background->SetSize(0, 0);
-	background->Set2DPosition(0, 0);
+	sfxForegroundBar = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\settings_bar.png"), SDL_FLIP_NONE);
+	sfxForegroundBar->SetSize(SCREEN_WIDTH * SETTINGS_BAR_WIDTH_RATIO * sfxVolume, SCREEN_HEIDHT * SETTINGS_BAR_HEIGHT_RATIO);
+	sfxForegroundBar->Set2DPosition(SCREEN_WIDTH * SETTINGS_BAR_POSITION_X_RATIO, SCREEN_HEIDHT* SETTINGS_BAR_2_POSITION_Y_RATIO);
 	uiWhenPause.push_back(sfxForegroundBar);
-	#pragma endregion
+
+
+	// SETTINGS ICON:
+	iconMusicSettings = std::make_shared<SliderIcon>(ResourceManagers::GetInstance()->GetTexture("btn_settings.png"), SDL_FLIP_NONE);
+	iconMusicSettings->SetSize(SCREEN_WIDTH* SETTINGS_ICON_WIDTH_RATIO, SCREEN_HEIDHT* SETTINGS_ICON_HEIGHT_RATIO);
+	iconMusicSettings->Set2DPosition(SCREEN_WIDTH * (SETTINGS_SOUND_START_X + musicVolume * (SETTINGS_SOUND_END_X - SETTINGS_SOUND_START_X)),
+									 SCREEN_HEIDHT * SETTINGS_ICON_1_Y);
+	iconMusicSettings->SetRange(SCREEN_WIDTH * SETTINGS_SOUND_START_X, SCREEN_WIDTH * SETTINGS_SOUND_END_X);
+	uiWhenPause.push_back(iconMusicSettings);
+	sliderIcons.push_back(iconMusicSettings);
+
+	iconSfxSettings = std::make_shared<SliderIcon>(ResourceManagers::GetInstance()->GetTexture("btn_settings.png"), SDL_FLIP_NONE);
+	iconSfxSettings->SetSize(SCREEN_WIDTH* SETTINGS_ICON_WIDTH_RATIO, SCREEN_HEIDHT* SETTINGS_ICON_HEIGHT_RATIO);
+	iconSfxSettings->Set2DPosition(SCREEN_WIDTH* (SETTINGS_SOUND_START_X + sfxVolume * (SETTINGS_SOUND_END_X - SETTINGS_SOUND_START_X)),
+													SCREEN_HEIDHT* SETTINGS_ICON_2_Y);
+	iconSfxSettings->SetRange(SCREEN_WIDTH* SETTINGS_SOUND_START_X, SCREEN_WIDTH* SETTINGS_SOUND_END_X);
+	uiWhenPause.push_back(iconSfxSettings);
+	sliderIcons.push_back(iconSfxSettings);
+
+	iconSensitivitySettings = std::make_shared<SliderIcon>(ResourceManagers::GetInstance()->GetTexture("btn_settings.png"), SDL_FLIP_NONE);
+	iconSensitivitySettings->SetSize(SCREEN_WIDTH * SETTINGS_ICON_WIDTH_RATIO, SCREEN_HEIDHT * SETTINGS_ICON_HEIGHT_RATIO);
+	iconSensitivitySettings->Set2DPosition(SCREEN_WIDTH * (SETTINGS_SENSITIVITY_START_X + (9 - mousewheelSensitivity) * (SETTINGS_SENSITIVITY_END_X - SETTINGS_SENSITIVITY_START_X) / 8),
+											SCREEN_HEIDHT* SETTINGS_ICON_3_Y);
+	iconSensitivitySettings->SetRange(SCREEN_WIDTH * SETTINGS_SENSITIVITY_START_X, SCREEN_WIDTH* SETTINGS_SENSITIVITY_END_X);
+	uiWhenPause.push_back(iconSensitivitySettings);
+	sliderIcons.push_back(iconSensitivitySettings);
+#pragma endregion
 }
 
 
@@ -260,11 +279,34 @@ UIManager::~UIManager() {}
 #pragma region Handle events
 void UIManager::HandleTouchEvents(SDL_Event& e)
 {
-	for (auto button : buttons)
-	{
-		if (button->HandleTouchEvent(&e))
+	// when run game:
+	if (*m_timeScale == 1) {
+		for (auto button : buttons)
 		{
-			break;
+			if (button->HandleTouchEvent(&e))
+			{
+				break;
+			}
+		}
+		return;
+	}
+
+
+	// when pause game:
+	if (*m_timeScale == 0) {
+		for (auto icon : sliderIcons)
+		{
+			if (icon->HandleTouchEvent(&e))
+			{
+				break;
+			}
+		}
+
+		if (e.type == SDL_MOUSEBUTTONDOWN) {
+			pressButtonWhenPause = true;
+		}
+		else if (e.type == SDL_MOUSEBUTTONUP) {
+			releaseButtonWhenPause = true;
 		}
 	}
 }
@@ -275,7 +317,7 @@ void UIManager::HandleMouseEvents(SDL_Event& e) {
 	if (*m_timeScale == 1) {
 		if (e.type == SDL_MOUSEWHEEL) {
 			std::lock_guard<std::mutex> lock(mtx);
-			if (timer <= 0) timer = 500;
+			if (timer <= 0) timer = 400;
 			changeInWheelValue += e.wheel.y;
 		}
 	}
@@ -376,6 +418,7 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 // sub-thread
 void UIManager::UpdateStats() {
 	std::thread t([this]() {
+		int musicVolume, sfxVolume;
 		while (m_isPlaying) {
 			if (*m_timeScale == 1) {
 				#pragma region Check Player stats
@@ -426,7 +469,6 @@ void UIManager::UpdateStats() {
 				m_playerController->ResetChangeInValue();
 				#pragma endregion
 
-
 				#pragma region Update Inventory slot
 				if (timer <= 0) {
 					int slot = m_playerController->GetWeaponIndex();
@@ -436,7 +478,6 @@ void UIManager::UpdateStats() {
 
 						if (slot == 0) selectedSlot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
 						else selectedSlot->Set2DPosition(SLOT_1_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
-
 						Sound::GetInstance()->PlaySfx("ui_pop.wav");
 					}
 				}
@@ -447,7 +488,7 @@ void UIManager::UpdateStats() {
 					if (m_inventorySlot > maxSlotNumber) m_inventorySlot = maxSlotNumber;
 					else if (m_inventorySlot < 0) m_inventorySlot = 0;
 
-					int slot = m_inventorySlot / mousewheelSensitivity;
+					int slot = std::round((float)m_inventorySlot / mousewheelSensitivity);
 
 					if (slot != m_playerController->GetWeaponIndex()) {
 						m_playerController->SetWeaponIndex(slot);
@@ -457,12 +498,67 @@ void UIManager::UpdateStats() {
 					}
 
 					timer -= 10;
-					if (timer <= 0) m_inventorySlot = m_inventorySlot / mousewheelSensitivity * mousewheelSensitivity;
+					if (timer <= 0) m_inventorySlot = m_playerController->GetWeaponIndex() * mousewheelSensitivity;
 				}
 				#pragma endregion
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			else if (*m_timeScale == 0) {
+				musicVolume = 128.0f * (iconMusicSettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SOUND_START_X) /
+										(SCREEN_WIDTH * (SETTINGS_SOUND_END_X - SETTINGS_SOUND_START_X));
+				sfxVolume = 128.0f * (iconSfxSettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SOUND_START_X) /
+									  (SCREEN_WIDTH * (SETTINGS_SOUND_END_X - SETTINGS_SOUND_START_X));
+
+				Sound::GetInstance()->SetMusicVolume(musicVolume);
+				Sound::GetInstance()->SetSfxVolume(sfxVolume);
+
+				SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
+				saveData.musicVolume = musicVolume;
+				saveData.sfxVolume = sfxVolume;
+
+				musicForegroundBar->SetSize(SCREEN_WIDTH * SETTINGS_BAR_WIDTH_RATIO * musicVolume / 128,
+										    musicForegroundBar->GetHeight());
+				sfxForegroundBar->SetSize(SCREEN_WIDTH * SETTINGS_BAR_WIDTH_RATIO * sfxVolume / 128,
+										  sfxForegroundBar->GetHeight());
+
+				if (pressButtonWhenPause) {
+					pressButtonWhenPause = false;
+					int x, y;
+					SDL_GetMouseState(&x, &y);
+					if (x >= SCREEN_WIDTH * RESUME_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * RESUME_BUTTON_RIGHT_RATIO &&
+						y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
+					{
+						*m_timeScale = 1;
+					}
+					else if (x >= SCREEN_WIDTH * QUIT_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * QUIT_BUTTON_RIGHT_RATIO &&
+							y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
+					{
+						printf("pop!\n");
+						//*m_timeScale = 3;
+						GameStateMachine::GetInstance()->PopState();
+					}
+				}
+
+				else if (releaseButtonWhenPause) {
+					releaseButtonWhenPause = false;
+					int a = std::round((iconSensitivitySettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SENSITIVITY_START_X) /
+									   (SCREEN_WIDTH * (SETTINGS_SENSITIVITY_END_X - SETTINGS_SENSITIVITY_START_X)) * 4);
+					mousewheelSensitivity = 9 - 2 * a;
+					saveData.mousewheelSensitivity = mousewheelSensitivity;
+					iconSensitivitySettings->Set2DPosition(
+						SCREEN_WIDTH * (SETTINGS_SENSITIVITY_START_X + a * (SETTINGS_SENSITIVITY_END_X -
+																			 SETTINGS_SENSITIVITY_START_X) / 4),
+						iconSensitivitySettings->Get2DPosition().y
+					);
+				}
+
+				DataSaver::GetInstance()->SetSaveData(saveData);
+				DataSaver::GetInstance()->SaveGame("save.dat");
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			}
 		}
 
 		m_finishThread = true;

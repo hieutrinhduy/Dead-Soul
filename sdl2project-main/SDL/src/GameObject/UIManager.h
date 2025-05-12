@@ -45,16 +45,19 @@ private:
 	std::shared_ptr<Sprite2D> hpBgBar, spBgBar, mpBgBar, expBgBar;
 	float fullHpBarWidth, fullSpBarWidth, fullMpBarWidth;
 	std::shared_ptr<Sprite2D> iconCoin;
-	std::list<std::shared_ptr<MouseButton>> buttons;
 	std::shared_ptr<Sprite2D> selectedSlot;
 	int m_inventorySlot;
 	std::shared_ptr<Text> txtHP, txtSP, txtMP, txtEXP, txtCoin;
 
 	// UI WHEN PAUSE GAME:
 	std::shared_ptr<Sprite2D> musicForegroundBar, sfxForegroundBar;
-	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings;
+	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings, iconSensitivitySettings;
+	bool pressButtonWhenPause, releaseButtonWhenPause;
 
+	std::list<std::shared_ptr<MouseButton>> buttons;
 	std::list<std::shared_ptr<Sprite2D>> uiWhenRunGame;
+
+	std::list<std::shared_ptr<SliderIcon>> sliderIcons;
 	std::list<std::shared_ptr<Sprite2D>> uiWhenPause;
 
 	SDL_Color hpTextColor, expTextColor;
