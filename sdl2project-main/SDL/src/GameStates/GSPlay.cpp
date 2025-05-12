@@ -39,7 +39,7 @@ GSPlay::GSPlay()
 
     m_uiManager = std::make_shared<UIManager>(timeScale);
 
-    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output2.bin", "Data/Textures/Map/tiles", 32);
+    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output1.bin", "Data/Textures/Map/tiles", 32);
 
     m_playerController = std::make_shared<PlayerController>();
     m_playerController->Init();
