@@ -28,8 +28,6 @@
 #include "BossBullet.h"
 
 
-
-SDL_Rect groundCollider;
 SDL_Rect enemyCollider;
 std::vector<std::shared_ptr<Bullet>> g_bullets;
 std::vector<std::shared_ptr<BossBullet>> g_bossBullets;
@@ -41,7 +39,7 @@ GSPlay::GSPlay()
 
     m_uiManager = std::make_shared<UIManager>(timeScale);
 
-    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output1.bin", "Data/Textures/Map/tiles", 32);
+    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output2.bin", "Data/Textures/Map/tiles", 32);
 
     m_playerController = std::make_shared<PlayerController>();
     m_playerController->Init();
@@ -54,7 +52,6 @@ GSPlay::~GSPlay() {}
 
 void GSPlay::Init()
 {
-    groundCollider = { 0, 1440, 10000, 200 };
 
     auto tex1 = ResourceManagers::GetInstance()->GetTexture("background_layer_1.png");
     auto tex2 = ResourceManagers::GetInstance()->GetTexture("background_layer_2.png");
@@ -118,17 +115,6 @@ void GSPlay::Init()
     //Enemy ban dan: RangedEnemy
     m_rangedEnemy = std::make_shared<RangedEnemy>();
     m_rangedEnemy->Init(3550, 5700, 300);
-
-    // Set ground collider cho tất cả
-    m_playerController->SetGroundCollider(&groundCollider);
-    m_enemyController->SetGroundCollider(&groundCollider);
-    m_enemyController2->SetGroundCollider(&groundCollider);
-    m_evilCreature->SetGroundCollider(&groundCollider);
-    m_ghostWarrior->SetGroundCollider(&groundCollider);
-    m_ghostWarriorRed->SetGroundCollider(&groundCollider);
-    m_rangedEnemy->SetGroundCollider(&groundCollider);
-    m_boss1->SetGroundCollider(&groundCollider);
-    m_boss2->SetGroundCollider(&groundCollider);
 
     // Set player collider cho tất cả
     m_enemyController->SetPlayerCollider(&m_playerController->GetCollider());
@@ -421,9 +407,6 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderDrawRect(renderer, &ConvertToCameraView(enemyCollider, camPos));
-
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderDrawRect(renderer, &ConvertToCameraView(groundCollider, camPos));
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 

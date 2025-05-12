@@ -25,7 +25,7 @@ extern std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 /* ----------------------------------------------------------------------------------------------------------------------- */
 
 PlayerController::PlayerController()
-    : m_gravityForce(150.0f), m_jumpForce(-500.0f), m_velocityY(0.0f), m_speed(500.0f),
+    : m_gravityForce(150.0f), m_jumpForce(-500.0f), m_velocityY(0.0f), m_speed(700.0f),
     m_jumpCount(0), m_maxJump(2), m_isGrounded(false),
     m_forceJumpAnimation(false), m_forceJumpTimer(0.0f), m_forceJumpDuration(0.15f),
     m_playerFlip(SDL_FLIP_NONE),

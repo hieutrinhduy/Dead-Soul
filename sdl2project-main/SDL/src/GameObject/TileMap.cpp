@@ -62,7 +62,7 @@ void TileMap::GetTileIdFromTilemap()
 void TileMap::LoadTileTexturesFromTileset()
 {
     for (auto& texture : m_tileTextures) {
-        texture.second = ResourceManagers::GetInstance()->GetTexture("Map/tileset_indexed/" + std::to_string(texture.first) + ".png");
+        texture.second = ResourceManagers::GetInstance()->GetTexture("Map/map2_tileset/" + std::to_string(texture.first) + ".png");
     }
 }
 
