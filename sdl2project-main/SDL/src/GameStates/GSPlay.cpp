@@ -1,8 +1,9 @@
 ﻿/*
     m_timeScale == -2 => LOADING SCENE
     m_timeScale == -1 => CHANGE LEVEL
-    m_timeScale == 0 => PAUSE GAME (just is pause, or level up, die, victory<complete all levels>)
-    m_timeScale == 1 => RESUME GAME
+	m_timeScale == 0 => PAUSE GAME
+	m_timeScale == 1 => RESUME GAME
+	m_timeScale == 2 => LEVEL UP
 */
 
 #include "GSPlay.h"
@@ -333,16 +334,6 @@ void GSPlay::Update(float deltaTime)
 
 void GSPlay::Draw(SDL_Renderer* renderer)
 {
-    m_uiManager->Draw(renderer);
-
-    // if the game isn't running or hasn't resumed, stop draw:
-    if (*timeScale != 1) {
-        // draw UI:
-        m_uiManager->Draw(renderer);
-
-        return;
-    }
-
     Vector2 camPos = Camera::GetInstance()->GetPosition();
     std::vector<float> parallaxFactors = { 0.2f, 0.5f, 0.8f };
 
@@ -368,9 +359,6 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
 
     if (m_tileMap) m_tileMap->DrawMap(renderer);
-
-
-    for (auto& it : m_listButton) it->Draw(renderer);
 
     m_playerController->Draw(renderer);
 
