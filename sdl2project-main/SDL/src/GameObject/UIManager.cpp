@@ -365,7 +365,7 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 	
 	// when level up:
 	if (*m_timeScale == 2) {
-		if (e.type = SDL_MOUSEBUTTONDOWN) {
+		if (e.type == SDL_MOUSEBUTTONDOWN) {
 			pressButtonWhenLevelUp = true;
 		}
 	}
@@ -521,7 +521,7 @@ void UIManager::UpdateStats() {
 					exp = 0;
 					pressButtonWhenLevelUp = false;
 					selection = 0;
-					*m_timeScale = 2;
+					//*m_timeScale = 2;
 				//	hoverBorder->SetSize(0, hoverBorder->GetHeight());
 				//	underline->SetSize(0, underline->GetHeight());
 				//	confirmButton->SetSize(0, confirmButton->GetHeight());
@@ -646,11 +646,12 @@ void UIManager::UpdateStats() {
 						(SELECTION_BOTTOM_RATIO - SELECTION_TOP_RATIO) * SCREEN_HEIDHT);
 					hoverBorder->Set2DPosition(SELECTION_3_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
 
-					if (pressButtonWhenLevelUp) selection = 2;
+					if (pressButtonWhenLevelUp) selection = 3;
 				}
 
 				// if not hovering any selection:
 				else hoverBorder->SetSize(0, 0);
+				printf("%d\npressbutton = %d\n\n", selection, pressButtonWhenLevelUp);
 
 
 				/*if (selection != 0) {
