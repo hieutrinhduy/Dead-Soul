@@ -61,7 +61,7 @@ private:
 
 	// UI WHEN CHANGE MAP:
 	std::shared_ptr<SpriteAnimation> animationMapTransition;
-	bool nextLevel = false;
+	bool mapTransitionFlag = true, mapTransitionNextRow = false;
 
 	std::list<std::shared_ptr<MouseButton>> buttons;
 	std::list<std::shared_ptr<Sprite2D>> uiWhenRunGame;

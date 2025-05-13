@@ -272,7 +272,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 #pragma endregion
 
 	#pragma region UI WHEN CHANGE MAP
-	animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("NextLevelPortal.png"), 1, 6, 1, 0.5);
+	animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.03);
 	animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	animationMapTransition->Set2DPosition(0, 0);
 	#pragma endregion
@@ -383,17 +383,29 @@ void UIManager::Update(float deltaTime) {
 
 	if (*m_timeScale == -1) {
 		animationMapTransition->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
+		m_playerController->ResetPlayerPosition();
 		animationMapTransition->Update(deltaTime);
-		if (animationMapTransition->GetCurrentFrame() == 0) {
-			m_playerController->ResetPlayerPosition();
+		if (mapTransitionNextRow && animationMapTransition->GetCurrentFrame() == 0) {
+			animationMapTransition->SetCurrentAction(animationMapTransition->GetCurrentAction() + 1);
+			mapTransitionNextRow = false;
 		}
-		else if (animationMapTransition->GetCurrentFrame() == 2) {
+		else if (animationMapTransition->GetCurrentFrame() == 1) mapTransitionNextRow = true;
+
+		if (mapTransitionFlag && animationMapTransition->GetCurrentFrame() == 6 && animationMapTransition->GetCurrentAction() == 6) {
+			mapTransitionFlag = false;
+			mapTransitionNextRow = false;
 			m_tileMap->LoadNewMap();
-			animationMapTransition->SetCurrentFrame(3);
+			Camera::GetInstance()->Update(deltaTime);
+			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_2.png"), 1, 9, 6, 0.015);
+			animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+			animationMapTransition->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
 		}
-		else if (animationMapTransition->GetCurrentFrame() == 5) {
+		else if (!mapTransitionFlag && animationMapTransition->GetCurrentFrame() == 7 && animationMapTransition->GetCurrentAction() == 6) {
+			mapTransitionFlag = true;
+			mapTransitionNextRow = false;
+			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.02);
+			animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 			*m_timeScale = 1;
-			animationMapTransition->SetCurrentFrame(0);
 		}
 	}
 
