@@ -297,6 +297,7 @@ void RangedEnemy::Draw(SDL_Renderer* renderer)
 bool RangedEnemy::DetectPlayer()
 {
     if (!m_playerCollider) return false;
+    if (m_playerCollider->w == 1) return false;
     float ex = m_collider.x + m_collider.w / 2.0f;
     float px = m_playerCollider->x + m_playerCollider->w / 2.0f;
     float enemyCenterY = m_collider.y + m_collider.h / 2.0f;

@@ -10,6 +10,7 @@ int attackIndex = 0;
 
 const char* EnemyStateToString(EnemyState state) {
     switch (state) {
+    case EnemyState::Idle: return "Idle";
     case EnemyState::Patrol: return "Patrol";
     case EnemyState::Chase: return "Chase";
     case EnemyState::Attack: return "Attack";
@@ -335,7 +336,6 @@ void EnemyController::Update(float deltaTime)
         }
     }
     break;
-
     }
 
     m_enemy->Set2DPosition(posX, posY);
@@ -424,6 +424,10 @@ void EnemyController::Draw(SDL_Renderer* renderer)
 bool EnemyController::DetectPlayer()
 {
     if (!m_playerCollider) return false;
+    if (m_playerCollider->w == 1) 
+    { 
+        return false;
+    }
     float enemyCenterX = m_enemyCollider.x + m_enemyCollider.w / 2.0f;
     float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2.0f;
 

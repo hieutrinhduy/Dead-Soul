@@ -5,6 +5,7 @@
 
 enum class EnemyState
 {
+    Idle,
     Patrol,
     Chase,
     Attack,
@@ -98,7 +99,7 @@ private:
     bool m_isKnockback = false;
     float m_knockbackTimer = 0.0f;
     float m_knockbackDuration = 0.2f;
-    float m_knockbackSpeed = 350.0f;
+    float m_knockbackSpeed = 120.0f;
     int m_knockbackDir = 0; // -1 trái, 1 phải
 
 private:

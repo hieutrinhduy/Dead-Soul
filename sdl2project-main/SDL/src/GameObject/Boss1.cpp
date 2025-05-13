@@ -392,6 +392,7 @@ void Boss1::Draw(SDL_Renderer* renderer)
 bool Boss1::DetectPlayer()
 {
     if (!m_playerCollider) return false;
+    if (m_playerCollider->w == 1) return false;
     float enemyCenterX = m_enemyCollider.x + m_enemyCollider.w / 2.0f;
     float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2.0f;
     float distance = std::abs(enemyCenterX - playerCenterX);

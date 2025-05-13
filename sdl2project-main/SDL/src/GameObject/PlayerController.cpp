@@ -8,7 +8,6 @@
 #include "RangedEnemy.h"
 #include "PlayerBullet.h"
 
-
 constexpr int PLAYER_SIZE = 150, PLAYER_STARTING_POSITION_X = 200, PLAYER_STARTING_POSITION_Y = 100; // sprite size, measure unit: screen pixel
 constexpr float COLLIDER_X = 0.35f, COLLIDER_Y = 0.1f, COLLIDER_W = 0.24f, COLLIDER_H = 0.9f;      // collider : sprite_size ratio
 constexpr float COLLIDER_X_FLIP = 1 - COLLIDER_X - COLLIDER_W;                                     // collider-x when flipped
@@ -86,6 +85,7 @@ void PlayerController::Init()
 
 void PlayerController::HandleKeyEvents(SDL_Event& e)
 {
+    if (m_isDead) return;
     if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
         case SDLK_a: m_KeyPress |= 1; break;
@@ -119,6 +119,10 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
             break;
         case SDLK_2:
             SetWeaponIndex(1);
+            break;
+        case SDLK_9:
+            m_isDead = true;
+            break;
         }
     }
     else if (e.type == SDL_KEYUP) {
@@ -133,6 +137,7 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
 
 void PlayerController::HandleMouseEvents(SDL_Event& e)
 {
+    if (m_isDead) return;
     if (e.type == SDL_MOUSEBUTTONDOWN) {
         if (e.button.button == SDL_BUTTON_LEFT) {
             switch (m_currentWeaponIndex)
@@ -191,14 +196,23 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
     }
 }
 
-
-
 void PlayerController::Update(float deltaTime)
 {
     if (!m_player) return;
-
+    int currentFrame = m_player->GetCurrentFrame();
     //Nếu chết thì đếm ngược thời gian trước khi dừng draw
     if (m_isDead) {
+        if (!m_hasDied) {
+            DestroyPlayer();    
+            Die();
+        }
+        else
+        {
+            if (currentFrame == 5) {
+                std::cout << "Pause" << std::endl;
+                m_player->SetFrameTime(INFINITY);
+            }
+        }
         if (!m_finishDead) {
             m_deadTimer -= deltaTime;
             if (m_deadTimer <= 0.0f) {
@@ -222,29 +236,31 @@ void PlayerController::Update(float deltaTime)
             }
         }
 
-        // ❌ KHÔNG return nếu còn knockback
         if (!m_isKnockback) {
             m_player->Update(deltaTime);
             return;
         }
     }
 
-
     if (m_isKnockback) {
         m_knockbackTimer -= deltaTime;
 
         float moveAmount = m_knockbackDir * m_knockbackSpeed * deltaTime;
-        float clampedMove = std::clamp(moveAmount, -leftLimit, rightLimit);
+
+        // Clamp lượng knockback không vượt quá giới hạn
+        moveAmount = std::clamp(moveAmount, -leftLimit, rightLimit);
+
         auto pos = m_player->Get2DPosition();
-        pos.x += clampedMove;
+        pos.x += moveAmount;
         m_player->Set2DPosition(pos.x, pos.y);
-        m_playerCollider.x = (int)pos.x;
+        m_playerCollider.x = static_cast<int>(pos.x);
 
         if (m_knockbackTimer <= 0.0f) {
             m_isKnockback = false;
         }
-        return;
+        //return;
     }
+
 
 
     //Sau khi tấn công 1 khoảng thời gian trở về trạng thái idle
@@ -334,7 +350,10 @@ void PlayerController::Update(float deltaTime)
 
     //Chỉnh tốc độ rơi dựa trên m_airTime (thời gian trên không), càng lâu thì rơi càng nhanh, tối đa vận tốc rơi là 800
     m_velocityY += m_gravityForce * (1.0f + m_airTime * 15.0f) * deltaTime;
-    if (m_velocityY > 800) m_velocityY = 800;
+    if (m_velocityY > 800) 
+    {
+        m_velocityY = 800;
+    }
 
 
     // Tính vị trí mới theo trục Y dựa vào trọng lực (trên kia là tính x)
@@ -345,7 +364,8 @@ void PlayerController::Update(float deltaTime)
             posY = m_player->Get2DPosition().y - topLimit;
             m_velocityY = -m_velocityY;
         }
-        else posY = m_player->Get2DPosition().y + m_velocityY * deltaTime;
+        else 
+            posY = m_player->Get2DPosition().y + m_velocityY * deltaTime;
     }
     else posY = m_player->Get2DPosition().y + std::min(m_velocityY * deltaTime, bottomLimit);
 
@@ -423,8 +443,6 @@ void PlayerController::Update(float deltaTime)
     wasGrounded = m_isGrounded;
     wasJumpingUp = isJumpingUp;
 
-    // Khi đang Attack
-    int currentFrame = m_player->GetCurrentFrame();
     switch (m_currentWeaponIndex)
     {
     case 0:
@@ -481,8 +499,7 @@ void PlayerController::Draw(SDL_Renderer* renderer)
 {
     if (m_isDead && m_finishDead)
     {
-        DestroyPlayer();
-        return;
+        //return;
     }
 
     if (m_player)
@@ -515,7 +532,7 @@ void PlayerController::Draw(SDL_Renderer* renderer)
         //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         //SDL_RenderDrawRect(renderer, &attackBox);
 
-        int damageAmount = 10;
+        int damageAmount = GetPlayerDamage();
         for (size_t i = 0; i < m_enemyColliders.size(); ++i)
         {
             SDL_Rect enemyScreen = *m_enemyColliders[i];
@@ -558,6 +575,7 @@ void PlayerController::TakeDamage(int damage, int knockbackDir)
     //}
 
     // Bị hit
+    m_isAttacking = false;
     m_isHit = true;
     m_hitTimer = 0.20f;
     ChangeAnimation(hurtTexture, 3, 0.07f);
@@ -569,10 +587,10 @@ void PlayerController::TakeDamage(int damage, int knockbackDir)
 
 void PlayerController::Die()
 {
-    m_isDead = true;
-    m_deadTimer = 0.29f;
+    m_deadTimer = 0.59f;
     m_finishDead = false;
-    ChangeAnimation(deadTexture, 6, 0.05f);
+    ChangeAnimation(deadTexture, 6, 0.1f);
+    m_hasDied = true;
 }
 
 
@@ -586,7 +604,13 @@ void PlayerController::ChangeAnimation(std::shared_ptr<TextureManager> texture, 
     pos.y = temp.y;
     m_player = std::make_shared<SpriteAnimation>(texture, 1, frameCount, 1, frameTime);
     m_player->SetSize(180, 180);
-    m_player->Set2DPosition(pos.x, pos.y);
+    m_player->Set2DPosition(pos.x, pos.y);    
+    if (texture == deadTexture) {
+        m_player->SetSize(360, 180);
+        if (m_playerFlip == SDL_FLIP_HORIZONTAL) {
+            m_player->Set2DPosition(pos.x - 180, pos.y);
+        }
+    }
     m_player->SetFlip(m_playerFlip);
 
     Camera::GetInstance()->SetTarget(m_player);
@@ -617,7 +641,9 @@ void PlayerController::SetEnemyColliders(const std::vector<SDL_Rect*>& enemies)
 
 void PlayerController::DestroyPlayer()
 {
-    m_playerCollider = { 0, 0, 0, 0 };
+    m_velocityX = 0;
+    m_velocityY = 0;
+    m_playerCollider.w = 1;
 }
 
 void PlayerController::SetOnHitEnemyCallbacks(const std::vector<std::function<void(int)>>& callbacks)

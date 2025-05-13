@@ -61,6 +61,11 @@ public:
         return m_currentWeaponIndex;
     };
 
+    int GetPlayerDamage() {
+        std::lock_guard<std::mutex> lock(mtx);
+        return m_damage;
+    }
+
     /* -------- SETTER: -------- */
     // set movement ability data:
     void SetMovementState(bool canGoLeft, bool canGoRight, bool bumpTheHead, bool isGrounded) {
@@ -110,6 +115,11 @@ public:
         m_SpLose = 0;
         m_MpLose = 0;
     };
+
+    void SetPlayerDamage(int damage) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_damage = damage;
+    }
 
     // set Weapon Index:
     void SetWeaponIndex(int index) 
@@ -203,6 +213,7 @@ private:
     float m_hitTimer = 0.0f;
     bool m_didDamage = false;
     bool m_canDealDamage;
+    int m_damage = 10;
 
     //MP and SP
     bool m_enoughSP;
@@ -243,6 +254,9 @@ private:
 
     //Check Attack Move flag
     bool m_didAttackMove = false;
+
+    //Kiem tra da goi ham die hay chua
+    bool m_hasDied = false;
 
 
     void ShootProjectile();
