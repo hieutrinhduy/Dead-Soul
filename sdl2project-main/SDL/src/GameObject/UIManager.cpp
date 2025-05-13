@@ -5,6 +5,13 @@
 	m_timeScale == 1 => RESUME GAME
 	m_timeScale == 2 => LEVEL UP
 */
+// ----------------------------------------------------------------------
+/*
+	upgrade 1: increase 25% of max HP, then refill 10% of max HP
+	upgrade 2: increase 10% of max MP, and increase refill speed
+	upgrade 3: increase 4 - 6 ATK dmg
+*/
+// ----------------------------------------------------------------------
 
 #include "UIManager.h"
 
@@ -60,6 +67,14 @@ constexpr float SETTINGS_ICON_1_Y = 42.0f / 144, SETTINGS_ICON_2_Y = 66.0f /144,
 constexpr float RESUME_BUTTON_LEFT_RATIO = 51.0f / 256, RESUME_BUTTON_RIGHT_RATIO = 97.0f / 256;
 constexpr float QUIT_BUTTON_LEFT_RATIO = 159.0f / 256, QUIT_BUTTON_RIGHT_RATIO = 205.0f / 256;
 constexpr float PAUSE_BUTTON_TOP_RATIO = 117.0f / 144, PAUSE_BUTTON_BOTTOM_RATIO = 131.0f / 144;
+
+// statistic about: selection border, hover border, underline, confirm button
+constexpr float SELECTION_WIDTH_RATIO = 20.0f / 256, SELECTION_HEIGHT_RATIO = 40.0f / 144;
+constexpr float SELECTION_TOP_RATIO = 40.0f / 144, SELECTION_BOTTOM_RATIO = 80.0f / 144;
+constexpr float SELECTION_1_LEFT_RATIO = 40.0f / 256, SELECTION_1_RIGHT_RATIO = 80.0f / 256;
+constexpr float SELECTION_2_LEFT_RATIO = 81.0f / 256, SELECTION_2_RIGHT_RATIO = 121.0f / 256;
+constexpr float SELECTION_3_LEFT_RATIO = 122.0f / 256, SELECTION_3_RIGHT_RATIO = 162.0f / 256;
+
 #pragma endregion
 
 
@@ -73,15 +88,18 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	m_isPlaying = true; m_finishThread = false;
 	TTF_Font* font = ResourceManagers::GetInstance()->GetFont("FVF Fernando 08.ttf", 48);
 
-	// LOADING SCENE:
+	#pragma region UI WHEN LOAD SCENE
+	// LOADING BACKGROUND:
 	loadingBackground = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("bg_loading.png"), SDL_FLIP_NONE);
 	loadingBackground->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	loadingBackground->Set2DPosition(0, 0);
 	loadingBackground->Draw(m_renderer);
 
+	// LOADING TEXT:
 	txtLoading = std::make_shared<Text>("LOADING", font, hpTextColor);
 	txtLoading->SetSize(LOADING_TEXT_WIDTH, LOADING_TEXT_HEIGHT);
 	txtLoading->Set2DPosition( (SCREEN_WIDTH - LOADING_TEXT_WIDTH) / 2.0f, SCREEN_HEIDHT - LOADING_TEXT_HEIGHT - 75 );
+	#pragma endregion
 
 	m_inventorySlot = 0;
 	
@@ -89,7 +107,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	// get data from save file:
 	SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
 	float musicVolume = saveData.musicVolume / 128.0f, sfxVolume = saveData.sfxVolume / 128.0f;
-	mousewheelSensitivity = saveData.mousewheelSensitivity;//9 - 2a
+	mousewheelSensitivity = saveData.mousewheelSensitivity;
 	hp = 100; sp = 100; mp = 100; exp = 100;
 	maxHP = 100; maxSP = 100; maxMP = 100; maxEXP = 100;
 
@@ -206,7 +224,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	buttons.push_back(slot);
 
 	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\slot_selected.png");
-	selectedSlot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
+	selectedSlot = std::make_shared<Sprite2D>(texture, SDL_FLIP_NONE);
 	selectedSlot->SetSize(SLOT_SIZE, SLOT_SIZE);
 	selectedSlot->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
 	uiWhenRunGame.push_back(selectedSlot);
@@ -269,12 +287,38 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	iconSensitivitySettings->SetRange(SCREEN_WIDTH * SETTINGS_SENSITIVITY_START_X, SCREEN_WIDTH* SETTINGS_SENSITIVITY_END_X);
 	uiWhenPause.push_back(iconSensitivitySettings);
 	sliderIcons.push_back(iconSensitivitySettings);
-#pragma endregion
+	#pragma endregion
 
 	#pragma region UI WHEN CHANGE MAP
 	animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.03);
 	animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	animationMapTransition->Set2DPosition(0, 0);
+	#pragma endregion
+
+
+	#pragma region UI WHEN LEVEL UP
+	// BACKGROUND:
+	background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\level_up.png"), SDL_FLIP_NONE);
+	background->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	background->Set2DPosition(0, 0);
+	uiWhenLevelUp.push_back(background);
+
+	// HOVERING SELECTION:
+	hoverBorder = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\slot_selected.png"), SDL_FLIP_NONE);
+	hoverBorder->SetSize(SLOT_SIZE, SLOT_SIZE);
+	hoverBorder->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	uiWhenLevelUp.push_back(hoverBorder);
+
+	// SELECTED SELECTION:
+	selectionBorder = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\slot_selected.png"), SDL_FLIP_NONE);
+	selectionBorder->SetSize(SLOT_SIZE, SLOT_SIZE);
+	selectionBorder->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	uiWhenLevelUp.push_back(selectionBorder);
+
+	// UNDERLINE:
+
+	// CONFIRM BUTTON:
+
 	#pragma endregion
 
 }
@@ -317,6 +361,14 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 			releaseButtonWhenPause = true;
 		}
 	}
+
+	
+	// when level up:
+	if (*m_timeScale == 2) {
+		if (e.type = SDL_MOUSEBUTTONDOWN) {
+			pressButtonWhenLevelUp = true;
+		}
+	}
 }
 
 
@@ -338,6 +390,7 @@ void UIManager::Update(float deltaTime) {
 		// UPDATE HP:
 		if (!FloatEquals(hpChangePerFrame, 0.0f) && !FloatEquals(hpLoss, 0.0f)) {
 			hp -= hpChangePerFrame;
+			if (hp < 0) hp = 0;
 			hpLoss -= hpChangePerFrame;
 
 			// set the text displaying the HP amount:
@@ -437,6 +490,9 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 		if (*m_timeScale == 0) {
 			for (auto& it : uiWhenPause) it->Draw(renderer);
 		}
+		else if (*m_timeScale == 2) {
+			for (auto& it : uiWhenLevelUp) it->Draw(renderer);
+		}
 		return;
 	}
 
@@ -456,9 +512,21 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 // sub-thread
 void UIManager::UpdateStats() {
 	std::thread t([this]() {
+		int x, y; // mouse coordination
 		int musicVolume, sfxVolume;
+		float refillSpTime = 0.1f, spRefilled = 1.0f, refillMpTime = 1.0f, mpRefilled = 30;
 		while (m_isPlaying) {
 			if (*m_timeScale == 1) {
+				if (exp == maxEXP) {
+					exp = 0;
+					pressButtonWhenLevelUp = false;
+					selection = 0;
+					*m_timeScale = 2;
+				//	hoverBorder->SetSize(0, hoverBorder->GetHeight());
+				//	underline->SetSize(0, underline->GetHeight());
+				//	confirmButton->SetSize(0, confirmButton->GetHeight());
+				}
+
 				#pragma region Check Player stats
 				// check HP_STATUS:
 				int lossAmount = m_playerController->GetHpLose();
@@ -477,10 +545,10 @@ void UIManager::UpdateStats() {
 				}
 
 				spTimer += 0.01f;
-				if (spTimer >= 0.1f) {
+				if (spTimer >= refillSpTime) {
 					spTimer = 0;
 					sp += 1;
-					if (sp > maxSP) sp = maxSP;
+					if (sp >= maxSP) sp = maxSP;
 				}
 				if (sp - lossAmount < 30 ) m_playerController->SetSpStatus(false);
 				else m_playerController->SetSpStatus(true);
@@ -494,10 +562,10 @@ void UIManager::UpdateStats() {
 				}
 
 				mpTimer += 0.01f;
-				if (mpTimer >= 1.0f) {
+				if (mpTimer >= refillMpTime) {
 					mpTimer = 0;
-					mp += 30;
-					if (mp > maxMP) mp = maxMP;
+					mp += mpRefilled;
+					if (mp >= maxMP) mp = maxMP;
 				}
 				if (mp - lossAmount < 30) m_playerController->SetMpStatus(false);
 				else m_playerController->SetMpStatus(true);
@@ -543,6 +611,81 @@ void UIManager::UpdateStats() {
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}
 
+
+
+			else if (*m_timeScale == 2) {
+				SDL_GetMouseState(&x, &y);
+
+				// if hovering selection 1:
+				if (x >= SELECTION_1_LEFT_RATIO * SCREEN_WIDTH && x <= SELECTION_1_RIGHT_RATIO * SCREEN_WIDTH &&
+					y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y >= SELECTION_BOTTOM_RATIO)
+				{
+					hoverBorder->SetSize((SELECTION_1_RIGHT_RATIO - SELECTION_1_LEFT_RATIO) * SCREEN_WIDTH,
+						(SELECTION_BOTTOM_RATIO - SELECTION_TOP_RATIO) * SCREEN_HEIDHT);
+					hoverBorder->Set2DPosition(SELECTION_1_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
+
+					if (pressButtonWhenLevelUp) selection = 1;
+				}
+
+				// if hovering selection 2:
+				else if (x >= SELECTION_2_LEFT_RATIO * SCREEN_WIDTH && x <= SELECTION_2_RIGHT_RATIO * SCREEN_WIDTH &&
+					y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y >= SELECTION_BOTTOM_RATIO)
+				{
+					hoverBorder->SetSize((SELECTION_2_RIGHT_RATIO - SELECTION_2_LEFT_RATIO) * SCREEN_WIDTH,
+						(SELECTION_BOTTOM_RATIO - SELECTION_TOP_RATIO) * SCREEN_HEIDHT);
+					hoverBorder->Set2DPosition(SELECTION_2_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
+
+					if (pressButtonWhenLevelUp) selection = 2;
+				}
+
+				// if hovering selection 3:
+				else if (x >= SELECTION_3_LEFT_RATIO * SCREEN_WIDTH && x <= SELECTION_3_RIGHT_RATIO * SCREEN_WIDTH &&
+					y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y >= SELECTION_BOTTOM_RATIO)
+				{
+					hoverBorder->SetSize((SELECTION_3_RIGHT_RATIO - SELECTION_3_LEFT_RATIO) * SCREEN_WIDTH,
+						(SELECTION_BOTTOM_RATIO - SELECTION_TOP_RATIO) * SCREEN_HEIDHT);
+					hoverBorder->Set2DPosition(SELECTION_3_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
+
+					if (pressButtonWhenLevelUp) selection = 2;
+				}
+
+				// if not hovering any selection:
+				else hoverBorder->SetSize(0, 0);
+
+
+				/*if (selection != 0) {
+					underline->SetSize(100, underline->GetHeight());
+					confirmButton->SetSize(100, confirmButton->GetHeight());
+				}*/
+
+				if (pressButtonWhenLevelUp) {
+					pressButtonWhenLevelUp = false;
+					// check confirm button's location when it's activated:
+					// if () {
+						/**m_timeScale = 1;
+						if (selection == 1) {
+							maxHP *= 1.25f;
+							hpLoss -= 0.1f * maxHP;
+							hpChangePerFrame = hpLoss / FRAGMENT_COUNT;
+						}
+						if (selection == 2) {
+							maxSP *= 1.1f;
+							spRefilled += 0.1f;
+							maxMP += 10;
+							mpRefilled += 1;
+						}
+						if (selection == 3) {
+
+						}*/
+					//}
+					//*m_timeScale = 1;
+				}
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			}
+
+
+
 			else if (*m_timeScale == 0) {
 				musicVolume = 128.0f * (iconMusicSettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SOUND_START_X) /
 										(SCREEN_WIDTH * (SETTINGS_SOUND_END_X - SETTINGS_SOUND_START_X));
@@ -563,7 +706,6 @@ void UIManager::UpdateStats() {
 
 				if (pressButtonWhenPause) {
 					pressButtonWhenPause = false;
-					int x, y;
 					SDL_GetMouseState(&x, &y);
 					if (x >= SCREEN_WIDTH * RESUME_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * RESUME_BUTTON_RIGHT_RATIO &&
 						y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
@@ -595,6 +737,8 @@ void UIManager::UpdateStats() {
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(20));
 			}
+
+			
 
 			else if (*m_timeScale == -1) {
 			}

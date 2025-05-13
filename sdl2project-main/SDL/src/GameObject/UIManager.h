@@ -59,6 +59,11 @@ private:
 	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings, iconSensitivitySettings;
 	bool pressButtonWhenPause, releaseButtonWhenPause;
 
+	// UI WHEN LEVEL UP:
+	std::shared_ptr<Sprite2D> selectionBorder, hoverBorder, underline, confirmButton;
+	int selection = 0;
+	bool pressButtonWhenLevelUp = false;
+
 	// UI WHEN CHANGE MAP:
 	std::shared_ptr<SpriteAnimation> animationMapTransition;
 	bool mapTransitionFlag = true, mapTransitionNextRow = false;
@@ -68,6 +73,8 @@ private:
 
 	std::list<std::shared_ptr<SliderIcon>> sliderIcons;
 	std::list<std::shared_ptr<Sprite2D>> uiWhenPause;
+
+	std::list<std::shared_ptr<Sprite2D>> uiWhenLevelUp;
 
 	
 
