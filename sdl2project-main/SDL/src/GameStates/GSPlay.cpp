@@ -27,12 +27,16 @@
 #include "Boss1.h"
 #include "SecretBoss.h"
 #include "BossBullet.h"
+#include "ExpOrb.h"
 
 
 SDL_Rect enemyCollider;
 std::vector<std::shared_ptr<Bullet>> g_bullets;
 std::vector<std::shared_ptr<BossBullet>> g_bossBullets;
 std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
+
+// ExpOrbs
+std::vector<std::shared_ptr<ExpOrb>> g_expOrbs;
 
 GSPlay::GSPlay()
 {
@@ -213,8 +217,18 @@ void GSPlay::Init()
         Camera::GetInstance()->Shake(0.1f, randomMagnitude);
     });
 
-    DisplayLoadingView();
+    //Callback Khi Enemy Chet
+    m_enemyController->SetOnDeathCallback([this]() {
+        m_playerController->SetExpGained(10);
+        m_playerController->SetGoldGained(10);
+        });
+    //Spawn Exp khi enemy Chet
+    m_enemyController->SetSpawnExpCallback([this](Vector2 pos) {
+        g_expOrbs.push_back(std::make_shared<ExpOrb>(pos));
+        });
 
+
+    DisplayLoadingView();
 }
 
 
@@ -288,6 +302,7 @@ void GSPlay::Update(float deltaTime)
     m_boss1->Update(deltaTime);
     m_boss2->Update(deltaTime);
 
+    for (auto& orb : g_expOrbs) orb->Update(deltaTime);
 
     for (auto it = g_bullets.begin(); it != g_bullets.end(); )
     {
@@ -381,6 +396,8 @@ void GSPlay::Draw(SDL_Renderer* renderer)
     m_rangedEnemy->Draw(renderer);
     m_boss1->Draw(renderer);
     m_boss2->Draw(renderer);
+
+    for (auto& orb : g_expOrbs) orb->Draw(renderer);
 
     for (auto& bullet : g_bullets)
     {

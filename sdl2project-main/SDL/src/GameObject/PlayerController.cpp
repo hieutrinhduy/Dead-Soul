@@ -169,7 +169,7 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
                     m_lastAttackTime = now;
                     // Nhích nhẹ theo hướng attack
                     float moveDir = (m_playerFlip == SDL_FLIP_NONE) ? 1.0f : -1.0f;
-                    float attackMoveAmount = moveDir * 40.0f;
+                    float attackMoveAmount = moveDir * 60.0f;
 
                     auto currentPos = m_player->Get2DPosition();
                     float maxMove = (moveDir > 0) ? rightLimit : -leftLimit;
@@ -209,7 +209,6 @@ void PlayerController::Update(float deltaTime)
         else
         {
             if (currentFrame == 5) {
-                std::cout << "Pause" << std::endl;
                 m_player->SetFrameTime(INFINITY);
             }
         }
@@ -220,7 +219,11 @@ void PlayerController::Update(float deltaTime)
             }
         }
         m_player->Update(deltaTime);
-        return;
+
+        if (m_isGrounded) {
+            if (m_playerCollider.x != 1) DestroyPlayer();
+            return;
+        }
     }
 
     //Nếu bị hit, sau khi bị hit chuyển về trạng thái chạy hoặc idle
@@ -597,7 +600,7 @@ void PlayerController::Die()
 void PlayerController::ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime)
 {
     if (!m_player) return;
-
+    if (m_hasDied) return;
     auto temp = m_player->Get2DPosition();
     SDL_FPoint pos;
     pos.x = temp.x;
@@ -641,8 +644,8 @@ void PlayerController::SetEnemyColliders(const std::vector<SDL_Rect*>& enemies)
 
 void PlayerController::DestroyPlayer()
 {
+    //Clear Collider and velocity
     m_velocityX = 0;
-    m_velocityY = 0;
     m_playerCollider.w = 1;
 }
 

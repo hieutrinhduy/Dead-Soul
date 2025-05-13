@@ -179,6 +179,7 @@
     <ClCompile Include="src\GameObject\CMath.cpp" />
     <ClCompile Include="src\GameObject\EnemyController.cpp" />
     <ClCompile Include="src\GameObject\EvilCreature.cpp" />
+    <ClCompile Include="src\GameObject\ExpOrb.cpp" />
     <ClCompile Include="src\GameObject\GhostWarrior.cpp" />
     <ClCompile Include="src\GameObject\MouseButton.cpp" />
     <ClCompile Include="src\GameObject\PlayerBullet.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="src\GameObject\CMath.h" />
     <ClInclude Include="src\GameObject\Define.h" />
     <ClInclude Include="src\GameObject\EnemyController.h" />
+    <ClInclude Include="src\GameObject\ExpOrb.h" />
     <ClInclude Include="src\GameObject\GhostWarrior.h" />
     <ClInclude Include="src\GameObject\GhostWarriorRed.h" />
     <ClInclude Include="src\GameObject\KeyState.h" />

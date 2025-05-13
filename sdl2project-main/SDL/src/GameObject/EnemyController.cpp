@@ -112,7 +112,23 @@ void EnemyController::Die()
     m_deadTimer = 1.3f;
     m_finishDead = false;
     ChangeAnimation(deadTexture, 13, 0.1f);
+
+    if (m_onDeathCallback) {
+        m_onDeathCallback();
+    }
+
+    if (m_spawnExpCallback) {
+        Vector2 pos = m_enemy->Get2DPosition();
+        m_spawnExpCallback(pos);
+    }
 }
+
+// EnemyController.cpp
+void EnemyController::SetSpawnExpCallback(std::function<void(Vector2)> callback)
+{
+    m_spawnExpCallback = callback;
+}
+
 
 void EnemyController::DestroyEnemy()
 {
@@ -465,3 +481,9 @@ bool EnemyController::GroundCheck()
     if (!m_groundCollider) return false;
     return CheckCollision(m_enemyCollider, *m_groundCollider);
 }
+
+void EnemyController::SetOnDeathCallback(std::function<void()> callback)
+{
+    m_onDeathCallback = callback;
+}
+

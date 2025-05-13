@@ -100,11 +100,13 @@ public:
     };
 
     void SetExpGained(int amount) {
+        std::cout << "Amount Exp Gained" << amount << std::endl;
         std::lock_guard<std::mutex> lock(mtx);
         m_ExpGained += amount;
     }
 
     void SetGoldGained(int amount) {
+        std::cout << "Amount Gold Gained" << amount << std::endl;
         std::lock_guard<std::mutex> lock(mtx);
         m_GoldGained += amount;
     }

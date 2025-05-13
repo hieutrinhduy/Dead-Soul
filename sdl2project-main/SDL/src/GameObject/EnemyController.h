@@ -31,6 +31,9 @@ public:
 
     // Gọi callback khi tấn công trúng Player
     void SetOnHitPlayerCallback(std::function<void(int damage)> callback) { m_onHitPlayer = callback; }
+    void SetOnDeathCallback(std::function<void()> callback);
+    
+    void SetSpawnExpCallback(std::function<void(Vector2)> callback);
 
 private:
     // === Core ===
@@ -67,6 +70,8 @@ private:
     int m_currentHP;
     int m_damage;
     std::function<void(int damage)> m_onHitPlayer;
+    std::function<void()> m_onDeathCallback;
+    std::function<void(Vector2)> m_spawnExpCallback;
 
     // === Animation Resources ===
     std::shared_ptr<TextureManager> idleTexture;
@@ -99,8 +104,10 @@ private:
     bool m_isKnockback = false;
     float m_knockbackTimer = 0.0f;
     float m_knockbackDuration = 0.2f;
-    float m_knockbackSpeed = 120.0f;
+    float m_knockbackSpeed = 180.0f;
     int m_knockbackDir = 0; // -1 trái, 1 phải
+
+    //Death Call Back
 
 private:
     bool DetectPlayer();
