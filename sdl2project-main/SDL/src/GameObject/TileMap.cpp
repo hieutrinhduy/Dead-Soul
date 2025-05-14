@@ -236,7 +236,9 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             }
             tilePosition = bottomRowLimit * m_tileSize;
             bottomLimit = tilePosition - playerBottom;
-            if (tilePosition == playerBottom) isGrounded = true;
+            if (tilePosition == playerBottom) {
+                if (!m_player->IsJumping()) isGrounded = true;
+            }
             else {
                 if (isGrounded && !m_player->IsJumping()) m_player->LoseTheirFooting();
                 isGrounded = false;

@@ -71,19 +71,6 @@ void GSPlay::Init()
         bg->Set2DPosition(0, 0);
     }
 
-    auto texture = ResourceManagers::GetInstance()->GetTexture("btn_close.tga");
-    button = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
-    button->SetSize(50, 50);
-    button->Set2DPosition(SCREEN_WIDTH - 50, 10);
-    button->SetOnClick([this]() { GameStateMachine::GetInstance()->PopState(); });
-    m_listButton.push_back(button);
-
-    /* m_tileMap->LoadMap("Data/Map/map6.txt");
-     if (!m_tileMapLoaded) {
-         m_tileMap->LoadTiles(Renderer::GetInstance()->GetRenderer(), "Data/Map/tiles", 32);
-         m_tileMapLoaded = true;
-     }*/
-
     Camera::GetInstance()->SetLevelDimension(
         m_tileMap->GetWidth() * m_tileMap->GetTileSize(),
         m_tileMap->GetHeight() * m_tileMap->GetTileSize()

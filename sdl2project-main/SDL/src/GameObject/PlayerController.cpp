@@ -101,8 +101,6 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
                 }
                 m_jumpCount++;
                 m_isGrounded = false;
-                std::cout << topLimit << std::endl;
-                std::cout << m_velocityY << std::endl;
             }
             break;
         case SDLK_LSHIFT:
