@@ -22,6 +22,9 @@ Level1::Level1(std::shared_ptr<PlayerController> player)
         bg->Set2DPosition(0, 0);
     }
 
+    m_gate = std::make_shared<ChangeLevelGate>();
+    m_gate->Init(0, 800);
+
     // Khởi tạo enemy
     m_enemyController = std::make_shared<EnemyController>();
     m_enemyController->Init(0, 800, 450);
@@ -79,6 +82,7 @@ Level1::~Level1() {}
 
 void Level1::Update(float dt)
 {
+    m_gate->Update(dt);
     m_enemyController->Update(dt);
     m_enemyController2->Update(dt);
     m_evilCreature->Update(dt);
@@ -91,6 +95,7 @@ void Level1::Update(float dt)
 
 void Level1::Draw(SDL_Renderer* renderer)
 {
+    m_gate->Draw(renderer);
     m_enemyController->Draw(renderer);
     m_enemyController2->Draw(renderer);
     m_evilCreature->Draw(renderer);

@@ -14,6 +14,7 @@
 #include "SecretBoss.h"
 #include "Level1.h"
 #include "Level2.h"
+#include "ChangeLevelGate.h"
 
 class Sprite2D;
 class SpriteAnimation;
@@ -66,6 +67,8 @@ private:
 	std::shared_ptr<GhostWarrior> m_ghostWarrior;
 	std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed;
 	std::shared_ptr<RangedEnemy> m_rangedEnemy;
+
+	std::shared_ptr<ChangeLevelGate> m_ChangeLevelGate;
 
 	std::shared_ptr<Sprite2D>	m_background;
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;

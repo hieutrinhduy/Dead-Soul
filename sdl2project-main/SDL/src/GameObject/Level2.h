@@ -1,6 +1,4 @@
 #pragma once
-// Level2.h
-#pragma once
 #include <vector>
 #include <memory>
 #include "EnemyController.h"
@@ -12,6 +10,7 @@
 #include "SecretBoss.h"
 #include "PlayerController.h"
 #include "Sprite2D.h"
+#include "ChangeLevelGate.h"
 
 class Level2 {
 public:
@@ -25,6 +24,8 @@ public:
     std::vector<std::function<void(int)>> GetHitEnemyCallbacks();
 
     std::vector<std::shared_ptr<Sprite2D>> GetBackgrounds();
+    std::shared_ptr<ChangeLevelGate> GetChangeLevelGate() const { return m_gate; }
+
 private:
     std::shared_ptr<EnemyController> m_enemyController;
     std::shared_ptr<EnemyController> m_enemyController2;
@@ -34,6 +35,8 @@ private:
     std::shared_ptr<RangedEnemy> m_rangedEnemy;
     std::shared_ptr<Boss1> m_boss1;
     std::shared_ptr<ScecretBoss> m_boss2;
+
+    std::shared_ptr<ChangeLevelGate> m_gate;
 
     std::vector<SDL_Rect*> m_enemyColliders;
     std::vector<std::function<void(int)>> m_hitCallbacks;

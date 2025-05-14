@@ -17,6 +17,10 @@ Level2::Level2(std::shared_ptr<PlayerController> player)
         bg->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
         bg->Set2DPosition(0, 0);
     }
+
+    m_gate = std::make_shared<ChangeLevelGate>();
+    m_gate->Init(1000, 800);
+
     // Khởi tạo enemy
     m_enemyController = std::make_shared<EnemyController>();
     m_enemyController->Init(0, 800, 450);
@@ -74,6 +78,7 @@ Level2::~Level2() {}
 
 void Level2::Update(float dt)
 {
+    m_gate->Update(dt);
     m_enemyController->Update(dt);
     m_enemyController2->Update(dt);
     //m_evilCreature->Update(dt);
@@ -86,6 +91,7 @@ void Level2::Update(float dt)
 
 void Level2::Draw(SDL_Renderer* renderer)
 {
+    m_gate->Draw(renderer);
     m_enemyController->Draw(renderer);
     m_enemyController2->Draw(renderer);
     //m_evilCreature->Draw(renderer);

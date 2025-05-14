@@ -176,6 +176,7 @@
     <ClCompile Include="src\GameObject\BossBullet.cpp" />
     <ClCompile Include="src\GameObject\Bullet.cpp" />
     <ClCompile Include="src\GameObject\Camera.cpp" />
+    <ClCompile Include="src\GameObject\ChangeLevelGate.cpp" />
     <ClCompile Include="src\GameObject\CMath.cpp" />
     <ClCompile Include="src\GameObject\EnemyController.cpp" />
     <ClCompile Include="src\GameObject\EvilCreature.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="src\GameObject\BossBullet.h" />
     <ClInclude Include="src\GameObject\Bullet.h" />
     <ClInclude Include="src\GameObject\Camera.h" />
+    <ClInclude Include="src\GameObject\ChangeLevelGate.h" />
     <ClInclude Include="src\GameObject\CMath.h" />
     <ClInclude Include="src\GameObject\Define.h" />
     <ClInclude Include="src\GameObject\EnemyController.h" />
