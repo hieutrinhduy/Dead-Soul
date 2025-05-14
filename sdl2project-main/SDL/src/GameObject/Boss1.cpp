@@ -99,6 +99,24 @@ void Boss1::Die()
     m_deadTimer = 1.3f;
     m_finishDead = false;
     ChangeAnimation(deadTexture, 19, 0.1f);
+
+    if (m_onDeathCallback) {
+        m_onDeathCallback();
+    }
+
+    if (m_spawnExpCallback) {
+        Vector2 basePos = m_enemy->Get2DPosition();
+        basePos.x += 400;
+        basePos.y += 450;
+
+        for (int i = 0; i < m_exp_orb_number; ++i) {
+            Vector2 offset = {
+                basePos.x + (rand() % 310 - 150),
+                basePos.y
+            };
+            m_spawnExpCallback(offset);
+        }
+    }
 }
 
 void Boss1::DestroyEnemy()
@@ -427,4 +445,14 @@ bool Boss1::GroundCheck()
 {
     if (!m_groundCollider) return false;
     return CheckCollision(m_enemyCollider, *m_groundCollider);
+}
+
+void Boss1::SetOnDeathCallback(std::function<void()> callback)
+{
+    m_onDeathCallback = callback;
+}
+
+void Boss1::SetSpawnExpCallback(std::function<void(Vector2)> callback)
+{
+    m_spawnExpCallback = callback;
 }

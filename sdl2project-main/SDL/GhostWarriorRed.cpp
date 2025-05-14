@@ -71,6 +71,24 @@ void GhostWarriorRed::Die()
     m_deadTimer = 1.3f;
     m_finishDead = false;
     ChangeAnimation(deadTexture, 13, 0.1f);
+
+    if (m_onDeathCallback) {
+        m_onDeathCallback();
+    }
+
+    if (m_spawnExpCallback) {
+        Vector2 basePos = m_sprite->Get2DPosition();
+        basePos.x += 80;
+        basePos.y += 100;
+
+        for (int i = 0; i < m_exp_orb_number; ++i) {
+            Vector2 offset = {
+                basePos.x + (rand() % 310 - 150),
+                basePos.y
+            };
+            m_spawnExpCallback(offset);
+        }
+    }
 }
 
 void GhostWarriorRed::Destroy()
@@ -343,3 +361,13 @@ void GhostWarriorRed::ChangeAnimation(std::shared_ptr<TextureManager> texture, i
 
 bool GhostWarriorRed::CheckCollision(const SDL_Rect& a, const SDL_Rect& b) { return SDL_HasIntersection(&a, &b); }
 bool GhostWarriorRed::GroundCheck() { return m_groundCollider && CheckCollision(m_collider, *m_groundCollider); }
+
+void GhostWarriorRed::SetOnDeathCallback(std::function<void()> callback)
+{
+    m_onDeathCallback = callback;
+}
+
+void GhostWarriorRed::SetSpawnExpCallback(std::function<void(Vector2)> callback)
+{
+    m_spawnExpCallback = callback;
+}

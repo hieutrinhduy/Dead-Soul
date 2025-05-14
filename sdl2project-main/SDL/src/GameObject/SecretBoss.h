@@ -42,12 +42,19 @@ public:
     void ShootInAngle(float angleRad);
     void FireBulletPattern(int waveIndex);
 
+    void SetOnDeathCallback(std::function<void()> callback);
+    void SetSpawnExpCallback(std::function<void(Vector2)> callback);
+
 private:
     // === Core ===
     std::shared_ptr<SpriteAnimation> m_enemy;
     SDL_Rect m_enemyCollider;
     SDL_Rect* m_groundCollider;
     const SDL_Rect* m_playerCollider;
+    std::function<void()> m_onDeathCallback;
+    std::function<void(Vector2)> m_spawnExpCallback;
+
+    float m_exp_orb_number = 15;
 
     float m_pointA;
     float m_pointB;

@@ -72,6 +72,24 @@ void RangedEnemy::Die()
     m_deadTimer = 0.69f;
     m_finishDead = false;
     ChangeAnimation(deadTexture, 7, 0.1f);
+
+    if (m_onDeathCallback) {
+        m_onDeathCallback();
+    }
+
+    if (m_spawnExpCallback) {
+        Vector2 basePos = m_sprite->Get2DPosition();
+        basePos.x += 80;
+        basePos.y += 100;
+
+        for (int i = 0; i < m_exp_orb_number; ++i) {
+            Vector2 offset = {
+                basePos.x + (rand() % 310 - 150),
+                basePos.y
+            };
+            m_spawnExpCallback(offset);
+        }
+    }
 }
 
 void RangedEnemy::Destroy()
@@ -334,5 +352,15 @@ void RangedEnemy::ShootProjectile()
         });
 
     g_bullets.push_back(bullet);
+}
+
+void RangedEnemy::SetOnDeathCallback(std::function<void()> callback)
+{
+    m_onDeathCallback = callback;
+}
+
+void RangedEnemy::SetSpawnExpCallback(std::function<void(Vector2)> callback)
+{
+    m_spawnExpCallback = callback;
 }
 

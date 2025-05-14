@@ -30,12 +30,18 @@ public:
     void TakeDamage(int damage, int knockbackDir);
     void SetOnHitPlayerCallback(std::function<void(int damage)> callback) { m_onHitPlayer = callback; }
 
+    void SetOnDeathCallback(std::function<void()> callback);
+    void SetSpawnExpCallback(std::function<void(Vector2)> callback);
 private:
     // === Core ===
     std::shared_ptr<SpriteAnimation> m_sprite;
     SDL_Rect m_collider;
     SDL_Rect* m_groundCollider = nullptr;
     const SDL_Rect* m_playerCollider = nullptr;
+    std::function<void()> m_onDeathCallback;
+    std::function<void(Vector2)> m_spawnExpCallback;
+
+    float m_exp_orb_number = 5;
 
     float m_pointA = 0.0f;
     float m_pointB = 0.0f;

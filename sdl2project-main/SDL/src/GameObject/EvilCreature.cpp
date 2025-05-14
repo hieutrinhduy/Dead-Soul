@@ -79,6 +79,20 @@ void EvilCreature::Die()
     m_deadTimer = 1.3f;
     m_finishDead = false;
     ChangeAnimation(deadTexture, 14, 0.1f);
+
+    if (m_spawnExpCallback) {
+        Vector2 basePos = m_sprite->Get2DPosition();
+        basePos.x += 80;
+        basePos.y += 100;
+
+        for (int i = 0; i < m_exp_orb_number; ++i) {
+            Vector2 offset = {
+                basePos.x + (rand() % 310 - 150),
+                basePos.y
+            };
+            m_spawnExpCallback(offset);
+        }
+    }
 }
 
 void EvilCreature::Destroy()
@@ -376,4 +390,14 @@ bool EvilCreature::GroundCheck()
 {
     if (!m_groundCollider) return false;
     return CheckCollision(m_collider, *m_groundCollider);
+}
+
+void EvilCreature::SetSpawnExpCallback(std::function<void(Vector2)> callback)
+{
+    m_spawnExpCallback = callback;
+}
+
+void EvilCreature::SetOnDeathCallback(std::function<void()> callback)
+{
+    m_onDeathCallback = callback;
 }

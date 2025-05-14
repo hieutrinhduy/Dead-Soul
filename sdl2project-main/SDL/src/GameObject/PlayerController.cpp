@@ -138,6 +138,7 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
 void PlayerController::HandleMouseEvents(SDL_Event& e)
 {
     if (m_isDead) return;
+    if (m_isCLickingOnUI) return;
     if (e.type == SDL_MOUSEBUTTONDOWN) {
         if (e.button.button == SDL_BUTTON_LEFT) {
             switch (m_currentWeaponIndex)
@@ -681,4 +682,39 @@ void PlayerController::LoseTheirFooting() {
     m_jumpCount = 1;
     m_velocityY = 600;
     ChangeAnimation(jumpOnAirTexture, 1, 0.05f);
+}
+
+void PlayerController::ResetInput() {
+    m_KeyPress = 0;
+
+    // Reset attack state
+    m_isAttacking = false;
+    m_attackTimer = 0.0f;
+    m_justDidAttack2 = false;
+    m_justDidAttack3 = false;
+    m_didDamage = false;
+    m_canDealDamage = false;
+
+    // Reset rolling state
+    m_isRolling = false;
+    m_rollTimer = 0.0f;
+
+    // Reset hit state
+    m_isHit = false;
+    m_hitTimer = 0.0f;
+
+    // Reset knockback
+    m_isKnockback = false;
+    m_knockbackTimer = 0.0f;
+    m_knockbackDir = 0;
+
+    // Reset jump
+    m_jumpCount = 0;
+    m_velocityY = 0.0f;
+    m_airTime = 0.0f;
+    m_isJumping = false;
+    m_isFalling = false;
+
+    // Force animation reset to idle
+    ChangeAnimation(idleTexture, 2, 0.5f);
 }

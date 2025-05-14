@@ -109,6 +109,24 @@ void ScecretBoss::Die()
     m_deadTimer = 0.9f;
     m_finishDead = false;
     ChangeAnimation(deadTexture, 10, 0.1f);
+
+    if (m_onDeathCallback) {
+        m_onDeathCallback();
+    }
+
+    if (m_spawnExpCallback) {
+        Vector2 basePos = m_enemy->Get2DPosition();
+        basePos.x += 400;
+        basePos.y += 400;
+
+        for (int i = 0; i < m_exp_orb_number; ++i) {
+            Vector2 offset = {
+                basePos.x + (rand() % 310 - 150),
+                basePos.y
+            };
+            m_spawnExpCallback(offset);
+        }
+    }
 }
 
 void ScecretBoss::DestroyEnemy()
@@ -594,4 +612,14 @@ void ScecretBoss::FireBulletPattern(int waveIndex)
         break;
     }
     }
+}
+
+void ScecretBoss::SetOnDeathCallback(std::function<void()> callback)
+{
+    m_onDeathCallback = callback;
+}
+
+void ScecretBoss::SetSpawnExpCallback(std::function<void(Vector2)> callback)
+{
+    m_spawnExpCallback = callback;
 }

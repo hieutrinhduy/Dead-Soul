@@ -30,6 +30,8 @@ public:
 
     // Gọi callback khi tấn công trúng Player
     void SetOnHitPlayerCallback(std::function<void(int damage)> callback) { m_onHitPlayer = callback; }
+    void SetOnDeathCallback(std::function<void()> callback);
+    void SetSpawnExpCallback(std::function<void(Vector2)> callback);
 
 private:
     // === Core ===
@@ -37,6 +39,10 @@ private:
     SDL_Rect m_enemyCollider;
     SDL_Rect* m_groundCollider;
     const SDL_Rect* m_playerCollider;
+    std::function<void()> m_onDeathCallback;
+    std::function<void(Vector2)> m_spawnExpCallback;
+
+    float m_exp_orb_number = 15;
 
     float m_pointA;
     float m_pointB;

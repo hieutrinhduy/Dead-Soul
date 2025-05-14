@@ -32,6 +32,7 @@ public:
     bool CanGoRight() const { return m_canGoRight; };
     bool BumpTheHead() const { return m_bumpTheHead; };
     bool OnTheGround() const { return m_isGrounded; };
+    Vector2 GetPlayerPosition() const { return m_player->Get2DPosition(); }
 
     // get player's stats data:
     int GetHpLose() {
@@ -123,6 +124,14 @@ public:
         m_damage = damage;
     }
 
+    void SetClickingStatus(bool isClickingOnUI) {
+        m_isCLickingOnUI = isClickingOnUI;
+    }
+
+    void SetPlayerDamage(float damage) {
+        m_damage = damage;
+    }
+
     // set Weapon Index:
     void SetWeaponIndex(int index) 
     {
@@ -158,6 +167,7 @@ public:
 
     void LoseTheirFooting();
 
+    void ResetInput();
 
 private:
     std::shared_ptr<SpriteAnimation> m_player;
@@ -260,6 +270,8 @@ private:
     //Kiem tra da goi ham die hay chua
     bool m_hasDied = false;
 
+    //Kiem tra xem co nhan vao UI hay khong?
+    bool m_isCLickingOnUI = false;
 
     void ShootProjectile();
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);

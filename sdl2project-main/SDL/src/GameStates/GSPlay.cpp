@@ -217,22 +217,68 @@ void GSPlay::Init()
         Camera::GetInstance()->Shake(0.1f, randomMagnitude);
     });
 
-    //Callback Khi Enemy Chet
-    m_enemyController->SetOnDeathCallback([this]() {
-        m_playerController->SetExpGained(10);
-        m_playerController->SetGoldGained(10);
-        });
     //Spawn Exp khi enemy Chet
     m_enemyController->SetSpawnExpCallback([this](Vector2 pos) {
+        auto orb = std::make_shared<ExpOrb>(pos);
+        orb->SetOnCollectedCallback([this]() {
+            m_playerController->SetExpGained(10);
+            m_playerController->SetGoldGained(10);
+            });
+        g_expOrbs.push_back(orb);
+        });
+    m_enemyController2->SetSpawnExpCallback([this](Vector2 pos) {
+        auto orb = std::make_shared<ExpOrb>(pos);
+        orb->SetOnCollectedCallback([this]() {
+            m_playerController->SetExpGained(10);
+            m_playerController->SetGoldGained(10);
+            });
+        g_expOrbs.push_back(orb);
+        });
+    m_evilCreature->SetSpawnExpCallback([this](Vector2 pos) {
+        auto orb = std::make_shared<ExpOrb>(pos);
+        orb->SetOnCollectedCallback([this]() {
+            m_playerController->SetExpGained(10);
+            m_playerController->SetGoldGained(10);
+            });
+        g_expOrbs.push_back(orb);
+        });
+    m_ghostWarrior->SetSpawnExpCallback([this](Vector2 pos) {
+        auto orb = std::make_shared<ExpOrb>(pos);
+        orb->SetOnCollectedCallback([this]() {
+            m_playerController->SetExpGained(10);
+            m_playerController->SetGoldGained(10);
+            });
+        g_expOrbs.push_back(orb);
+        });
+    m_ghostWarriorRed->SetSpawnExpCallback([this](Vector2 pos) {
+        auto orb = std::make_shared<ExpOrb>(pos);
+        orb->SetOnCollectedCallback([this]() {
+            m_playerController->SetExpGained(10);
+            m_playerController->SetGoldGained(10);
+            });
+        g_expOrbs.push_back(orb);
+        });
+    m_rangedEnemy->SetSpawnExpCallback([this](Vector2 pos) {
+        auto orb = std::make_shared<ExpOrb>(pos);
+        orb->SetOnCollectedCallback([this]() {
+            m_playerController->SetExpGained(10);
+            m_playerController->SetGoldGained(10);
+            });
+        g_expOrbs.push_back(orb);
+        });
+    m_boss1->SetSpawnExpCallback([this](Vector2 pos) {
         g_expOrbs.push_back(std::make_shared<ExpOrb>(pos));
         });
-
-
+    m_boss2->SetSpawnExpCallback([this](Vector2 pos) {
+        auto orb = std::make_shared<ExpOrb>(pos);
+        orb->SetOnCollectedCallback([this]() {
+            m_playerController->SetExpGained(10);
+            m_playerController->SetGoldGained(10);
+            });
+        g_expOrbs.push_back(orb);
+        });
     DisplayLoadingView();
 }
-
-
-
 
 void GSPlay::Exit() {
     // stop thread at TileMap:
@@ -302,7 +348,19 @@ void GSPlay::Update(float deltaTime)
     m_boss1->Update(deltaTime);
     m_boss2->Update(deltaTime);
 
-    for (auto& orb : g_expOrbs) orb->Update(deltaTime);
+    Vector2 playerPos;
+    playerPos.x = m_playerController->GetCollider().x; 
+    playerPos.y = m_playerController->GetCollider().y + 50;
+    for (auto& orb : g_expOrbs)
+        orb->Update(deltaTime, playerPos);
+
+    g_expOrbs.erase(
+        std::remove_if(g_expOrbs.begin(), g_expOrbs.end(),
+            [](const std::shared_ptr<ExpOrb>& orb) {
+                return orb->IsCollected();
+            }),
+        g_expOrbs.end());
+
 
     for (auto it = g_bullets.begin(); it != g_bullets.end(); )
     {

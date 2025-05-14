@@ -118,15 +118,19 @@ void EnemyController::Die()
     }
 
     if (m_spawnExpCallback) {
-        Vector2 pos = m_enemy->Get2DPosition();
-        m_spawnExpCallback(pos);
-    }
-}
+        Vector2 basePos = m_enemy->Get2DPosition();
+        basePos.x += 80;
+        basePos.y += 100;
 
-// EnemyController.cpp
-void EnemyController::SetSpawnExpCallback(std::function<void(Vector2)> callback)
-{
-    m_spawnExpCallback = callback;
+        for (int i = 0; i < m_exp_orb_number; ++i) {
+            Vector2 offset = {
+                basePos.x + (rand() % 310 - 150),
+                basePos.y
+            };
+            m_spawnExpCallback(offset);
+        }
+    }
+
 }
 
 
@@ -487,3 +491,7 @@ void EnemyController::SetOnDeathCallback(std::function<void()> callback)
     m_onDeathCallback = callback;
 }
 
+void EnemyController::SetSpawnExpCallback(std::function<void(Vector2)> callback)
+{
+    m_spawnExpCallback = callback;
+}

@@ -30,12 +30,16 @@ public:
     void TakeDamage(int damage, int knockbackDir);
     void SetOnHitPlayerCallback(std::function<void(int damage)> callback) { m_onHitPlayer = callback; }
 
+    void SetOnDeathCallback(std::function<void()> callback);
+    void SetSpawnExpCallback(std::function<void(Vector2)> callback);
 private:
     // === Core ===
     std::shared_ptr<SpriteAnimation> m_sprite;
     SDL_Rect m_collider;
     SDL_Rect* m_groundCollider = nullptr;
     const SDL_Rect* m_playerCollider = nullptr;
+
+    float m_exp_orb_number = 3;
 
     float m_pointA = 0.0f;
     float m_pointB = 0.0f;
@@ -47,6 +51,8 @@ private:
     int m_direction = 1;
     SDL_RendererFlip m_flip = SDL_FLIP_NONE;
     SDL_RendererFlip m_attackFlip = SDL_FLIP_NONE;
+    std::function<void()> m_onDeathCallback;
+    std::function<void(Vector2)> m_spawnExpCallback;
 
     bool m_isGrounded = false;
 
