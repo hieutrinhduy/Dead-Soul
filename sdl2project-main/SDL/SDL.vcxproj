@@ -181,6 +181,8 @@
     <ClCompile Include="src\GameObject\EvilCreature.cpp" />
     <ClCompile Include="src\GameObject\ExpOrb.cpp" />
     <ClCompile Include="src\GameObject\GhostWarrior.cpp" />
+    <ClCompile Include="src\GameObject\Level1.cpp" />
+    <ClCompile Include="src\GameObject\Level2.cpp" />
     <ClCompile Include="src\GameObject\MouseButton.cpp" />
     <ClCompile Include="src\GameObject\PlayerBullet.cpp" />
     <ClCompile Include="src\GameObject\PlayerController.cpp" />
@@ -223,6 +225,8 @@
     <ClInclude Include="src\GameObject\GhostWarrior.h" />
     <ClInclude Include="src\GameObject\GhostWarriorRed.h" />
     <ClInclude Include="src\GameObject\KeyState.h" />
+    <ClInclude Include="src\GameObject\Level1.h" />
+    <ClInclude Include="src\GameObject\Level2.h" />
     <ClInclude Include="src\GameObject\MouseButton.h" />
     <ClInclude Include="src\GameObject\PlayerBullet.h" />
     <ClInclude Include="src\GameObject\PlayerController.h" />

@@ -28,6 +28,7 @@
 #include "SecretBoss.h"
 #include "BossBullet.h"
 #include "ExpOrb.h"
+#include "Level1.h"
 
 
 SDL_Rect enemyCollider;
@@ -58,212 +59,27 @@ GSPlay::~GSPlay() {}
 void GSPlay::Init()
 {
 
-    auto tex1 = ResourceManagers::GetInstance()->GetTexture("background_layer_1.png");
-    auto tex2 = ResourceManagers::GetInstance()->GetTexture("background_layer_2.png");
-    auto tex3 = ResourceManagers::GetInstance()->GetTexture("background_layer_3.png");
-
-    m_backgroundList.push_back(std::make_shared<Sprite2D>(tex1, SDL_FLIP_NONE));
-    m_backgroundList.push_back(std::make_shared<Sprite2D>(tex2, SDL_FLIP_NONE));
-    m_backgroundList.push_back(std::make_shared<Sprite2D>(tex3, SDL_FLIP_NONE));
-
-    for (auto& bg : m_backgroundList) {
-        bg->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
-        bg->Set2DPosition(0, 0);
-    }
-
     Camera::GetInstance()->SetLevelDimension(
         m_tileMap->GetWidth() * m_tileMap->GetTileSize(),
         m_tileMap->GetHeight() * m_tileMap->GetTileSize()
     );
 
-    // Enemy thường
-    m_enemyController = std::make_shared<EnemyController>();
-    m_enemyController->Init(0, 800, 450);
+    m_playerController = std::make_shared<PlayerController>();
+    m_playerController->Init();
 
-    m_enemyController2 = std::make_shared<EnemyController>();
-    m_enemyController2->Init(1220, 1790, 385);
-
-    //Boss1
-    m_boss1 = std::make_shared<Boss1>();
-    m_boss1->Init(600, 1900, 960);
-
-    //Boss2
-    m_boss2 = std::make_shared<ScecretBoss>();
-    m_boss2->Init(600, 1900, 1030);
-
-    // Enemy đặc biệt: EvilCreature
-    m_evilCreature = std::make_shared<EvilCreature>();
-    m_evilCreature->Init(1850, 3000, 325);
-
-    // Enemy đặc biệt: GhostWarrior
-    m_ghostWarrior = std::make_shared<GhostWarrior>();
-    m_ghostWarrior->Init(1850, 3000, 325);
-
-    // Enemy đặc biệt: GhostWarriorRed
-    m_ghostWarriorRed = std::make_shared<GhostWarriorRed>();
-    m_ghostWarriorRed->Init(3550, 5700, 300);
-
-    //Enemy ban dan: RangedEnemy
-    m_rangedEnemy = std::make_shared<RangedEnemy>();
-    m_rangedEnemy->Init(3550, 5700, 300);
-
-    // Set player collider cho tất cả
-    m_enemyController->SetPlayerCollider(&m_playerController->GetCollider());
-    m_enemyController2->SetPlayerCollider(&m_playerController->GetCollider());
-    m_evilCreature->SetPlayerCollider(&m_playerController->GetCollider());
-    m_ghostWarrior->SetPlayerCollider(&m_playerController->GetCollider());
-    m_ghostWarriorRed->SetPlayerCollider(&m_playerController->GetCollider());
-    m_rangedEnemy->SetPlayerCollider(&m_playerController->GetCollider());
-    m_rangedEnemy->SetPlayerController(m_playerController.get());
-
-    m_boss1->SetPlayerCollider(&m_playerController->GetCollider());
-    m_boss2->SetPlayerCollider(&m_playerController->GetCollider());
-
-    // Lấy danh sách collider của enemy
-    enemyColliders.push_back(m_enemyController->GetEnemyCollider());
-    enemyColliders.push_back(m_enemyController2->GetEnemyCollider());
-    enemyColliders.push_back(m_evilCreature->GetCollider());
-    enemyColliders.push_back(m_ghostWarrior->GetCollider());
-    enemyColliders.push_back(m_ghostWarriorRed->GetCollider());
-    enemyColliders.push_back(m_rangedEnemy->GetCollider());
-    enemyColliders.push_back(m_boss1->GetEnemyCollider());
-    enemyColliders.push_back(m_boss2->GetEnemyCollider());
-    m_playerController->SetEnemyColliders(enemyColliders);
-
-    // Callback khi enemy đánh player
-    m_enemyController->SetOnHitPlayerCallback([this](int damage) {
-        int dir = (m_enemyController->GetEnemyCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
-        m_playerController->TakeDamage(damage, dir);
-        });
-    m_enemyController2->SetOnHitPlayerCallback([this](int damage) {
-        int dir = (m_enemyController2->GetEnemyCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
-        m_playerController->TakeDamage(damage, dir);
-        });
-    m_evilCreature->SetOnHitPlayerCallback([this](int damage) {
-        int dir = (m_evilCreature->GetCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
-        m_playerController->TakeDamage(damage, dir);
-        });
-    m_ghostWarrior->SetOnHitPlayerCallback([this](int damage) {
-        int dir = (m_ghostWarrior->GetCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
-        m_playerController->TakeDamage(damage, dir);
-        });
-    m_ghostWarriorRed->SetOnHitPlayerCallback([this](int damage) {
-        int dir = (m_ghostWarriorRed->GetCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
-        m_playerController->TakeDamage(damage, dir);
-        });
-    m_rangedEnemy->SetOnHitPlayerCallback([this](int damage) {
-        int dir = (m_rangedEnemy->GetCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
-        m_playerController->TakeDamage(damage, dir);
-        });
-    m_boss1->SetOnHitPlayerCallback([this](int damage) {
-        int dir = (m_boss1->GetEnemyCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
-        m_playerController->TakeDamage(damage, dir);
-        });
-    m_boss2->SetOnHitPlayerCallback([this](int damage) {
-        int dir = (m_boss2->GetEnemyCollider()->x < m_playerController->GetCollider().x) ? 1 : -1;
-        m_playerController->TakeDamage(damage, dir);
-        });
-
-    // Callback khi player đánh trúng enemy
-    m_hitEnemyCallbacks.push_back([this](int damage) {
-        int dir = (m_playerController->GetCollider().x > m_enemyController->GetEnemyCollider()->x) ? -1 : 1;
-        m_enemyController->TakeDamage(damage, dir);
-        });
-
-    m_hitEnemyCallbacks.push_back([this](int damage) {
-        int dir = (m_playerController->GetCollider().x > m_enemyController2->GetEnemyCollider()->x) ? -1 : 1;
-        m_enemyController2->TakeDamage(damage, dir);
-        });
-    m_hitEnemyCallbacks.push_back([this](int damage) {
-        int dir = (m_playerController->GetCollider().x > m_evilCreature->GetCollider()->x) ? -1 : 1;
-        m_evilCreature->TakeDamage(damage, dir);
-        });
-    m_hitEnemyCallbacks.push_back([this](int damage) {
-        int dir = (m_playerController->GetCollider().x > m_ghostWarrior->GetCollider()->x) ? -1 : 1;
-        m_ghostWarrior->TakeDamage(damage, dir);
-        });
-    m_hitEnemyCallbacks.push_back([this](int damage) {
-        int dir = (m_playerController->GetCollider().x > m_ghostWarriorRed->GetCollider()->x) ? -1 : 1;
-        m_ghostWarriorRed->TakeDamage(damage, dir);
-        });
-    m_hitEnemyCallbacks.push_back([this](int damage) {
-        int dir = (m_playerController->GetCollider().x > m_rangedEnemy->GetCollider()->x) ? -1 : 1;
-        m_rangedEnemy->TakeDamage(damage, dir);
-        });
-    m_hitEnemyCallbacks.push_back([this](int damage) {
-        m_boss1->TakeDamage(damage);
-        });
-    m_hitEnemyCallbacks.push_back([this](int damage) {
-        m_boss2->TakeDamage(damage);
-        });
-    m_playerController->SetOnHitEnemyCallbacks(m_hitEnemyCallbacks);
+    m_currentLevel = LevelID::Level1;
+    m_level1 = std::make_shared<Level1>(m_playerController);
+    m_playerController->SetEnemyColliders(m_level1->GetEnemyColliders());
+    m_playerController->SetOnHitEnemyCallbacks(m_level1->GetHitEnemyCallbacks());
+    enemyColliders = m_level1->GetEnemyColliders();
+    m_hitEnemyCallbacks = m_level1->GetHitEnemyCallbacks();
 
     // Rung màn hình khi đánh trúng enemy
     m_playerController->SetOnScreenShakeCallback([]() {
         int randomMagnitude = 5 + rand() % 2;
         Camera::GetInstance()->Shake(0.1f, randomMagnitude);
-    });
+        });
 
-    //Spawn Exp khi enemy Chet
-    m_enemyController->SetSpawnExpCallback([this](Vector2 pos) {
-        auto orb = std::make_shared<ExpOrb>(pos);
-        orb->SetOnCollectedCallback([this]() {
-            m_playerController->SetExpGained(10);
-            m_playerController->SetGoldGained(10);
-            });
-        g_expOrbs.push_back(orb);
-        });
-    m_enemyController2->SetSpawnExpCallback([this](Vector2 pos) {
-        auto orb = std::make_shared<ExpOrb>(pos);
-        orb->SetOnCollectedCallback([this]() {
-            m_playerController->SetExpGained(10);
-            m_playerController->SetGoldGained(10);
-            });
-        g_expOrbs.push_back(orb);
-        });
-    m_evilCreature->SetSpawnExpCallback([this](Vector2 pos) {
-        auto orb = std::make_shared<ExpOrb>(pos);
-        orb->SetOnCollectedCallback([this]() {
-            m_playerController->SetExpGained(10);
-            m_playerController->SetGoldGained(10);
-            });
-        g_expOrbs.push_back(orb);
-        });
-    m_ghostWarrior->SetSpawnExpCallback([this](Vector2 pos) {
-        auto orb = std::make_shared<ExpOrb>(pos);
-        orb->SetOnCollectedCallback([this]() {
-            m_playerController->SetExpGained(10);
-            m_playerController->SetGoldGained(10);
-            });
-        g_expOrbs.push_back(orb);
-        });
-    m_ghostWarriorRed->SetSpawnExpCallback([this](Vector2 pos) {
-        auto orb = std::make_shared<ExpOrb>(pos);
-        orb->SetOnCollectedCallback([this]() {
-            m_playerController->SetExpGained(10);
-            m_playerController->SetGoldGained(10);
-            });
-        g_expOrbs.push_back(orb);
-        });
-    m_rangedEnemy->SetSpawnExpCallback([this](Vector2 pos) {
-        auto orb = std::make_shared<ExpOrb>(pos);
-        orb->SetOnCollectedCallback([this]() {
-            m_playerController->SetExpGained(10);
-            m_playerController->SetGoldGained(10);
-            });
-        g_expOrbs.push_back(orb);
-        });
-    m_boss1->SetSpawnExpCallback([this](Vector2 pos) {
-        g_expOrbs.push_back(std::make_shared<ExpOrb>(pos));
-        });
-    m_boss2->SetSpawnExpCallback([this](Vector2 pos) {
-        auto orb = std::make_shared<ExpOrb>(pos);
-        orb->SetOnCollectedCallback([this]() {
-            m_playerController->SetExpGained(10);
-            m_playerController->SetGoldGained(10);
-            });
-        g_expOrbs.push_back(orb);
-        });
     DisplayLoadingView();
 }
 
@@ -295,6 +111,21 @@ void GSPlay::HandleKeyEvents(SDL_Event& e)
     if (*timeScale == 1) {
         m_playerController->HandleKeyEvents(e);
         m_playerController->HandleMouseEvents(e);
+
+        if (e.type == SDL_KEYDOWN)
+        {
+            switch (e.key.keysym.sym)
+            {
+            case SDLK_n:
+                ChangeLevel(LevelID::Level2);
+                break;
+            case SDLK_m:
+                ChangeLevel(LevelID::Level1);
+                break;
+            default:
+                break;
+            }
+        }
     }
 }
 
@@ -326,14 +157,16 @@ void GSPlay::Update(float deltaTime)
     for (auto& it : m_listButton) it->Update(deltaTime);
 
     m_playerController->Update(deltaTime);
-    m_enemyController->Update(deltaTime);
-    m_enemyController2->Update(deltaTime);
-    m_evilCreature->Update(deltaTime);
-    m_ghostWarrior->Update(deltaTime);
-    m_ghostWarriorRed->Update(deltaTime);
-    m_rangedEnemy->Update(deltaTime);
-    m_boss1->Update(deltaTime);
-    m_boss2->Update(deltaTime);
+    //m_enemyController->Update(deltaTime);
+    //m_enemyController2->Update(deltaTime);
+    //m_evilCreature->Update(deltaTime);
+    //m_ghostWarrior->Update(deltaTime);
+    //m_ghostWarriorRed->Update(deltaTime);
+    //m_rangedEnemy->Update(deltaTime);
+    //m_boss1->Update(deltaTime);
+    //m_boss2->Update(deltaTime);
+    if (m_currentLevel == LevelID::Level1 && m_level1) m_level1->Update(deltaTime);
+    if (m_currentLevel == LevelID::Level2 && m_level2) m_level2->Update(deltaTime);
 
     Vector2 playerPos;
     playerPos.x = m_playerController->GetCollider().x; 
@@ -373,6 +206,7 @@ void GSPlay::Update(float deltaTime)
         bullet->Update(deltaTime);
 
         bool hit = false;
+        std::cout << enemyColliders.size() << std::endl;
         for (size_t j = 0; j < enemyColliders.size(); ++j)
         {
             if (bullet->HasHitEnemy(enemyColliders[j]))
@@ -394,9 +228,6 @@ void GSPlay::Update(float deltaTime)
         }
     }
 
-
-
-
     Camera::GetInstance()->Update(deltaTime);
 }
 
@@ -408,9 +239,16 @@ void GSPlay::Draw(SDL_Renderer* renderer)
     Vector2 camPos = Camera::GetInstance()->GetPosition();
     std::vector<float> parallaxFactors = { 0.2f, 0.5f, 0.8f };
 
-    for (size_t i = 0; i < m_backgroundList.size(); ++i)
+    std::vector<std::shared_ptr<Sprite2D>> bgList;
+
+    if (m_currentLevel == LevelID::Level1 && m_level1)
+        bgList = m_level1->GetBackgrounds();
+    else if (m_currentLevel == LevelID::Level2 && m_level2)
+        bgList = m_level2->GetBackgrounds();
+
+    for (size_t i = 0; i < bgList.size(); ++i)
     {
-        auto& bg = m_backgroundList[i];
+        auto& bg = bgList[i];
         float factor = parallaxFactors[i];
 
         float bgWidth = SCREEN_WIDTH;
@@ -428,19 +266,21 @@ void GSPlay::Draw(SDL_Renderer* renderer)
         }
     }
 
-
     if (m_tileMap) m_tileMap->DrawMap(renderer);
 
     m_playerController->Draw(renderer);
 
-    m_enemyController->Draw(renderer);
-    m_enemyController2->Draw(renderer);
-    m_evilCreature->Draw(renderer);
-    m_ghostWarrior->Draw(renderer);
-    m_ghostWarriorRed->Draw(renderer);
-    m_rangedEnemy->Draw(renderer);
-    m_boss1->Draw(renderer);
-    m_boss2->Draw(renderer);
+    //m_enemyController->Draw(renderer);
+    //m_enemyController2->Draw(renderer);
+    //m_evilCreature->Draw(renderer);
+    //m_ghostWarrior->Draw(renderer);
+    //m_ghostWarriorRed->Draw(renderer);
+    //m_rangedEnemy->Draw(renderer);
+    //m_boss1->Draw(renderer);
+    //m_boss2->Draw(renderer);
+
+    if (m_currentLevel == LevelID::Level1 && m_level1) m_level1->Draw(renderer);
+    if (m_currentLevel == LevelID::Level2 && m_level2) m_level2->Draw(renderer);
 
     for (auto& orb : g_expOrbs) orb->Draw(renderer);
 
@@ -500,4 +340,42 @@ void GSPlay::DisplayLoadingView() {
     });
 
     t.detach();
+}
+
+void GSPlay::ChangeLevel(LevelID newLevel)
+{
+    if (newLevel == m_currentLevel) return; // Không đổi level
+
+    // Xóa level cũ
+    m_level1.reset();
+    m_level2.reset();
+
+    m_hitEnemyCallbacks.clear();
+    enemyColliders.clear();
+
+    // Tạo level mới
+    m_currentLevel = newLevel;
+
+    if (newLevel == LevelID::Level1)
+        m_level1 = std::make_shared<Level1>(m_playerController);
+    else if (newLevel == LevelID::Level2)
+        m_level2 = std::make_shared<Level2>(m_playerController);
+
+    // Cập nhật lại thông tin cho player
+    if (newLevel == LevelID::Level1)
+    {
+        m_playerController->SetEnemyColliders(m_level1->GetEnemyColliders());
+        m_playerController->SetOnHitEnemyCallbacks(m_level1->GetHitEnemyCallbacks());
+
+        enemyColliders = m_level1->GetEnemyColliders();
+        m_hitEnemyCallbacks = m_level1->GetHitEnemyCallbacks();
+    }
+    else if (newLevel == LevelID::Level2)
+    {
+        m_playerController->SetEnemyColliders(m_level2->GetEnemyColliders());
+        m_playerController->SetOnHitEnemyCallbacks(m_level2->GetHitEnemyCallbacks());
+
+        enemyColliders = m_level2->GetEnemyColliders();
+        m_hitEnemyCallbacks = m_level2->GetHitEnemyCallbacks();
+    }
 }

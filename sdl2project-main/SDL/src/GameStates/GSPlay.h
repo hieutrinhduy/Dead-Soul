@@ -12,12 +12,20 @@
 #include "RangedEnemy.h"
 #include "Boss1.h"
 #include "SecretBoss.h"
-
+#include "Level1.h"
+#include "Level2.h"
 
 class Sprite2D;
 class SpriteAnimation;
 class MouseButton;
 class Sound;
+
+enum class LevelID {
+	Level1,
+	Level2,
+	Level3,
+	SecretLevel
+};
 
 class GSPlay : public GameStateBase
 {
@@ -59,7 +67,6 @@ private:
 	std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed;
 	std::shared_ptr<RangedEnemy> m_rangedEnemy;
 
-	std::vector<std::shared_ptr<Sprite2D>> m_backgroundList;
 	std::shared_ptr<Sprite2D>	m_background;
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;
 	std::list<std::shared_ptr<SpriteAnimation>>	m_listAnimation;
@@ -75,6 +82,9 @@ private:
 
 	std::vector<std::function<void(int)>> m_hitEnemyCallbacks; //Luu hit callback cua tung enemy
 
+	std::shared_ptr<Level1> m_level1;
+	std::shared_ptr<Level2> m_level2;
+	LevelID m_currentLevel;
 
 	// === Thêm 5 hàm private mới cho quản lý Update ===
 	void UpdateAttackTimer(float deltaTime);
@@ -82,4 +92,5 @@ private:
 	void UpdateGravity(float deltaTime);
 	void UpdateGroundCheck();
 	void UpdateAnimation(float deltaTime);
+	void ChangeLevel(LevelID newLevel);
 };
