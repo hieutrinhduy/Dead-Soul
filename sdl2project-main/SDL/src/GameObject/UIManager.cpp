@@ -69,11 +69,13 @@ constexpr float QUIT_BUTTON_LEFT_RATIO = 159.0f / 256, QUIT_BUTTON_RIGHT_RATIO =
 constexpr float PAUSE_BUTTON_TOP_RATIO = 117.0f / 144, PAUSE_BUTTON_BOTTOM_RATIO = 131.0f / 144;
 
 // statistic about: selection border, hover border, underline, confirm button
-constexpr float SELECTION_WIDTH_RATIO = 20.0f / 256, SELECTION_HEIGHT_RATIO = 40.0f / 144;
-constexpr float SELECTION_TOP_RATIO = 40.0f / 144, SELECTION_BOTTOM_RATIO = 80.0f / 144;
-constexpr float SELECTION_1_LEFT_RATIO = 40.0f / 256, SELECTION_1_RIGHT_RATIO = 80.0f / 256;
-constexpr float SELECTION_2_LEFT_RATIO = 81.0f / 256, SELECTION_2_RIGHT_RATIO = 121.0f / 256;
-constexpr float SELECTION_3_LEFT_RATIO = 122.0f / 256, SELECTION_3_RIGHT_RATIO = 162.0f / 256;
+constexpr float SELECTION_WIDTH_RATIO = 62.0f / 256, SELECTION_HEIGHT_RATIO = 83.0f / 144;
+constexpr float SELECTION_TOP_RATIO = 27.0f / 144, SELECTION_BOTTOM_RATIO = 110.0f / 144;
+constexpr float SELECTION_1_LEFT_RATIO = 32.0f / 256, SELECTION_1_RIGHT_RATIO = 94.0f / 256;
+constexpr float SELECTION_2_LEFT_RATIO = 97.0f / 256, SELECTION_2_RIGHT_RATIO = 159.0f / 256;
+constexpr float SELECTION_3_LEFT_RATIO = 162.0f / 256, SELECTION_3_RIGHT_RATIO = 224.0f / 256;
+constexpr float UP_BUTTON_TOP_RATIO = 116.0f / 144, UP_BUTTON_BOTTOM_RATIO = 130.0f / 144;
+constexpr float UP_BUTTON_LEFT_RATIO = 138.0f / 256, UP_BUTTON_RIGHT_RATIO = 160.0f / 256;
 
 #pragma endregion
 
@@ -231,13 +233,12 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 
 
 	// PAUSE BUTTON:
-	auto button = std::make_shared<MouseButton>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\btn_pause.png"), SDL_FLIP_NONE);
-	button->SetSize(50, 50);
-	button->Set2DPosition((SCREEN_WIDTH - 50) / 2.0f, HP_BACKGROUND_BAR_POSITION_Y);
-	button->SetOnClick([this]() {
+	btnPause = std::make_shared<MouseButton>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\btn_pause.png"), SDL_FLIP_NONE);
+	btnPause->SetSize(50, 50);
+	btnPause->Set2DPosition((SCREEN_WIDTH - 50) / 2.0f, HP_BACKGROUND_BAR_POSITION_Y);
+	btnPause->SetOnClick([this]() {
 		*m_timeScale = 0;
 	});
-	buttons.push_back(button);
 	#pragma endregion
 
 	#pragma	region UI WHEN PAUSE GAME
@@ -289,13 +290,6 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	sliderIcons.push_back(iconSensitivitySettings);
 	#pragma endregion
 
-	#pragma region UI WHEN CHANGE MAP
-	animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.03);
-	animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
-	animationMapTransition->Set2DPosition(0, 0);
-	#pragma endregion
-
-
 	#pragma region UI WHEN LEVEL UP
 	// BACKGROUND:
 	background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\level_up.png"), SDL_FLIP_NONE);
@@ -304,23 +298,37 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	uiWhenLevelUp.push_back(background);
 
 	// HOVERING SELECTION:
-	hoverBorder = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\slot_selected.png"), SDL_FLIP_NONE);
-	hoverBorder->SetSize(SLOT_SIZE, SLOT_SIZE);
-	hoverBorder->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	hoverBorder = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\hover_border.png"), SDL_FLIP_NONE);
+	hoverBorder->SetSize((SELECTION_2_RIGHT_RATIO - SELECTION_2_LEFT_RATIO)* SCREEN_WIDTH,
+						 (SELECTION_BOTTOM_RATIO - SELECTION_TOP_RATIO)* SCREEN_HEIDHT);
+	hoverBorder->Set2DPosition(SCREEN_WIDTH, 0);
 	uiWhenLevelUp.push_back(hoverBorder);
 
 	// SELECTED SELECTION:
-	selectionBorder = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\slot_selected.png"), SDL_FLIP_NONE);
-	selectionBorder->SetSize(SLOT_SIZE, SLOT_SIZE);
-	selectionBorder->Set2DPosition(SLOT_0_POSITION_X, SCREEN_HEIDHT - SLOT_Y);
+	selectionBorder = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\selected_border.png"), SDL_FLIP_NONE);
+	selectionBorder->SetSize(hoverBorder->GetWidth(), hoverBorder->GetHeight());
+	selectionBorder->Set2DPosition(SCREEN_WIDTH, 0);
 	uiWhenLevelUp.push_back(selectionBorder);
 
 	// UNDERLINE:
+	underline = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\underline.png"), SDL_FLIP_NONE);
+	underline->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	underline->Set2DPosition(SCREEN_WIDTH, 0);
+	uiWhenLevelUp.push_back(underline);
 
 	// CONFIRM BUTTON:
+	confirmButton = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\confirm_level_up.png"), SDL_FLIP_NONE);
+	confirmButton->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	confirmButton->Set2DPosition(SCREEN_WIDTH, 0);
+	uiWhenLevelUp.push_back(confirmButton);
 
 	#pragma endregion
 
+	#pragma region UI WHEN CHANGE MAP
+	animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.03);
+	animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	animationMapTransition->Set2DPosition(0, 0);
+	#pragma endregion
 }
 
 
@@ -340,8 +348,12 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 				break;
 			}
 		}
+		
+		btnPause->HandleTouchEvent(&e);
+
 		return;
 	}
+
 
 
 	// when pause game:
@@ -391,6 +403,7 @@ void UIManager::Update(float deltaTime) {
 		if (!FloatEquals(hpChangePerFrame, 0.0f) && !FloatEquals(hpLoss, 0.0f)) {
 			hp -= hpChangePerFrame;
 			if (hp < 0) hp = 0;
+			else if (hp > maxHP) hp = maxHP;
 			hpLoss -= hpChangePerFrame;
 
 			// set the text displaying the HP amount:
@@ -487,7 +500,10 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 		for (auto& it : buttons) it->Draw(renderer);
 		for (auto& it : uiWhenRunGame) it->Draw(renderer);
 
-		if (*m_timeScale == 0) {
+		if (*m_timeScale == 1) {
+			btnPause->Draw(renderer);
+		}
+		else if (*m_timeScale == 0) {
 			for (auto& it : uiWhenPause) it->Draw(renderer);
 		}
 		else if (*m_timeScale == 2) {
@@ -518,10 +534,11 @@ void UIManager::UpdateStats() {
 		while (m_isPlaying) {
 			if (*m_timeScale == 1) {
 				if (exp == maxEXP) {
+					Camera::GetInstance()->Update(0);
 					exp = 0;
 					pressButtonWhenLevelUp = false;
 					selection = 0;
-					//*m_timeScale = 2;
+					*m_timeScale = 2;
 				//	hoverBorder->SetSize(0, hoverBorder->GetHeight());
 				//	underline->SetSize(0, underline->GetHeight());
 				//	confirmButton->SetSize(0, confirmButton->GetHeight());
@@ -618,68 +635,73 @@ void UIManager::UpdateStats() {
 
 				// if hovering selection 1:
 				if (x >= SELECTION_1_LEFT_RATIO * SCREEN_WIDTH && x <= SELECTION_1_RIGHT_RATIO * SCREEN_WIDTH &&
-					y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y >= SELECTION_BOTTOM_RATIO)
+					y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y <= SELECTION_BOTTOM_RATIO * SCREEN_HEIDHT)
 				{
-					hoverBorder->SetSize((SELECTION_1_RIGHT_RATIO - SELECTION_1_LEFT_RATIO) * SCREEN_WIDTH,
-						(SELECTION_BOTTOM_RATIO - SELECTION_TOP_RATIO) * SCREEN_HEIDHT);
 					hoverBorder->Set2DPosition(SELECTION_1_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
-
-					if (pressButtonWhenLevelUp) selection = 1;
+					if (pressButtonWhenLevelUp) {
+						selection = 1;
+						selectionBorder->Set2DPosition(hoverBorder->Get2DPosition().x, hoverBorder->Get2DPosition().y);
+					}
 				}
 
 				// if hovering selection 2:
 				else if (x >= SELECTION_2_LEFT_RATIO * SCREEN_WIDTH && x <= SELECTION_2_RIGHT_RATIO * SCREEN_WIDTH &&
-					y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y >= SELECTION_BOTTOM_RATIO)
+						 y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y <= SELECTION_BOTTOM_RATIO * SCREEN_HEIDHT)
 				{
-					hoverBorder->SetSize((SELECTION_2_RIGHT_RATIO - SELECTION_2_LEFT_RATIO) * SCREEN_WIDTH,
-						(SELECTION_BOTTOM_RATIO - SELECTION_TOP_RATIO) * SCREEN_HEIDHT);
 					hoverBorder->Set2DPosition(SELECTION_2_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
-
-					if (pressButtonWhenLevelUp) selection = 2;
+					if (pressButtonWhenLevelUp) {
+						selection = 2;
+						selectionBorder->Set2DPosition(hoverBorder->Get2DPosition().x, hoverBorder->Get2DPosition().y);
+					}
 				}
 
 				// if hovering selection 3:
 				else if (x >= SELECTION_3_LEFT_RATIO * SCREEN_WIDTH && x <= SELECTION_3_RIGHT_RATIO * SCREEN_WIDTH &&
-					y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y >= SELECTION_BOTTOM_RATIO)
+						 y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y <= SELECTION_BOTTOM_RATIO * SCREEN_HEIDHT)
 				{
-					hoverBorder->SetSize((SELECTION_3_RIGHT_RATIO - SELECTION_3_LEFT_RATIO) * SCREEN_WIDTH,
-						(SELECTION_BOTTOM_RATIO - SELECTION_TOP_RATIO) * SCREEN_HEIDHT);
 					hoverBorder->Set2DPosition(SELECTION_3_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
-
-					if (pressButtonWhenLevelUp) selection = 3;
+					if (pressButtonWhenLevelUp) {
+						selection = 3;
+						selectionBorder->Set2DPosition(hoverBorder->Get2DPosition().x, hoverBorder->Get2DPosition().y);
+					}
 				}
 
 				// if not hovering any selection:
-				else hoverBorder->SetSize(0, 0);
-				printf("%d\npressbutton = %d\n\n", selection, pressButtonWhenLevelUp);
+				else {
+					hoverBorder->Set2DPosition(SCREEN_WIDTH, 0);
+					if (x >= UP_BUTTON_LEFT_RATIO * SCREEN_WIDTH && x <= UP_BUTTON_RIGHT_RATIO * SCREEN_WIDTH &&
+						y >= UP_BUTTON_TOP_RATIO * SCREEN_HEIDHT && y <= UP_BUTTON_BOTTOM_RATIO * SCREEN_HEIDHT && selection != 0)
+						underline->Set2DPosition(0, 0);
+					else underline->Set2DPosition(SCREEN_WIDTH, 0);
+				}
 
 
-				/*if (selection != 0) {
-					underline->SetSize(100, underline->GetHeight());
-					confirmButton->SetSize(100, confirmButton->GetHeight());
-				}*/
+				if (selection != 0) {
+					confirmButton->Set2DPosition(0, 0);
+				}
+
 
 				if (pressButtonWhenLevelUp) {
 					pressButtonWhenLevelUp = false;
 					// check confirm button's location when it's activated:
-					// if () {
-						/**m_timeScale = 1;
+					if (x >= UP_BUTTON_LEFT_RATIO * SCREEN_WIDTH && x <= UP_BUTTON_RIGHT_RATIO * SCREEN_WIDTH &&
+						y >= UP_BUTTON_TOP_RATIO * SCREEN_HEIDHT && y <= UP_BUTTON_BOTTOM_RATIO * SCREEN_HEIDHT) {
 						if (selection == 1) {
-							maxHP *= 1.25f;
-							hpLoss -= 0.1f * maxHP;
+							maxHP = std::round(maxHP * 1.1f);
+							hpLoss -= 0.15f * maxHP;
 							hpChangePerFrame = hpLoss / FRAGMENT_COUNT;
 						}
 						if (selection == 2) {
-							maxSP *= 1.1f;
+							maxSP += 5;
 							spRefilled += 0.1f;
 							maxMP += 10;
-							mpRefilled += 1;
+							mpRefilled += 5;
 						}
 						if (selection == 3) {
 
-						}*/
-					//}
-					//*m_timeScale = 1;
+						}
+						*m_timeScale = 1;
+					}
 				}
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(20));

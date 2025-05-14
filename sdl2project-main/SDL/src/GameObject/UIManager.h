@@ -53,6 +53,7 @@ private:
 	std::shared_ptr<Sprite2D> selectedSlot;
 	int m_inventorySlot;
 	std::shared_ptr<Text> txtHP, txtSP, txtMP, txtEXP, txtCoin;
+	std::shared_ptr<MouseButton> btnPause;
 
 	// UI WHEN PAUSE GAME:
 	std::shared_ptr<Sprite2D> musicForegroundBar, sfxForegroundBar;
