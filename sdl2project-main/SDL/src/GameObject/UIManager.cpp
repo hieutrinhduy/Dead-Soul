@@ -325,7 +325,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	#pragma endregion
 
 	#pragma region UI WHEN CHANGE MAP
-	animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.03);
+	animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.02f);
 	animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	animationMapTransition->Set2DPosition(0, 0);
 	#pragma endregion
@@ -462,14 +462,14 @@ void UIManager::Update(float deltaTime) {
 			mapTransitionNextRow = false;
 			m_tileMap->LoadNewMap();
 			Camera::GetInstance()->Update(deltaTime);
-			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_2.png"), 1, 9, 6, 0.015);
+			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_2.png"), 1, 9, 6, 0.02f);
 			animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 			animationMapTransition->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
 		}
 		else if (!mapTransitionFlag && animationMapTransition->GetCurrentFrame() == 7 && animationMapTransition->GetCurrentAction() == 6) {
 			mapTransitionFlag = true;
 			mapTransitionNextRow = false;
-			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.02);
+			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.02f);
 			animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 			*m_timeScale = 1;
 		}
@@ -546,9 +546,10 @@ void UIManager::UpdateStats() {
 				if (x >= (SCREEN_WIDTH - 50) / 2.0f && x <= (SCREEN_WIDTH - 50) / 2.0f + 50 && y >= 4 && y <= 54 ||
 					((x >= SLOT_0_POSITION_X && x <= SLOT_0_POSITION_X + SLOT_SIZE ||
 						x >= SLOT_1_POSITION_X && x <= SLOT_1_POSITION_X + SLOT_SIZE) &&
-						y >= SCREEN_HEIDHT - SLOT_Y - SLOT_SIZE && y <= SCREEN_HEIDHT - SLOT_Y)) {
-					
+						y >= SCREEN_HEIDHT - SLOT_Y && y <= SCREEN_HEIDHT - SLOT_Y + SLOT_SIZE)) {
+					m_playerController->SetClickingStatus(true);
 				}
+				else m_playerController->SetClickingStatus(false);
 
 				#pragma region Check Player stats
 				// check HP_STATUS:
@@ -704,7 +705,7 @@ void UIManager::UpdateStats() {
 							mpRefilled += 5;
 						}
 						if (selection == 3) {
-							
+							m_playerController->SetPlayerDamage(m_playerController->GetPlayerDamage() + 5);
 						}
 						*m_timeScale = 1;
 					}
