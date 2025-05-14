@@ -58,7 +58,7 @@ GSPlay::~GSPlay() {}
 
 void GSPlay::Init()
 {
-
+    m_tileMap->SetReferenceToGSPlay(this);
     Camera::GetInstance()->SetLevelDimension(
         m_tileMap->GetWidth() * m_tileMap->GetTileSize(),
         m_tileMap->GetHeight() * m_tileMap->GetTileSize()

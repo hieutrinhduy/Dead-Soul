@@ -6,6 +6,7 @@
 
 #include "ResourceManagers.h"
 #include "Camera.h"
+#include "GSPlay.h"
 
 
 constexpr int CHECK_SCOPE = 2; // scope of the object-terrain collision check
@@ -103,6 +104,7 @@ void TileMap::LoadNewMap() {
         m_tilesFolder = "Map/map2_tileset/";
         GetTileIdFromTilemap();
         LoadTileTexturesFromTileset();
+        m_gsPlay->ChangeLevel(LevelID::Level2);
     }
 }
 #pragma endregion
@@ -116,6 +118,7 @@ int TileMap::GetTileSize() { return m_tileSize; }
 
 
 #pragma region SETTER
+void TileMap::SetReferenceToGSPlay(GSPlay* gsPlay) { m_gsPlay = gsPlay; }
 void TileMap::SetPlayer(std::shared_ptr<PlayerController> player) { m_player = player; }
 #pragma endregion
 

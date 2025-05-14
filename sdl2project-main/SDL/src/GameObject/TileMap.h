@@ -7,6 +7,7 @@
 #include "Define.h"
 #include "TextureManager.h"
 #include "PlayerController.h"
+class GSPlay;
 
 
 /*
@@ -32,6 +33,7 @@ public:
     int GetTileSize();
 
     // SETTER:
+    void SetReferenceToGSPlay(GSPlay* gsPlay);
     void SetPlayer(std::shared_ptr<PlayerController> player);
 
     // checking MOVEMENT_ABILITY thread:
@@ -55,5 +57,6 @@ private:
 
 
     bool m_isPlaying;
+    GSPlay* m_gsPlay;
     std::shared_ptr<PlayerController> m_player;
 };

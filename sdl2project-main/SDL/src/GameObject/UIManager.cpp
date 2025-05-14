@@ -637,6 +637,60 @@ void UIManager::UpdateStats() {
 
 
 
+			else if (*m_timeScale == 0) {
+				musicVolume = 128.0f * (iconMusicSettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SOUND_START_X) /
+										(SCREEN_WIDTH * (SETTINGS_SOUND_END_X - SETTINGS_SOUND_START_X));
+				sfxVolume = 128.0f * (iconSfxSettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SOUND_START_X) /
+									  (SCREEN_WIDTH * (SETTINGS_SOUND_END_X - SETTINGS_SOUND_START_X));
+
+				Sound::GetInstance()->SetMusicVolume(musicVolume);
+				Sound::GetInstance()->SetSfxVolume(sfxVolume);
+
+				SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
+				saveData.musicVolume = musicVolume;
+				saveData.sfxVolume = sfxVolume;
+
+				musicForegroundBar->SetSize(SCREEN_WIDTH * SETTINGS_BAR_WIDTH_RATIO * musicVolume / 128,
+										    musicForegroundBar->GetHeight());
+				sfxForegroundBar->SetSize(SCREEN_WIDTH * SETTINGS_BAR_WIDTH_RATIO * sfxVolume / 128,
+										  sfxForegroundBar->GetHeight());
+
+				if (pressButtonWhenPause) {
+					pressButtonWhenPause = false;
+					SDL_GetMouseState(&x, &y);
+					if (x >= SCREEN_WIDTH * RESUME_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * RESUME_BUTTON_RIGHT_RATIO &&
+						y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
+					{
+						*m_timeScale = 1;
+					}
+					else if (x >= SCREEN_WIDTH * QUIT_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * QUIT_BUTTON_RIGHT_RATIO &&
+							y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
+					{
+						ClearThread();
+					}
+				}
+
+				else if (releaseButtonWhenPause) {
+					releaseButtonWhenPause = false;
+					int a = std::round((iconSensitivitySettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SENSITIVITY_START_X) /
+									   (SCREEN_WIDTH * (SETTINGS_SENSITIVITY_END_X - SETTINGS_SENSITIVITY_START_X)) * 4);
+					mousewheelSensitivity = 9 - 2 * a;
+					saveData.mousewheelSensitivity = mousewheelSensitivity;
+					iconSensitivitySettings->Set2DPosition(
+						SCREEN_WIDTH * (SETTINGS_SENSITIVITY_START_X + a * (SETTINGS_SENSITIVITY_END_X -
+																			 SETTINGS_SENSITIVITY_START_X) / 4),
+						iconSensitivitySettings->Get2DPosition().y
+					);
+				}
+
+				DataSaver::GetInstance()->SetSaveData(saveData);
+				DataSaver::GetInstance()->SaveGame("save.dat");
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			}
+
+
+
 			else if (*m_timeScale == 2) {
 				SDL_GetMouseState(&x, &y);
 
@@ -710,60 +764,6 @@ void UIManager::UpdateStats() {
 						*m_timeScale = 1;
 					}
 				}
-
-				std::this_thread::sleep_for(std::chrono::milliseconds(20));
-			}
-
-
-
-			else if (*m_timeScale == 0) {
-				musicVolume = 128.0f * (iconMusicSettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SOUND_START_X) /
-										(SCREEN_WIDTH * (SETTINGS_SOUND_END_X - SETTINGS_SOUND_START_X));
-				sfxVolume = 128.0f * (iconSfxSettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SOUND_START_X) /
-									  (SCREEN_WIDTH * (SETTINGS_SOUND_END_X - SETTINGS_SOUND_START_X));
-
-				Sound::GetInstance()->SetMusicVolume(musicVolume);
-				Sound::GetInstance()->SetSfxVolume(sfxVolume);
-
-				SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
-				saveData.musicVolume = musicVolume;
-				saveData.sfxVolume = sfxVolume;
-
-				musicForegroundBar->SetSize(SCREEN_WIDTH * SETTINGS_BAR_WIDTH_RATIO * musicVolume / 128,
-										    musicForegroundBar->GetHeight());
-				sfxForegroundBar->SetSize(SCREEN_WIDTH * SETTINGS_BAR_WIDTH_RATIO * sfxVolume / 128,
-										  sfxForegroundBar->GetHeight());
-
-				if (pressButtonWhenPause) {
-					pressButtonWhenPause = false;
-					SDL_GetMouseState(&x, &y);
-					if (x >= SCREEN_WIDTH * RESUME_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * RESUME_BUTTON_RIGHT_RATIO &&
-						y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
-					{
-						*m_timeScale = 1;
-					}
-					else if (x >= SCREEN_WIDTH * QUIT_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * QUIT_BUTTON_RIGHT_RATIO &&
-							y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
-					{
-						ClearThread();
-					}
-				}
-
-				else if (releaseButtonWhenPause) {
-					releaseButtonWhenPause = false;
-					int a = std::round((iconSensitivitySettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SENSITIVITY_START_X) /
-									   (SCREEN_WIDTH * (SETTINGS_SENSITIVITY_END_X - SETTINGS_SENSITIVITY_START_X)) * 4);
-					mousewheelSensitivity = 9 - 2 * a;
-					saveData.mousewheelSensitivity = mousewheelSensitivity;
-					iconSensitivitySettings->Set2DPosition(
-						SCREEN_WIDTH * (SETTINGS_SENSITIVITY_START_X + a * (SETTINGS_SENSITIVITY_END_X -
-																			 SETTINGS_SENSITIVITY_START_X) / 4),
-						iconSensitivitySettings->Get2DPosition().y
-					);
-				}
-
-				DataSaver::GetInstance()->SetSaveData(saveData);
-				DataSaver::GetInstance()->SaveGame("save.dat");
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(20));
 			}

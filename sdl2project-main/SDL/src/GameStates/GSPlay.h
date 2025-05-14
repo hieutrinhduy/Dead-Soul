@@ -51,6 +51,7 @@ public:
 	void DisplayLoadingView();
 
 	int m_KeyPress;
+	void ChangeLevel(LevelID newLevel);
 
 private:
 	std::shared_ptr<int> timeScale;
@@ -95,5 +96,4 @@ private:
 	void UpdateGravity(float deltaTime);
 	void UpdateGroundCheck();
 	void UpdateAnimation(float deltaTime);
-	void ChangeLevel(LevelID newLevel);
 };
