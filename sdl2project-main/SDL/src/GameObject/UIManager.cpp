@@ -539,9 +539,15 @@ void UIManager::UpdateStats() {
 					pressButtonWhenLevelUp = false;
 					selection = 0;
 					*m_timeScale = 2;
-				//	hoverBorder->SetSize(0, hoverBorder->GetHeight());
-				//	underline->SetSize(0, underline->GetHeight());
-				//	confirmButton->SetSize(0, confirmButton->GetHeight());
+				}
+
+				// check if player is hovering an UI element:
+				SDL_GetMouseState(&x, &y);
+				if (x >= (SCREEN_WIDTH - 50) / 2.0f && x <= (SCREEN_WIDTH - 50) / 2.0f + 50 && y >= 4 && y <= 54 ||
+					((x >= SLOT_0_POSITION_X && x <= SLOT_0_POSITION_X + SLOT_SIZE ||
+						x >= SLOT_1_POSITION_X && x <= SLOT_1_POSITION_X + SLOT_SIZE) &&
+						y >= SCREEN_HEIDHT - SLOT_Y - SLOT_SIZE && y <= SCREEN_HEIDHT - SLOT_Y)) {
+					
 				}
 
 				#pragma region Check Player stats
@@ -698,7 +704,7 @@ void UIManager::UpdateStats() {
 							mpRefilled += 5;
 						}
 						if (selection == 3) {
-
+							
 						}
 						*m_timeScale = 1;
 					}
