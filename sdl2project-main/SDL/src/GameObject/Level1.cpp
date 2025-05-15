@@ -59,6 +59,12 @@ Level1::Level1(std::shared_ptr<PlayerController> player)
     m_evilCreature2 = std::make_shared<EvilCreature>();
     m_evilCreature2->Init(420, 4198, 1320);
 
+    m_evilCreature3 = std::make_shared<EvilCreature>();
+    m_evilCreature3->Init(580, 5800, 2280);
+
+    m_evilCreature4 = std::make_shared<EvilCreature>();
+    m_evilCreature4->Init(580, 5800, 2700);
+
     //m_ghostWarrior = std::make_shared<GhostWarrior>();
     //m_ghostWarrior->Init(1850, 3000, 325);
 
@@ -86,6 +92,8 @@ Level1::Level1(std::shared_ptr<PlayerController> player)
     m_enemyController8->SetPlayerCollider(&player->GetCollider());
     m_evilCreature->SetPlayerCollider(&player->GetCollider());
     m_evilCreature2->SetPlayerCollider(&player->GetCollider());
+    m_evilCreature3->SetPlayerCollider(&player->GetCollider());
+    m_evilCreature4->SetPlayerCollider(&player->GetCollider());
     //m_ghostWarrior->SetPlayerCollider(&player->GetCollider());
     //m_ghostWarriorRed->SetPlayerCollider(&player->GetCollider());
     //m_rangedEnemy->SetPlayerCollider(&player->GetCollider());
@@ -107,7 +115,9 @@ Level1::Level1(std::shared_ptr<PlayerController> player)
         m_enemyController7->GetEnemyCollider(),
         m_enemyController8->GetEnemyCollider(),
         m_evilCreature->GetCollider(),
-        m_evilCreature2->GetCollider()
+        m_evilCreature2->GetCollider(),
+        m_evilCreature3->GetCollider(),
+        m_evilCreature4->GetCollider()
         //m_ghostWarrior->GetCollider(),
         //m_ghostWarriorRed->GetCollider(),
         //m_rangedEnemy->GetCollider()
@@ -132,6 +142,8 @@ void Level1::Update(float dt)
     m_enemyController8->Update(dt);
     m_evilCreature->Update(dt);
     m_evilCreature2->Update(dt);
+    m_evilCreature3->Update(dt);
+    m_evilCreature4->Update(dt);
     //m_ghostWarrior->Update(dt);
     //m_ghostWarriorRed->Update(dt);
     //m_rangedEnemy->Update(dt);
@@ -153,6 +165,8 @@ void Level1::Draw(SDL_Renderer* renderer)
     m_enemyController8->Draw(renderer);
     m_evilCreature->Draw(renderer);
     m_evilCreature2->Draw(renderer);
+    m_evilCreature3->Draw(renderer);
+    m_evilCreature4->Draw(renderer);
     //m_ghostWarrior->Draw(renderer);
     //m_ghostWarriorRed->Draw(renderer);
     //m_rangedEnemy->Draw(renderer);
@@ -190,6 +204,8 @@ void Level1::SetupCallbacks(std::shared_ptr<PlayerController> player)
     m_enemyController8->SetOnHitPlayerCallback(createHitPlayerCallback([this]() { return m_enemyController8->GetEnemyCollider(); }));
     m_evilCreature->SetOnHitPlayerCallback(createHitPlayerCallback([this]() { return m_evilCreature->GetCollider(); }));
     m_evilCreature2->SetOnHitPlayerCallback(createHitPlayerCallback([this]() { return m_evilCreature2->GetCollider(); }));
+    m_evilCreature3->SetOnHitPlayerCallback(createHitPlayerCallback([this]() { return m_evilCreature3->GetCollider(); }));
+    m_evilCreature4->SetOnHitPlayerCallback(createHitPlayerCallback([this]() { return m_evilCreature4->GetCollider(); }));
     //m_ghostWarrior->SetOnHitPlayerCallback(createHitPlayerCallback([this]() { return m_ghostWarrior->GetCollider(); }));
     //m_ghostWarriorRed->SetOnHitPlayerCallback(createHitPlayerCallback([this]() { return m_ghostWarriorRed->GetCollider(); }));
     //m_rangedEnemy->SetOnHitPlayerCallback(createHitPlayerCallback([this]() { return m_rangedEnemy->GetCollider(); }));
@@ -214,6 +230,8 @@ void Level1::SetupCallbacks(std::shared_ptr<PlayerController> player)
     m_hitCallbacks.push_back(createHitEnemyCallback([this]() { return m_enemyController3->GetEnemyCollider(); }, [this](int d, int dir) { m_enemyController8->TakeDamage(d, dir); }));
     m_hitCallbacks.push_back(createHitEnemyCallback([this]() { return m_evilCreature->GetCollider(); }, [this](int d, int dir) { m_evilCreature->TakeDamage(d, dir); }));
     m_hitCallbacks.push_back(createHitEnemyCallback([this]() { return m_evilCreature2->GetCollider(); }, [this](int d, int dir) { m_evilCreature2->TakeDamage(d, dir); }));
+    m_hitCallbacks.push_back(createHitEnemyCallback([this]() { return m_evilCreature3->GetCollider(); }, [this](int d, int dir) { m_evilCreature3->TakeDamage(d, dir); }));
+    m_hitCallbacks.push_back(createHitEnemyCallback([this]() { return m_evilCreature4->GetCollider(); }, [this](int d, int dir) { m_evilCreature4->TakeDamage(d, dir); }));
     //m_hitCallbacks.push_back(createHitEnemyCallback([this]() { return m_ghostWarrior->GetCollider(); }, [this](int d, int dir) { m_ghostWarrior->TakeDamage(d, dir); }));
     //m_hitCallbacks.push_back(createHitEnemyCallback([this]() { return m_ghostWarriorRed->GetCollider(); }, [this](int d, int dir) { m_ghostWarriorRed->TakeDamage(d, dir); }));
     //m_hitCallbacks.push_back(createHitEnemyCallback([this]() { return m_rangedEnemy->GetCollider(); }, [this](int d, int dir) { m_rangedEnemy->TakeDamage(d, dir); }));
@@ -248,6 +266,8 @@ void Level1::SetupSpawnExp(std::shared_ptr<PlayerController> player)
     setupSpawn(m_enemyController5);
     setupSpawn(m_evilCreature);
     setupSpawn(m_evilCreature2);
+    setupSpawn(m_evilCreature3);
+    setupSpawn(m_evilCreature4);
     //setupSpawn(m_ghostWarrior);
     //setupSpawn(m_ghostWarriorRed);
     //setupSpawn(m_rangedEnemy);
