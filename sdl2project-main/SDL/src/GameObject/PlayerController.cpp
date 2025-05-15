@@ -23,7 +23,7 @@ extern std::vector<std::shared_ptr<PlayerBullet>> g_playerBullets;
 /* ----------------------------------------------------------------------------------------------------------------------- */
 #pragma region Predefined function
 PlayerController::PlayerController()
-    : m_gravityForce(150.0f), m_jumpForce(-500.0f), m_velocityY(0.0f), m_speed(700.0f),
+    : m_gravityForce(150.0f), m_jumpForce(-500.0f), m_velocityY(0.0f), m_speed(1500.0f),
     m_jumpCount(0), m_maxJump(2), m_isGrounded(false),
     m_forceJumpAnimation(false), m_forceJumpTimer(0.0f), m_forceJumpDuration(0.15f),
     m_playerFlip(SDL_FLIP_NONE),
@@ -79,6 +79,7 @@ void PlayerController::Init()
 
     // set CAMERA'S TARGET:
     Camera::GetInstance()->SetTarget(m_player);
+
 }
 
 
@@ -198,6 +199,10 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
 void PlayerController::Update(float deltaTime)
 {
     if (!m_player) return;
+
+    std::cout << "Top limimt " << topLimit << std::endl;
+    std::cout << "PlayerPosX " << m_player->Get2DPosition().x << " PlayerPosY " << m_player->Get2DPosition().y << std::endl;
+
     int currentFrame = m_player->GetCurrentFrame();
     //Nếu chết thì đếm ngược thời gian trước khi dừng draw
     if (m_isDead) {

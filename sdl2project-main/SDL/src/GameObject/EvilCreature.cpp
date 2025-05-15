@@ -30,12 +30,12 @@ void EvilCreature::Init(float pointA, float pointB, float posY)
 
     m_sprite = std::make_shared<SpriteAnimation>(runTexture, 1, 10, 1, 0.05f);
     m_sprite->SetSize(96 * 2, 64 * 2);
-    m_sprite->Set2DPosition(pointA, posY);
+    m_sprite->Set2DPosition(pointB, posY);
     m_collider = { (int)m_sprite->GetPosition().x + 50, (int)m_sprite->GetPosition().y, m_sprite->GetWidth() / 2, m_sprite->GetHeight() };
 
     m_pointA = pointA;
     m_pointB = pointB;
-    m_flip = SDL_FLIP_HORIZONTAL;
+    m_flip = SDL_FLIP_NONE;
 
     m_hpBarBg = { 0, 0, m_barWidth, m_barHeight };
     m_hpBarFill = m_hpBarBg;
@@ -355,6 +355,43 @@ void EvilCreature::Draw(SDL_Renderer* renderer)
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &drawFill);
+
+    //Draw Movement
+    int markerSize = 6;
+    SDL_Color lineColor = { 0, 255, 0, 255 }; // Xanh lá
+
+    // Vị trí Y dưới chân enemy
+    int drawY = static_cast<int>(m_sprite->Get2DPosition().y + m_sprite->GetHeight()) + 5 - static_cast<int>(camPos.y);
+
+    // ✅ Điều chỉnh thêm offset X = nửa chiều rộng sprite
+    int offsetX = m_sprite->GetWidth() / 2;
+
+    // Vẽ đường từ A đến B (có offset để canh giữa enemy)
+    SDL_SetRenderDrawColor(renderer, lineColor.r, lineColor.g, lineColor.b, lineColor.a);
+    SDL_RenderDrawLine(renderer,
+        static_cast<int>(m_pointA + offsetX - camPos.x),
+        drawY,
+        static_cast<int>(m_pointB + offsetX - camPos.x),
+        drawY
+    );
+
+    // Vẽ chấm tại pointA
+    SDL_Rect pointAmarker = {
+        static_cast<int>(m_pointA + offsetX - camPos.x - markerSize / 2),
+        drawY - markerSize / 2,
+        markerSize,
+        markerSize
+    };
+    SDL_RenderFillRect(renderer, &pointAmarker);
+
+    // Vẽ chấm tại pointB
+    SDL_Rect pointBmarker = {
+        static_cast<int>(m_pointB + offsetX - camPos.x - markerSize / 2),
+        drawY - markerSize / 2,
+        markerSize,
+        markerSize
+    };
+    SDL_RenderFillRect(renderer, &pointBmarker);
 }
 
 bool EvilCreature::DetectPlayer()
