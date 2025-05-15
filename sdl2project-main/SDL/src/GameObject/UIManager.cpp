@@ -33,6 +33,7 @@
 std::mutex mtx;
 
 #pragma region Constant expression evaluation
+//position of UI when RUN GAME:
 constexpr int HP_BACKGROUND_BAR_WIDTH_IN_SPRITE = 512;
 constexpr int BACKGROUND_BAR_HEIGHT = 16;
 constexpr int BAR_LEFT = 10;
@@ -55,6 +56,16 @@ constexpr int SLOT_0_POSITION_X = 10;
 constexpr int SLOT_1_POSITION_X = SLOT_0_POSITION_X + SLOT_SIZE + SLOT_GAP;
 constexpr int SLOT_Y = EXP_BAR_HEIGHT + SLOT_SIZE + 5;
 
+
+// position of UI when DEFEAT:
+constexpr float DEFEAT_BUTTON_LEFT_RATIO = 95.0f / 256, DEFEAT_BUTTON_RIGHT_RATIO = 161.0f / 256;
+constexpr float DEFEAT_BUTTON_TOP_RATIO = 72.0f / 144, DEFEAT_BUTTON_BOTTOM_RATIO = 88.0f / 144;
+
+
+// position of UI when VICTORY:
+
+
+// position of UI when PAUSE:
 constexpr float SETTINGS_BAR_WIDTH_RATIO = 114.0f / 256, SETTINGS_BAR_HEIGHT_RATIO = 3.0f / 144;
 constexpr float SETTINGS_BAR_POSITION_X_RATIO = 87.0f / 256;
 constexpr float SETTINGS_BAR_1_POSITION_Y_RATIO = 45.0f / 144, SETTINGS_BAR_2_POSITION_Y_RATIO = 69.0f / 144;
@@ -68,7 +79,8 @@ constexpr float RESUME_BUTTON_LEFT_RATIO = 51.0f / 256, RESUME_BUTTON_RIGHT_RATI
 constexpr float QUIT_BUTTON_LEFT_RATIO = 159.0f / 256, QUIT_BUTTON_RIGHT_RATIO = 205.0f / 256;
 constexpr float PAUSE_BUTTON_TOP_RATIO = 117.0f / 144, PAUSE_BUTTON_BOTTOM_RATIO = 131.0f / 144;
 
-// statistic about: selection border, hover border, underline, confirm button
+
+// position of UI when LEVEL UP:
 constexpr float SELECTION_WIDTH_RATIO = 62.0f / 256, SELECTION_HEIGHT_RATIO = 83.0f / 144;
 constexpr float SELECTION_TOP_RATIO = 27.0f / 144, SELECTION_BOTTOM_RATIO = 110.0f / 144;
 constexpr float SELECTION_1_LEFT_RATIO = 32.0f / 256, SELECTION_1_RIGHT_RATIO = 94.0f / 256;
@@ -329,6 +341,16 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	animationMapTransition->Set2DPosition(0, 0);
 	#pragma endregion
+
+	#pragma region UI WHEN DEFEAT/VICTORY
+	/*victoryScene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\victory_scene.png"), 1, 7, 10, 0.1f);
+	victoryScene->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	victoryScene->Set2DPosition(0, 0);*/
+
+	defeatScene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("defeat_scene.png"), 1, 7, 10, 0.1f);
+	defeatScene->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	defeatScene->Set2DPosition(0, 0);
+	#pragma endregion
 }
 
 
@@ -341,15 +363,21 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 {
 	// when run game:
 	if (*m_timeScale == 1) {
-		for (auto button : buttons)
-		{
-			if (button->HandleTouchEvent(&e))
+		if (statusCode == 0) {
+			for (auto button : buttons)
 			{
-				break;
+				if (button->HandleTouchEvent(&e))
+				{
+					break;
+				}
 			}
+
+			btnPause->HandleTouchEvent(&e);
 		}
-		
-		btnPause->HandleTouchEvent(&e);
+
+		if (e.type == SDL_MOUSEBUTTONDOWN) {
+			pressButtonWhenPause = true;
+		}
 
 		return;
 	}
@@ -386,7 +414,7 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 
 
 void UIManager::HandleMouseEvents(SDL_Event& e) {
-	if (*m_timeScale == 1) {
+	if (*m_timeScale == 1 && statusCode == 0) {
 		if (e.type == SDL_MOUSEWHEEL) {
 			std::lock_guard<std::mutex> lock(mtx);
 			if (timer <= 0) timer = 300;
@@ -399,6 +427,20 @@ void UIManager::HandleMouseEvents(SDL_Event& e) {
 
 void UIManager::Update(float deltaTime) {
 	if (*m_timeScale >= 0) {
+		if (*m_timeScale == 1) {
+			if (statusCode == 1) victoryScene->Update(deltaTime);
+			else if (statusCode == -1) {
+				defeatScene->Update(deltaTime);
+				defeatScene->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
+				if (endAnimationNextRow && defeatScene->GetCurrentFrame() == 0) {
+					endAnimationNextRow = false;
+					defeatScene->SetCurrentAction(defeatScene->GetCurrentAction() + 1);
+				}
+				else if (defeatScene->GetCurrentFrame() == 1) endAnimationNextRow = true;
+			}
+		}
+
+		#pragma region Update Player Stats
 		// UPDATE HP:
 		if (!FloatEquals(hpChangePerFrame, 0.0f) && !FloatEquals(hpLoss, 0.0f)) {
 			hp -= hpChangePerFrame;
@@ -445,6 +487,7 @@ void UIManager::Update(float deltaTime) {
 		txtMP->SetText(mpStat);
 		// set the MP bar
 		mpBar->SetSize(mp / maxMP * fullMpBarWidth, mpBar->GetHeight());
+		#pragma endregion
 	}
 
 	if (*m_timeScale == -1) {
@@ -499,8 +542,10 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 	if (*m_timeScale >= 0) {
 		for (auto& it : buttons) it->Draw(renderer);
 		for (auto& it : uiWhenRunGame) it->Draw(renderer);
+		//victoryScene->Draw(renderer);
+		defeatScene->Draw(renderer);
 
-		if (*m_timeScale == 1) {
+		if (*m_timeScale == 1 && statusCode == 0) {
 			btnPause->Draw(renderer);
 		}
 		else if (*m_timeScale == 0) {
@@ -543,21 +588,44 @@ void UIManager::UpdateStats() {
 
 				// check if player is hovering an UI element:
 				SDL_GetMouseState(&x, &y);
-				if (x >= (SCREEN_WIDTH - 50) / 2.0f && x <= (SCREEN_WIDTH - 50) / 2.0f + 50 && y >= 4 && y <= 54 ||
-					((x >= SLOT_0_POSITION_X && x <= SLOT_0_POSITION_X + SLOT_SIZE ||
-						x >= SLOT_1_POSITION_X && x <= SLOT_1_POSITION_X + SLOT_SIZE) &&
-						y >= SCREEN_HEIDHT - SLOT_Y && y <= SCREEN_HEIDHT - SLOT_Y + SLOT_SIZE)) {
-					m_playerController->SetClickingStatus(true);
+				if (statusCode == 1) {
+					if (x >= (SCREEN_WIDTH - 50) / 2.0f && x <= (SCREEN_WIDTH - 50) / 2.0f + 50 && y >= 4 && y <= 54 ||
+						((x >= SLOT_0_POSITION_X && x <= SLOT_0_POSITION_X + SLOT_SIZE ||
+							x >= SLOT_1_POSITION_X && x <= SLOT_1_POSITION_X + SLOT_SIZE) &&
+							y >= SCREEN_HEIDHT - SLOT_Y && y <= SCREEN_HEIDHT - SLOT_Y + SLOT_SIZE)) {
+						m_playerController->SetClickingStatus(true);
+					}
+					else m_playerController->SetClickingStatus(false);
 				}
-				else m_playerController->SetClickingStatus(false);
+
+				else if (statusCode == -1) {
+					if (defeatScene->GetCurrentFrame() == 6 && defeatScene->GetCurrentAction() == 10) {
+						if (pressButtonWhenPause) {
+							if (x >= DEFEAT_BUTTON_LEFT_RATIO * SCREEN_WIDTH && x <= DEFEAT_BUTTON_RIGHT_RATIO * SCREEN_WIDTH &&
+								y >= DEFEAT_BUTTON_TOP_RATIO * SCREEN_HEIDHT && y <= DEFEAT_BUTTON_BOTTOM_RATIO * SCREEN_HEIDHT)
+							{
+								ClearThread();
+								printf("OK\n");
+							}
+						}
+						defeatScene->SetCurrentFrame(6);
+					}
+				}
+
+				
+				if (pressButtonWhenPause) pressButtonWhenPause = false;
+
 
 				#pragma region Check Player stats
 				// check HP_STATUS:
 				int lossAmount = m_playerController->GetHpLose();
 				if (lossAmount) {
 					hpLoss += lossAmount;
+					if (hpLoss >= hp) {
+						hpLoss = hp;
+						statusCode = -1;
+					}
 					hpChangePerFrame = hpLoss / FRAGMENT_COUNT;
-
 				}
 
 

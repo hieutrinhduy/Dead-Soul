@@ -150,8 +150,6 @@ void GSPlay::HandleMouseMoveEvents(SDL_Event& e) {
 
 void GSPlay::Update(float deltaTime)
 {
-    m_uiManager->Update(deltaTime);
-
     // if the game is not running or hasn't resumed, not update:
     if (*timeScale != 1) return;
 
@@ -230,6 +228,8 @@ void GSPlay::Update(float deltaTime)
     }
 
     Camera::GetInstance()->Update(deltaTime);
+
+    m_uiManager->Update(deltaTime);
 }
 
 
@@ -269,7 +269,6 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
     if (m_tileMap) m_tileMap->DrawMap(renderer);
 
-    m_playerController->Draw(renderer);
 
     //m_enemyController->Draw(renderer);
     //m_enemyController2->Draw(renderer);
@@ -312,6 +311,7 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
+    m_playerController->Draw(renderer);
     // draw UI:
     m_uiManager->Draw(renderer);
 }
