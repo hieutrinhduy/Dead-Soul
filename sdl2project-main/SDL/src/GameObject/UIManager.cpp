@@ -640,7 +640,7 @@ void UIManager::UpdateStats() {
 					hpLoss += lossAmount;
 					if (hpLoss >= hp) {
 						hpLoss = hp;
-						statusCode = 1;
+						statusCode = -1;
 					}
 					hpChangePerFrame = hpLoss / FRAGMENT_COUNT;
 				}

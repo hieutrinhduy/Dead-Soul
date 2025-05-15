@@ -150,8 +150,12 @@ void GSPlay::HandleMouseMoveEvents(SDL_Event& e) {
 
 void GSPlay::Update(float deltaTime)
 {
+
     // if the game is not running or hasn't resumed, not update:
-    if (*timeScale != 1) return;
+    if (*timeScale != 1) {
+        m_uiManager->Update(deltaTime);
+        return;
+    }
 
     for (auto& it : m_listButton) it->Update(deltaTime);
 

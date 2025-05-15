@@ -676,6 +676,12 @@ void PlayerController::ShootProjectile()
 
 void PlayerController::ResetPlayerPosition() {
     m_player->Set2DPosition(PLAYER_STARTING_POSITION_X, PLAYER_STARTING_POSITION_Y);
+    m_playerCollider = {
+        (int)(PLAYER_SIZE * COLLIDER_X + m_player->Get2DPosition().x),
+        (int)(PLAYER_SIZE * COLLIDER_Y + m_player->Get2DPosition().y),
+        (int)(PLAYER_SIZE * COLLIDER_W),
+        (int)(PLAYER_SIZE * COLLIDER_H),
+    };
 }
 
 
