@@ -11,6 +11,7 @@
 #include "PlayerController.h"
 #include "Sprite2D.h"
 #include "ChangeLevelGate.h"
+#include "Shop.h"
 
 class Level2 {
 public:
@@ -25,6 +26,7 @@ public:
 
     std::vector<std::shared_ptr<Sprite2D>> GetBackgrounds();
     std::shared_ptr<ChangeLevelGate> GetChangeLevelGate() const { return m_gate; }
+    std::shared_ptr<Shop> GetShop() const { return m_shop; }
 
 private:
     std::shared_ptr<EnemyController> m_enemyController;
@@ -37,6 +39,7 @@ private:
     std::shared_ptr<ScecretBoss> m_boss2;
 
     std::shared_ptr<ChangeLevelGate> m_gate;
+    std::shared_ptr<Shop> m_shop;
 
     std::vector<SDL_Rect*> m_enemyColliders;
     std::vector<std::function<void(int)>> m_hitCallbacks;

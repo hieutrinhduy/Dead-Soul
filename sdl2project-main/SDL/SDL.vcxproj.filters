@@ -144,6 +144,12 @@
     <ClCompile Include="src\GameObject\Level2.cpp">
       <Filter>Source Files\GameObjects</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameObject\ChangeLevelGate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameObject\Shop.cpp">
+      <Filter>Source Files\GameObjects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GameObject\BaseObject.h">
@@ -273,6 +279,12 @@
       <Filter>Source Files\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="src\GameObject\Level2.h">
+      <Filter>Source Files\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameObject\ChangeLevelGate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameObject\Shop.h">
       <Filter>Source Files\GameObjects</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,6 +15,7 @@
 #include "Level1.h"
 #include "Level2.h"
 #include "ChangeLevelGate.h"
+#include "Shop.h"
 
 class Sprite2D;
 class SpriteAnimation;
@@ -70,6 +71,7 @@ private:
 	std::shared_ptr<RangedEnemy> m_rangedEnemy;
 
 	std::shared_ptr<ChangeLevelGate> m_ChangeLevelGate;
+	std::shared_ptr<Shop> m_shop;
 
 	std::shared_ptr<Sprite2D>	m_background;
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;

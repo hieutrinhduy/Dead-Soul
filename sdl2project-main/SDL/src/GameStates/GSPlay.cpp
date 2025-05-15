@@ -371,6 +371,7 @@ void GSPlay::ChangeLevel(LevelID newLevel)
         enemyColliders = m_level1->GetEnemyColliders();
         m_hitEnemyCallbacks = m_level1->GetHitEnemyCallbacks();
         m_ChangeLevelGate = m_level1->GetChangeLevelGate();
+        m_shop = m_level1->GetShop();
     }
     else if (newLevel == LevelID::Level2)
     {
@@ -380,5 +381,6 @@ void GSPlay::ChangeLevel(LevelID newLevel)
         enemyColliders = m_level2->GetEnemyColliders();
         m_hitEnemyCallbacks = m_level2->GetHitEnemyCallbacks();
         m_ChangeLevelGate = m_level2->GetChangeLevelGate();
+        m_shop = m_level2->GetShop();
     }
 }

@@ -148,6 +148,10 @@ public:
         }
     };
 
+    void SetDeadStatus(bool isDead) {
+        m_isDead = isDead;
+    }
+
     void ResetPlayerPosition();
 
     // set collider:
