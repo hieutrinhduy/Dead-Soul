@@ -7,9 +7,9 @@
 */
 // ----------------------------------------------------------------------
 /*
-	upgrade 1: increase 25% of max HP, then refill 10% of max HP
-	upgrade 2: increase 10% of max MP, and increase refill speed
-	upgrade 3: increase 4 - 6 ATK dmg
+	statusCode ==  0  =>  player is ALIVE
+	statuscode ==  1  =>  VICTORY
+	statusCode == -1  =>  DEFEAT
 */
 // ----------------------------------------------------------------------
 
@@ -57,12 +57,9 @@ constexpr int SLOT_1_POSITION_X = SLOT_0_POSITION_X + SLOT_SIZE + SLOT_GAP;
 constexpr int SLOT_Y = EXP_BAR_HEIGHT + SLOT_SIZE + 5;
 
 
-// position of UI when DEFEAT:
+// position of UI when VICTORY/DEFEAT:
 constexpr float DEFEAT_BUTTON_LEFT_RATIO = 95.0f / 256, DEFEAT_BUTTON_RIGHT_RATIO = 161.0f / 256;
 constexpr float DEFEAT_BUTTON_TOP_RATIO = 72.0f / 144, DEFEAT_BUTTON_BOTTOM_RATIO = 88.0f / 144;
-
-
-// position of UI when VICTORY:
 
 
 // position of UI when PAUSE:
@@ -343,11 +340,11 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	#pragma endregion
 
 	#pragma region UI WHEN DEFEAT/VICTORY
-	/*victoryScene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\victory_scene.png"), 1, 7, 10, 0.1f);
+	victoryScene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\victory_scene.png"), 1, 8, 11, 0.05f);
 	victoryScene->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
-	victoryScene->Set2DPosition(0, 0);*/
+	victoryScene->Set2DPosition(0, 0);
 
-	defeatScene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("defeat_scene.png"), 1, 7, 10, 0.1f);
+	defeatScene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\defeat_scene.png"), 1, 7, 10, 0.1f);
 	defeatScene->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	defeatScene->Set2DPosition(0, 0);
 	#pragma endregion
@@ -428,7 +425,15 @@ void UIManager::HandleMouseEvents(SDL_Event& e) {
 void UIManager::Update(float deltaTime) {
 	if (*m_timeScale >= 0) {
 		if (*m_timeScale == 1) {
-			if (statusCode == 1) victoryScene->Update(deltaTime);
+			if (statusCode == 1) {
+				victoryScene->Update(deltaTime);
+				victoryScene->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
+				if (endAnimationNextRow && victoryScene->GetCurrentFrame() == 0) {
+					endAnimationNextRow = false;
+					victoryScene->SetCurrentAction(victoryScene->GetCurrentAction() + 1);
+				}
+				else if (victoryScene->GetCurrentFrame() == 1) endAnimationNextRow = true;
+			}
 			else if (statusCode == -1) {
 				defeatScene->Update(deltaTime);
 				defeatScene->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
@@ -542,7 +547,7 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 	if (*m_timeScale >= 0) {
 		for (auto& it : buttons) it->Draw(renderer);
 		for (auto& it : uiWhenRunGame) it->Draw(renderer);
-		//victoryScene->Draw(renderer);
+		victoryScene->Draw(renderer);
 		defeatScene->Draw(renderer);
 
 		if (*m_timeScale == 1 && statusCode == 0) {
@@ -588,7 +593,7 @@ void UIManager::UpdateStats() {
 
 				// check if player is hovering an UI element:
 				SDL_GetMouseState(&x, &y);
-				if (statusCode == 1) {
+				if (statusCode == 0) {
 					if (x >= (SCREEN_WIDTH - 50) / 2.0f && x <= (SCREEN_WIDTH - 50) / 2.0f + 50 && y >= 4 && y <= 54 ||
 						((x >= SLOT_0_POSITION_X && x <= SLOT_0_POSITION_X + SLOT_SIZE ||
 							x >= SLOT_1_POSITION_X && x <= SLOT_1_POSITION_X + SLOT_SIZE) &&
@@ -598,14 +603,26 @@ void UIManager::UpdateStats() {
 					else m_playerController->SetClickingStatus(false);
 				}
 
-				else if (statusCode == -1) {
+				else if (statusCode == 1) {
+					if (victoryScene->GetCurrentFrame() == 7 && victoryScene->GetCurrentAction() == 11) {
+						if (pressButtonWhenPause) {
+							if (x >= DEFEAT_BUTTON_LEFT_RATIO * SCREEN_WIDTH && x <= DEFEAT_BUTTON_RIGHT_RATIO * SCREEN_WIDTH &&
+								y >= DEFEAT_BUTTON_TOP_RATIO * SCREEN_HEIDHT && y <= DEFEAT_BUTTON_BOTTOM_RATIO * SCREEN_HEIDHT)
+							{
+								ClearThread();
+							}
+						}
+						victoryScene->SetCurrentFrame(7);
+					}
+				}
+
+				else {
 					if (defeatScene->GetCurrentFrame() == 6 && defeatScene->GetCurrentAction() == 10) {
 						if (pressButtonWhenPause) {
 							if (x >= DEFEAT_BUTTON_LEFT_RATIO * SCREEN_WIDTH && x <= DEFEAT_BUTTON_RIGHT_RATIO * SCREEN_WIDTH &&
 								y >= DEFEAT_BUTTON_TOP_RATIO * SCREEN_HEIDHT && y <= DEFEAT_BUTTON_BOTTOM_RATIO * SCREEN_HEIDHT)
 							{
 								ClearThread();
-								printf("OK\n");
 							}
 						}
 						defeatScene->SetCurrentFrame(6);
@@ -623,7 +640,7 @@ void UIManager::UpdateStats() {
 					hpLoss += lossAmount;
 					if (hpLoss >= hp) {
 						hpLoss = hp;
-						statusCode = -1;
+						statusCode = 1;
 					}
 					hpChangePerFrame = hpLoss / FRAGMENT_COUNT;
 				}
