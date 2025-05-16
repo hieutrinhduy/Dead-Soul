@@ -1,4 +1,4 @@
-#include "TileMap.h"
+﻿#include "TileMap.h"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -263,3 +263,43 @@ void TileMap::ClearThread() {
     m_isPlaying = false;
 }
 #pragma endregion
+
+
+void TileMap::ExportFullMapImage(SDL_Renderer* renderer)
+{
+    int mapWidth = GetWidth() * m_tileSize;
+    int mapHeight = GetHeight() * m_tileSize;
+
+    SDL_Texture* renderTarget = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, mapWidth, mapHeight);
+    SDL_SetRenderTarget(renderer, renderTarget);
+    SDL_RenderClear(renderer);
+
+    // Vẽ toàn bộ bản đồ KHÔNG dùng camera
+    for (int row = 0; row < m_tileIds.size(); ++row)
+    {
+        for (int col = 0; col < m_tileIds[row].size(); ++col)
+        {
+            int tileID = m_tileIds[row][col];
+            if (m_tileTextures.count(tileID) == 0) continue;
+
+            SDL_Rect dstRect = {
+                col * m_tileSize,
+                row * m_tileSize,
+                m_tileSize,
+                m_tileSize
+            };
+
+            SDL_RenderCopy(renderer, m_tileTextures[tileID]->GetTextureObj(), nullptr, &dstRect);
+        }
+    }
+
+    SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, mapWidth, mapHeight, 32, SDL_PIXELFORMAT_RGBA8888);
+    SDL_RenderReadPixels(renderer, nullptr, SDL_PIXELFORMAT_RGBA8888, surface->pixels, surface->pitch);
+
+    IMG_SavePNG(surface, "full_map.png");
+
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(renderTarget);
+    SDL_SetRenderTarget(renderer, nullptr);
+}
+

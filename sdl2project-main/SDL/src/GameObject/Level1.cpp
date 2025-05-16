@@ -29,12 +29,26 @@ Level1::Level1(std::shared_ptr<PlayerController> player)
     m_shop = std::make_shared<Shop>();
     m_shop->Init(300, 0);
 
-    auto texture = ResourceManagers::GetInstance()->GetTexture("decorations/lamp.png");
-    auto tree = std::make_shared<SpriteAnimation>(texture, 1,1,1, 0.1);
-    tree->SetSize(100, 150);
-    tree->Set2DPosition(1200, 430);
-    m_decorList.push_back(tree);
+#pragma region Decor
 
+    auto level1Decor = ResourceManagers::GetInstance()->GetTexture("decorations/Level1Decor.png");
+    if (level1Decor != nullptr)
+    {
+        auto decor = std::make_shared<SpriteAnimation>(level1Decor, 1, 1, 1, 10);
+        int decorWidth = 6592;
+        int decorHeight = 3072;
+
+
+        decor->SetSize(decorWidth, decorHeight);
+        decor->Set2DPosition(0, 0);
+        m_decorList.push_back(decor);
+    }
+    else
+    {
+        std::cout << "Lỗi: Không tải được texture Level1Decor.png\n";
+    }
+
+#pragma endregion
     // Khởi tạo enemy
     m_enemyController = std::make_shared<EnemyController>();
     m_enemyController->Init(10, 1200, 865);

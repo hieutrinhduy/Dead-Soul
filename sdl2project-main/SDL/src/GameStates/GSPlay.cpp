@@ -63,7 +63,6 @@ void GSPlay::Init()
         m_tileMap->GetWidth() * m_tileMap->GetTileSize(),
         m_tileMap->GetHeight() * m_tileMap->GetTileSize()
     );
-
     m_playerController = std::make_shared<PlayerController>();
     m_playerController->Init();
 
@@ -82,6 +81,8 @@ void GSPlay::Init()
         });
 
     DisplayLoadingView();
+
+    //m_tileMap->ExportFullMapImage(Renderer::GetInstance()->GetRenderer());
 }
 
 void GSPlay::Exit() {
@@ -99,8 +100,6 @@ void GSPlay::Pause() {}
 
 
 void GSPlay::Resume() {}
-
-
 
 
 void GSPlay::HandleEvents() {}

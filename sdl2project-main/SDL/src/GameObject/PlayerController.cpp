@@ -200,8 +200,8 @@ void PlayerController::Update(float deltaTime)
 {
     if (!m_player) return;
 
-    std::cout << "Top limimt " << topLimit << std::endl;
-    std::cout << "PlayerPosX " << m_player->Get2DPosition().x << " PlayerPosY " << m_player->Get2DPosition().y << std::endl;
+    //std::cout << "Top limimt " << topLimit << std::endl;
+    //std::cout << "PlayerPosX " << m_player->Get2DPosition().x << " PlayerPosY " << m_player->Get2DPosition().y << std::endl;
 
     int currentFrame = m_player->GetCurrentFrame();
     //Nếu chết thì đếm ngược thời gian trước khi dừng draw

@@ -41,6 +41,7 @@ public:
     void ClearThread();
     bool m_finishThread;
 
+    void ExportFullMapImage(SDL_Renderer* renderer);
 
 
 private:
