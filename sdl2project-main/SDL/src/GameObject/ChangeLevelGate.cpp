@@ -8,8 +8,8 @@ ChangeLevelGate::~ChangeLevelGate() {}
 void ChangeLevelGate::Init(float posX, float posY)
 {
     auto texture = ResourceManagers::GetInstance()->GetTexture("NextLevelPortal.png");
-    m_animation = std::make_shared<SpriteAnimation>(texture, 1, 6, 1, 0.05f);
-    m_animation->SetSize(96 * 2, 64 * 2);
+    m_animation = std::make_shared<SpriteAnimation>(texture, 1, 6, 1, 0.1f);
+    m_animation->SetSize(96 * 3, 64 * 3);
     m_animation->Set2DPosition(posX, posY);
 }
 

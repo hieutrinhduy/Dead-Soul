@@ -14,6 +14,7 @@
 #include "Sprite2D.h"
 #include "ChangeLevelGate.h"
 #include "Shop.h"
+#include "SpriteAnimation.h"
 
 class Level1 {
 public:
@@ -39,6 +40,10 @@ private:
     std::shared_ptr<EnemyController> m_enemyController6;
     std::shared_ptr<EnemyController> m_enemyController7;
     std::shared_ptr<EnemyController> m_enemyController8;
+    std::shared_ptr<EnemyController> m_enemyController9;
+    std::shared_ptr<EnemyController> m_enemyController10;
+    std::shared_ptr<EnemyController> m_enemyController11;
+    std::shared_ptr<EnemyController> m_enemyController12;
 
     std::shared_ptr<EvilCreature> m_evilCreature;
     std::shared_ptr<EvilCreature> m_evilCreature2;
@@ -52,10 +57,14 @@ private:
     std::shared_ptr<GhostWarrior> m_ghostWarrior;
     std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed;
     std::shared_ptr<RangedEnemy> m_rangedEnemy;
+    std::shared_ptr<RangedEnemy> m_rangedEnemy2;
     std::shared_ptr<Boss1> m_boss1;
     std::shared_ptr<ScecretBoss> m_boss2;
     std::shared_ptr<ChangeLevelGate> m_gate;
     std::shared_ptr<Shop> m_shop;
+
+    //Decor
+    std::vector<std::shared_ptr<SpriteAnimation>> m_decorList;
 
     std::vector<SDL_Rect*> m_enemyColliders;
     std::vector<std::function<void(int)>> m_hitCallbacks;
