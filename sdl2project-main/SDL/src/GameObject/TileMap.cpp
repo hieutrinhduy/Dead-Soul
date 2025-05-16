@@ -106,6 +106,27 @@ void TileMap::LoadNewMap() {
         LoadTileTexturesFromTileset();
         m_gsPlay->ChangeLevel(LevelID::Level2);
     }
+    else if (m_mapNumber == 3) {
+        m_tilemapFile = "Data/Textures/Map/output3.bin";
+        m_tilesFolder = "Map/map3_tileset/";
+        GetTileIdFromTilemap();
+        LoadTileTexturesFromTileset();
+        m_gsPlay->ChangeLevel(LevelID::Level2);
+    }
+    else if (m_mapNumber == 4) {
+        m_tilemapFile = "Data/Textures/Map/output4.bin";
+        m_tilesFolder = "Map/map4_tileset/";
+        GetTileIdFromTilemap();
+        LoadTileTexturesFromTileset();
+        m_gsPlay->ChangeLevel(LevelID::Level2);
+    }
+    else if (m_mapNumber == 5) {
+        m_tilemapFile = "Data/Textures/Map/output5.bin";
+        m_tilesFolder = "Map/map5_tileset/";
+        GetTileIdFromTilemap();
+        LoadTileTexturesFromTileset();
+        m_gsPlay->ChangeLevel(LevelID::Level2);
+    }
 }
 #pragma endregion
 
