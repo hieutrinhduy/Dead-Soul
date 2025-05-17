@@ -521,6 +521,7 @@ void UIManager::Update(float deltaTime) {
 		// UPDATE MP:
 		if (!FloatEquals(mpChangePerFrame, 0.0f) && !FloatEquals(mpLoss, 0.0f)) {
 			mp -= mpChangePerFrame;
+			if (mp > maxMP) mp = (int)maxMP;
 			mpLoss -= mpChangePerFrame;
 
 			// get rid of accumulated error
@@ -667,7 +668,7 @@ void UIManager::UpdateStats() {
 	std::thread t([this]() {
 		int x, y; // mouse coordination
 		int musicVolume, sfxVolume;
-		float refillSpTime = 0.1f, spRefilled = 1.0f, refillMpTime = 1.0f, mpRefilled = 30;
+		float refillSpTime = 0.1f, spRefilled = 1.0f, refillMpTime = 1.5f, mpRefilled = 5;
 		while (m_isPlaying) {
 			if (*m_timeScale == 1) {
 				if (std::round(exp) == (int)maxEXP) {
@@ -760,6 +761,15 @@ void UIManager::UpdateStats() {
 					mpChangePerFrame = mpLoss / FRAGMENT_COUNT;
 				}
 
+				mpTimer += 0.01f;
+				if (mpTimer >= refillMpTime) {
+					mpTimer = 0;
+					mp += mpRefilled;
+					if (mp >= maxMP) mp = maxMP;
+				}
+				if (mp - lossAmount < 30) m_playerController->SetMpStatus(false);
+				else m_playerController->SetMpStatus(true);
+
 
 				// check EXP:
 				int gainedAmount = m_playerController->GetExpGained();
@@ -776,16 +786,6 @@ void UIManager::UpdateStats() {
 					goldGained += gainedAmount;
 					goldChangePerFrame = goldGained / FRAGMENT_COUNT;
 				}
-
-
-				mpTimer += 0.01f;
-				if (mpTimer >= refillMpTime) {
-					mpTimer = 0;
-					mp += mpRefilled;
-					if (mp >= maxMP) mp = maxMP;
-				}
-				if (mp - lossAmount < 30) m_playerController->SetMpStatus(false);
-				else m_playerController->SetMpStatus(true);
 
 
 				// reset change in value:
