@@ -59,6 +59,7 @@ private:
 	bool endAnimationNextRow = false;
 
 	// UI WHEN PAUSE GAME:
+	std::shared_ptr<Sprite2D> shop;
 	std::shared_ptr<Sprite2D> musicForegroundBar, sfxForegroundBar;
 	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings, iconSensitivitySettings;
 	bool pressButtonWhenPause, releaseButtonWhenPause;
@@ -90,6 +91,7 @@ private:
 	float hpLoss, spLoss, mpLoss, expGained, goldGained;
 	float hpChangePerFrame, spChangePerFrame, mpChangePerFrame, expChangePerFrame, goldChangePerFrame;
 	std::string hpStat, spStat, mpStat, expStat, goldAmount;
+	bool shopping = false;
 
 
 	int mousewheelSensitivity, changeInWheelValue;

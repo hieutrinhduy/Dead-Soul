@@ -162,8 +162,9 @@ void TileMap::StartCheckingPlayerMovementAbility() {
         m_finishThread = false;
         bool canGoLeft = true, canGoRight = true, bumpTheHead = true, isGrounded = true;
         float leftLimit = 200, rightLimit = 200, topLimit = 200, bottomLimit = 200;
+        int portalLeft, portalRight, portalTop, portalBottom;
+        int shopLeft, shopRight, shopTop, shopBottom;
 
-        int portal_left = (m_mapWidth - 5) * m_tileSize;
 
         while (m_isPlaying) {
             SDL_Rect player = m_player->GetCollider();
@@ -171,7 +172,21 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             float playerBottom = player.y + player.h;
 
             // check if player REACHES PORTAL:
-            if (playerRight >= portal_left) *m_timeScale = -1;
+            portalLeft = m_gsPlay->GetGatePos().x;
+            portalRight = portalLeft + m_gsPlay->GetGateSize().x;
+            portalTop = m_gsPlay->GetGatePos().y;
+            portalBottom = portalTop + m_gsPlay->GetGateSize().y;
+            if (playerRight >= portalLeft + 10 && player.x <= portalRight && player.y <= portalBottom && playerBottom >= portalTop)
+                *m_timeScale = -1;
+
+            // check if player REACHES SHOP:
+            shopLeft = m_gsPlay->GetShopPos().x;
+            shopRight = shopLeft + m_gsPlay->GetShopSize().x;
+            shopTop = m_gsPlay->GetShopPos().y;
+            shopBottom = shopTop + m_gsPlay->GetShopSize().y;
+            if (playerRight >= shopLeft && player.x <= shopRight && player.y <= shopBottom && playerBottom >= shopTop)
+                atShop = true;
+            else atShop = false;
 
             int startColumn = player.x / m_tileSize;
             int endColumn = playerRight / m_tileSize;
@@ -284,7 +299,7 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             m_player->SetMovementLimit(leftLimit, rightLimit, topLimit, bottomLimit);
             m_player->SetMovementState(canGoLeft, canGoRight, bumpTheHead, isGrounded);
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
         m_finishThread = true;
     });

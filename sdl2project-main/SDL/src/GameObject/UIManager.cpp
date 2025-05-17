@@ -76,6 +76,10 @@ constexpr float RESUME_BUTTON_LEFT_RATIO = 51.0f / 256, RESUME_BUTTON_RIGHT_RATI
 constexpr float QUIT_BUTTON_LEFT_RATIO = 159.0f / 256, QUIT_BUTTON_RIGHT_RATIO = 205.0f / 256;
 constexpr float PAUSE_BUTTON_TOP_RATIO = 117.0f / 144, PAUSE_BUTTON_BOTTOM_RATIO = 131.0f / 144;
 
+constexpr float ITEM_1_LEFT_RATIO = 14.0f / 256, ITEM_1_RIGHT_RATIO = 127.0f / 256;
+constexpr float ITEM_2_LEFT_RATIO = 129.0f / 256, ITEM_2_RIGHT_RATIO = 242.0f / 256;
+constexpr float ITEM_TOP_RATIO = 108.0f / 144, ITEM_BOTTOM_RATIO = 138.0f / 144;
+
 
 // position of UI when LEVEL UP:
 constexpr float SELECTION_WIDTH_RATIO = 62.0f / 256, SELECTION_HEIGHT_RATIO = 83.0f / 144;
@@ -218,9 +222,14 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 
 
 	// GOLD:
-	txtCoin = std::make_shared<Text>(goldAmount, font, hpTextColor);
-	txtCoin->SetSize(STAT_TEXT_WIDTH + 10, txtEXP->GetHeight());
-	txtCoin->Set2DPosition(SCREEN_WIDTH - txtCoin->GetWidth() - 20, 10);
+	iconCoin = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\coin.png"), SDL_FLIP_NONE);
+	iconCoin->SetSize(50, 50);
+	iconCoin->Set2DPosition(SCREEN_WIDTH - 80, 10);
+	uiWhenRunGame.push_back(iconCoin);
+
+	txtCoin = std::make_shared<Text>(goldAmount, font, expTextColor);
+	txtCoin->SetSize(20, 50);
+	txtCoin->Set2DPosition(SCREEN_WIDTH - 110, 12);
 	uiWhenRunGame.push_back(txtCoin);
 
 
@@ -263,6 +272,12 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	#pragma	region UI WHEN PAUSE GAME
 	pressButtonWhenPause = false;
 	releaseButtonWhenPause = false;
+
+	// SHOP UI:
+	shop = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\shop.png"), SDL_FLIP_NONE);
+	shop->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	shop->Set2DPosition(0, 0);
+
 
 	// PAUSE BACKGROUND:
 	auto background = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\pause_game.png"), SDL_FLIP_NONE);
@@ -380,6 +395,12 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 			}
 
 			btnPause->HandleTouchEvent(&e);
+
+			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_x)
+				if (m_tileMap->atShop) {
+					shopping = true;
+					*m_timeScale = 0;
+				}
 		}
 
 		if (e.type == SDL_MOUSEBUTTONDOWN) {
@@ -393,11 +414,19 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 
 	// when pause game:
 	if (*m_timeScale == 0) {
-		for (auto icon : sliderIcons)
-		{
-			if (icon->HandleTouchEvent(&e))
+		if (shopping) {
+			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_x) {
+				shopping = false;
+				*m_timeScale = 1;
+			}
+		}
+		else {
+			for (auto icon : sliderIcons)
 			{
-				break;
+				if (icon->HandleTouchEvent(&e))
+				{
+					break;
+				}
 			}
 		}
 
@@ -462,16 +491,16 @@ void UIManager::Update(float deltaTime) {
 			if (hp < 0) hp = 0;
 			else if (hp > maxHP) hp = maxHP;
 			hpLoss -= hpChangePerFrame;
-
-			// set the text displaying the HP amount:
-			hpStat = "HP: " + std::to_string((int)hp) + "/" + std::to_string((int)maxHP);
-			txtHP->SetText(hpStat);
-			// set the HP bar
-			hpBar->SetSize(hp / maxHP * fullHpBarWidth, hpBar->GetHeight());
 			
 			// get rid of accumulated error
 			if (FloatEquals(hpLoss, 0.0f)) hpLoss = 0;
 		}
+
+		// set the text displaying the HP amount:
+		hpStat = "HP: " + std::to_string((int)hp) + "/" + std::to_string((int)maxHP);
+		txtHP->SetText(hpStat);
+		// set the HP bar
+		hpBar->SetSize(hp / maxHP * fullHpBarWidth, hpBar->GetHeight());
 
 
 		// UPDATE SP:
@@ -530,6 +559,22 @@ void UIManager::Update(float deltaTime) {
 		// set the text displaying the MP amount:
 		goldAmount = std::to_string((int)std::round(gold));
 		txtCoin->SetText(goldAmount);
+		if (gold < 10) {
+			txtCoin->SetSize(20, 50);
+			txtCoin->Set2DPosition(SCREEN_WIDTH - 110, 12);
+		}
+		else if (gold < 100) {
+			txtCoin->SetSize(41, 50);
+			txtCoin->Set2DPosition(SCREEN_WIDTH - 131, 12);
+		}
+		else if (gold < 1000) {
+			txtCoin->SetSize(62, 50);
+			txtCoin->Set2DPosition(SCREEN_WIDTH - 152, 12);
+		}
+		else {
+			txtCoin->SetSize(83, 50);
+			txtCoin->Set2DPosition(SCREEN_WIDTH - 173, 12);
+		}
 		#pragma endregion
 	}
 
@@ -593,7 +638,8 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 			btnPause->Draw(renderer);
 		}
 		else if (*m_timeScale == 0) {
-			for (auto& it : uiWhenPause) it->Draw(renderer);
+			if (shopping) shop->Draw(renderer);
+			else for (auto& it : uiWhenPause) it->Draw(renderer);
 		}
 		else if (*m_timeScale == 2) {
 			for (auto& it : uiWhenLevelUp) it->Draw(renderer);
@@ -799,19 +845,39 @@ void UIManager::UpdateStats() {
 				if (pressButtonWhenPause) {
 					pressButtonWhenPause = false;
 					SDL_GetMouseState(&x, &y);
-					if (x >= SCREEN_WIDTH * RESUME_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * RESUME_BUTTON_RIGHT_RATIO &&
-						y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
-					{
-						*m_timeScale = 1;
+					if (shopping) {
+						if (y >= SCREEN_HEIDHT * ITEM_TOP_RATIO && y <= SCREEN_HEIDHT * ITEM_BOTTOM_RATIO) {
+							if (x >= SCREEN_WIDTH * ITEM_1_LEFT_RATIO && x <= SCREEN_WIDTH * ITEM_1_RIGHT_RATIO) {
+								if (gold > 1200 || FloatEquals(gold, 1200.0f)) {
+									maxHP += 10;
+									goldGained -= 1200;
+									goldChangePerFrame = goldGained / FRAGMENT_COUNT;
+								}
+							}
+							else if (x >= SCREEN_WIDTH * ITEM_2_LEFT_RATIO && x <= SCREEN_WIDTH * ITEM_2_RIGHT_RATIO && gold >= 1200) {
+								if (gold > 1200 || FloatEquals(gold, 1200.0f) ) {
+									maxMP += 5;
+									goldGained -= 1200;
+									goldChangePerFrame = goldGained / FRAGMENT_COUNT;
+								}
+							}
+						}
 					}
-					else if (x >= SCREEN_WIDTH * QUIT_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * QUIT_BUTTON_RIGHT_RATIO &&
+					else {
+						if (x >= SCREEN_WIDTH * RESUME_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * RESUME_BUTTON_RIGHT_RATIO &&
 							y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
-					{
-						ClearThread();
+						{
+							*m_timeScale = 1;
+						}
+						else if (x >= SCREEN_WIDTH * QUIT_BUTTON_LEFT_RATIO && x <= SCREEN_WIDTH * QUIT_BUTTON_RIGHT_RATIO &&
+							y >= SCREEN_HEIDHT * PAUSE_BUTTON_TOP_RATIO && y <= SCREEN_HEIDHT * PAUSE_BUTTON_BOTTOM_RATIO)
+						{
+							ClearThread();
+						}
 					}
 				}
 
-				else if (releaseButtonWhenPause) {
+				else if (releaseButtonWhenPause && !shopping) {
 					releaseButtonWhenPause = false;
 					int a = std::round((iconSensitivitySettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SENSITIVITY_START_X) /
 									   (SCREEN_WIDTH * (SETTINGS_SENSITIVITY_END_X - SETTINGS_SENSITIVITY_START_X)) * 4);

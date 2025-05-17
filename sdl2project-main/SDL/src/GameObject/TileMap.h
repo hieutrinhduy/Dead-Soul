@@ -43,6 +43,8 @@ public:
 
     void ExportFullMapImage(SDL_Renderer* renderer);
 
+    bool atShop = false;
+
 
 private:
     const char* m_tilemapFile;
