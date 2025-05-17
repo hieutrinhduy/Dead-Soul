@@ -313,8 +313,8 @@ void ScecretBoss::Update(float deltaTime)
                 if (!m_isFlying) {
                     posY += m_flySpeed * deltaTime;
 
-                    if (posY <= 630.0f) {
-                        posY = 630.0f;
+                    if (posY <= 0) {
+                        posY = 0;
                         m_isFlying = true;
                         m_shootTimer = 0.5f;
                     }
@@ -401,7 +401,6 @@ void ScecretBoss::Update(float deltaTime)
 
             }
         }
-
         if (m_attackTimer <= 0.0f) {
             m_isAttacking = false;
             m_didDamage = false;
@@ -410,19 +409,31 @@ void ScecretBoss::Update(float deltaTime)
             m_currentState = isChasing ? SecretBossState::Chase : SecretBossState::Patrol;
             ChangeAnimation(runTexture, 12, 0.05f);
 
+            // Update flip NGAY LẬP TỨC, không chờ đến cuối frame
+            if (isChasing) {
+                float enemyCenterX = posX + m_enemy->GetWidth() / 2;
+                float playerCenterX = m_playerCollider->x + m_playerCollider->w / 2;
+                float dx = playerCenterX - enemyCenterX;
+                m_enemyFlip = (dx > 0) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+            }
+            else {
+                m_enemyFlip = (m_direction == 1) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+            }
+
+            // Gán lại flip ngay để tránh dùng m_attackFlip thêm 1 frame nữa
+            m_enemy->SetFlip(m_enemyFlip);
+
+
             if (!isChasing) {
                 if (posX < m_pointA + 10) {
                     m_direction = 1;
-                    m_enemyFlip = SDL_FLIP_NONE;
                 }
                 else if (posX > m_pointB - 10) {
                     m_direction = -1;
-                    m_enemyFlip = SDL_FLIP_HORIZONTAL;
                 }
-                else {
-                    // Giữ nguyên direction, nhưng update flip theo direction
-                    m_enemyFlip = (m_direction == 1) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
-                }
+
+                // cập nhật hướng flip ngay lập tức
+                m_enemyFlip = (m_direction == 1) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
             }
             else {
                 float enemyCenterX = posX + m_enemy->GetWidth() / 2;
@@ -431,8 +442,6 @@ void ScecretBoss::Update(float deltaTime)
                 m_enemyFlip = (dx > 0) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
             }
         }
-
-
         break;
     }
 

@@ -1,5 +1,6 @@
 #include "ChangeLevelGate.h"
 #include "ResourceManagers.h"
+#include "iostream"
 
 ChangeLevelGate::ChangeLevelGate() {}
 
@@ -36,3 +37,7 @@ Vector2 ChangeLevelGate::GetGatePos() const
     return m_animation ? m_animation->Get2DPosition() : Vector2(0, 0);
 }
 
+void ChangeLevelGate::SetGatePos(Vector2 pos)
+{
+    m_animation->Set2DPosition(pos.x, pos.y);
+}

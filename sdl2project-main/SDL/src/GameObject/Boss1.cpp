@@ -43,11 +43,12 @@ void Boss1::Init(float pointA, float pointB, float posY)
 
     m_enemy = std::make_shared<SpriteAnimation>(runTexture, 1, 12, 1, 0.05f);
     m_enemy->SetSize(288 * 3, 160 * 3);
-    m_enemy->Set2DPosition(pointA, posY);
+    m_enemy->Set2DPosition((pointA+pointB)/2, posY);
     m_enemyCollider = { (int)m_enemy->GetPosition().x + xAlign, (int)m_enemy->GetPosition().y + yAlign, m_enemy->GetWidth() / 5, m_enemy->GetHeight()/2 };
 
     m_pointA = pointA;
     m_pointB = pointB;
+    m_pointY = posY;
 
     m_hpBarBg = { 0, 0, m_barWidth, m_barHeight };
     m_hpBarFill = m_hpBarBg;
@@ -100,8 +101,11 @@ void Boss1::Die()
     m_finishDead = false;
     ChangeAnimation(deadTexture, 19, 0.1f);
 
-    if (m_onDeathCallback) {
-        m_onDeathCallback();
+    if (m_onDeathCallback)
+    {
+        Vector2 deathPos = m_enemy->Get2DPosition();
+        deathPos.y += 100;
+        m_onDeathCallback(deathPos);
     }
 
     if (m_spawnExpCallback) {
@@ -405,6 +409,43 @@ void Boss1::Draw(SDL_Renderer* renderer)
     // Vẽ phần máu còn lại (đỏ)
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &drawFill);
+
+        //Draw Movement
+    int markerSize = 6;
+    SDL_Color lineColor = { 0, 255, 0, 255 }; // Xanh lá
+
+    // Vị trí Y dưới chân enemy
+    int drawY = static_cast<int>(m_enemy->Get2DPosition().y + m_enemy->GetHeight()) + 5 - static_cast<int>(camPos.y);
+
+    // ✅ Điều chỉnh thêm offset X = nửa chiều rộng sprite
+    int offsetX = m_enemy->GetWidth() / 2;
+
+    // Vẽ đường từ A đến B (có offset để canh giữa enemy)
+    SDL_SetRenderDrawColor(renderer, lineColor.r, lineColor.g, lineColor.b, lineColor.a);
+    SDL_RenderDrawLine(renderer,
+        static_cast<int>(m_pointA + offsetX - camPos.x),
+        drawY,
+        static_cast<int>(m_pointB + offsetX - camPos.x),
+        drawY
+    );
+
+    // Vẽ chấm tại pointA
+    SDL_Rect pointAmarker = {
+        static_cast<int>(m_pointA + offsetX - camPos.x - markerSize / 2),
+        drawY - markerSize / 2,
+        markerSize,
+        markerSize
+    };
+    SDL_RenderFillRect(renderer, &pointAmarker);
+
+    // Vẽ chấm tại pointB
+    SDL_Rect pointBmarker = {
+        static_cast<int>(m_pointB + offsetX - camPos.x - markerSize / 2),
+        drawY - markerSize / 2,
+        markerSize,
+        markerSize
+    };
+    SDL_RenderFillRect(renderer, &pointBmarker);
 }
 
 bool Boss1::DetectPlayer()
@@ -447,7 +488,7 @@ bool Boss1::GroundCheck()
     return CheckCollision(m_enemyCollider, *m_groundCollider);
 }
 
-void Boss1::SetOnDeathCallback(std::function<void()> callback)
+void Boss1::SetOnDeathCallback(std::function<void(Vector2)> callback)
 {
     m_onDeathCallback = callback;
 }

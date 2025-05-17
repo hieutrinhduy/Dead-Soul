@@ -119,26 +119,18 @@ void TileMap::LoadNewMap() {
         LoadTileTexturesFromTileset();
         m_gsPlay->ChangeLevel(LevelID::Level3);
         m_player->ResetInput();
+        Camera::GetInstance()->SetLevelDimension(GetWidth()*32,GetHeight()*32);
     }
     else if (m_mapNumber == 4) {
-        m_tilemapFile = "Data/Textures/Map/output4.bin";
-        m_tilesFolder = "Map/map4_tileset/";
+        m_tilemapFile = "Data/Textures/Map/hidden_boss_map.bin";
+        m_tilesFolder = "Map/map2_tileset/";
         m_tileIds.clear();
         m_tileTextures.clear();
         GetTileIdFromTilemap();
         LoadTileTexturesFromTileset();
-        m_gsPlay->ChangeLevel(LevelID::Level2);
+        m_gsPlay->ChangeLevel(LevelID::SecretLevel);
         m_player->ResetInput();
-    }
-    else if (m_mapNumber == 5) {
-        m_tilemapFile = "Data/Textures/Map/output5.bin";
-        m_tilesFolder = "Map/map5_tileset/";
-        m_tileIds.clear();
-        m_tileTextures.clear();
-        GetTileIdFromTilemap();
-        LoadTileTexturesFromTileset();
-        m_gsPlay->ChangeLevel(LevelID::Level2);
-        m_player->ResetInput();
+        Camera::GetInstance()->SetLevelDimension(GetWidth() * 32, GetHeight() * 32);
     }
     completeLoading = true;
 }

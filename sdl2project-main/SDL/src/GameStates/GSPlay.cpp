@@ -29,6 +29,9 @@
 #include "BossBullet.h"
 #include "ExpOrb.h"
 #include "Level1.h"
+#include "Level2.h"
+#include "Level3.h"
+#include "SecretLevel.h"
 
 
 SDL_Rect enemyCollider;
@@ -45,7 +48,7 @@ GSPlay::GSPlay()
 
     m_uiManager = std::make_shared<UIManager>(timeScale);
 
-    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output1.bin", "Map/map1_tileset/", 32, timeScale);
+    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/hidden_boss_map.bin", "Map/map2_tileset/", 32, timeScale);
 
     m_playerController = std::make_shared<PlayerController>();
     m_playerController->Init();
@@ -66,14 +69,14 @@ void GSPlay::Init()
     m_playerController = std::make_shared<PlayerController>();
     m_playerController->Init();
 
-    m_currentLevel = LevelID::Level1;
-    m_level1 = std::make_shared<Level1>(m_playerController);
-    m_playerController->SetEnemyColliders(m_level1->GetEnemyColliders());
-    m_playerController->SetOnHitEnemyCallbacks(m_level1->GetHitEnemyCallbacks());
-    enemyColliders = m_level1->GetEnemyColliders();
-    m_hitEnemyCallbacks = m_level1->GetHitEnemyCallbacks();
-    m_ChangeLevelGate = m_level1->GetChangeLevelGate();
-    m_shop = m_level1->GetShop();
+    m_currentLevel = LevelID::SecretLevel;
+    m_secretLevel = std::make_shared<SecretLevel>(m_playerController);
+    m_playerController->SetEnemyColliders(m_secretLevel->GetEnemyColliders());
+    m_playerController->SetOnHitEnemyCallbacks(m_secretLevel->GetHitEnemyCallbacks());
+    enemyColliders = m_secretLevel->GetEnemyColliders();
+    m_hitEnemyCallbacks = m_secretLevel->GetHitEnemyCallbacks();
+    m_ChangeLevelGate = m_secretLevel->GetChangeLevelGate();
+    m_shop = m_secretLevel->GetShop();
 
     // Rung màn hình khi đánh trúng enemy
     m_playerController->SetOnScreenShakeCallback([]() {
@@ -170,6 +173,8 @@ void GSPlay::Update(float deltaTime)
     //m_boss2->Update(deltaTime);
     if (m_currentLevel == LevelID::Level1 && m_level1) m_level1->Update(deltaTime);
     if (m_currentLevel == LevelID::Level2 && m_level2) m_level2->Update(deltaTime);
+    if (m_currentLevel == LevelID::Level3 && m_level3) m_level3->Update(deltaTime);
+    if (m_currentLevel == LevelID::SecretLevel && m_secretLevel) m_secretLevel->Update(deltaTime);
 
     Vector2 playerPos;
     playerPos.x = m_playerController->GetCollider().x; 
@@ -250,6 +255,10 @@ void GSPlay::Draw(SDL_Renderer* renderer)
         bgList = m_level1->GetBackgrounds();
     else if (m_currentLevel == LevelID::Level2 && m_level2)
         bgList = m_level2->GetBackgrounds();
+    else if (m_currentLevel == LevelID::Level3 && m_level3)
+        bgList = m_level3->GetBackgrounds();
+    else if (m_currentLevel == LevelID::SecretLevel && m_secretLevel)
+        bgList = m_secretLevel->GetBackgrounds();
 
     for (size_t i = 0; i < bgList.size(); ++i)
     {
@@ -285,6 +294,8 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
     if (m_currentLevel == LevelID::Level1 && m_level1) m_level1->Draw(renderer);
     if (m_currentLevel == LevelID::Level2 && m_level2) m_level2->Draw(renderer);
+    if (m_currentLevel == LevelID::Level3 && m_level3) m_level3->Draw(renderer);
+    if (m_currentLevel == LevelID::SecretLevel && m_secretLevel) m_secretLevel->Draw(renderer);
 
     for (auto& orb : g_expOrbs) orb->Draw(renderer);
 
@@ -354,6 +365,8 @@ void GSPlay::ChangeLevel(LevelID newLevel)
     // Xóa level cũ
     m_level1.reset();
     m_level2.reset();
+    m_level3.reset();
+    m_secretLevel.reset();
 
     m_hitEnemyCallbacks.clear();
     enemyColliders.clear();
@@ -363,11 +376,15 @@ void GSPlay::ChangeLevel(LevelID newLevel)
 
     if (newLevel == LevelID::Level1) {
         m_level1 = std::make_shared<Level1>(m_playerController);
-        //m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output1.bin", "Map/map1_tileset/", 32, timeScale);
     }
     else if (newLevel == LevelID::Level2) {
         m_level2 = std::make_shared<Level2>(m_playerController);
-        //m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output2.bin", "Map/map2_tileset/", 32, timeScale);
+    }
+    else if (newLevel == LevelID::Level3) {
+        m_level3 = std::make_shared<Level3>(m_playerController);
+    }
+    else if (newLevel == LevelID::SecretLevel) {
+        m_secretLevel = std::make_shared<SecretLevel>(m_playerController);
     }
 
     // Cập nhật lại thông tin cho player
@@ -390,5 +407,25 @@ void GSPlay::ChangeLevel(LevelID newLevel)
         m_hitEnemyCallbacks = m_level2->GetHitEnemyCallbacks();
         m_ChangeLevelGate = m_level2->GetChangeLevelGate();
         m_shop = m_level2->GetShop();
+    }
+    else if (newLevel == LevelID::Level3)
+    {
+        m_playerController->SetEnemyColliders(m_level3->GetEnemyColliders());
+        m_playerController->SetOnHitEnemyCallbacks(m_level3->GetHitEnemyCallbacks());
+
+        enemyColliders = m_level3->GetEnemyColliders();
+        m_hitEnemyCallbacks = m_level3->GetHitEnemyCallbacks();
+        m_ChangeLevelGate = m_level3->GetChangeLevelGate();
+        m_shop = m_level3->GetShop();
+    }
+    else if (newLevel == LevelID::SecretLevel)
+    {
+        m_playerController->SetEnemyColliders(m_secretLevel->GetEnemyColliders());
+        m_playerController->SetOnHitEnemyCallbacks(m_secretLevel->GetHitEnemyCallbacks());
+
+        enemyColliders = m_secretLevel->GetEnemyColliders();
+        m_hitEnemyCallbacks = m_secretLevel->GetHitEnemyCallbacks();
+        m_ChangeLevelGate = m_secretLevel->GetChangeLevelGate();
+        m_shop = m_secretLevel->GetShop();
     }
 }

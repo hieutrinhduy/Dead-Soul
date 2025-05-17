@@ -14,6 +14,8 @@
 #include "SecretBoss.h"
 #include "Level1.h"
 #include "Level2.h"
+#include "Level3.h"
+#include "SecretLevel.h"
 #include "ChangeLevelGate.h"
 #include "Shop.h"
 
@@ -96,6 +98,8 @@ private:
 
 	std::shared_ptr<Level1> m_level1;
 	std::shared_ptr<Level2> m_level2;
+	std::shared_ptr<Level3> m_level3;
+	std::shared_ptr<SecretLevel> m_secretLevel;
 	LevelID m_currentLevel;
 
 	// === Thêm 5 hàm private mới cho quản lý Update ===

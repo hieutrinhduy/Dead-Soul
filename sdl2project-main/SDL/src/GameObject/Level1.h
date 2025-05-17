@@ -58,8 +58,6 @@ private:
     std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed;
     std::shared_ptr<RangedEnemy> m_rangedEnemy;
     std::shared_ptr<RangedEnemy> m_rangedEnemy2;
-    std::shared_ptr<Boss1> m_boss1;
-    std::shared_ptr<ScecretBoss> m_boss2;
     std::shared_ptr<ChangeLevelGate> m_gate;
     std::shared_ptr<Shop> m_shop;
 
