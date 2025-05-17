@@ -102,30 +102,42 @@ void TileMap::LoadNewMap() {
     if (m_mapNumber == 2) {
         m_tilemapFile = "Data/Textures/Map/output2.bin";
         m_tilesFolder = "Map/map2_tileset/";
+        m_tileIds.clear();
+        m_tileTextures.clear();
         GetTileIdFromTilemap();
         LoadTileTexturesFromTileset();
         m_gsPlay->ChangeLevel(LevelID::Level2);
+        m_player->ResetInput();
     }
     else if (m_mapNumber == 3) {
         m_tilemapFile = "Data/Textures/Map/output3.bin";
-        m_tilesFolder = "Map/map3_tileset/";
+        m_tilesFolder = "Map/map1_tileset/";
+        m_tileIds.clear();
+        m_tileTextures.clear();
         GetTileIdFromTilemap();
         LoadTileTexturesFromTileset();
-        m_gsPlay->ChangeLevel(LevelID::Level2);
+        m_gsPlay->ChangeLevel(LevelID::Level3);
+        m_player->ResetInput();
     }
     else if (m_mapNumber == 4) {
         m_tilemapFile = "Data/Textures/Map/output4.bin";
         m_tilesFolder = "Map/map4_tileset/";
+        m_tileIds.clear();
+        m_tileTextures.clear();
         GetTileIdFromTilemap();
         LoadTileTexturesFromTileset();
         m_gsPlay->ChangeLevel(LevelID::Level2);
+        m_player->ResetInput();
     }
     else if (m_mapNumber == 5) {
         m_tilemapFile = "Data/Textures/Map/output5.bin";
         m_tilesFolder = "Map/map5_tileset/";
+        m_tileIds.clear();
+        m_tileTextures.clear();
         GetTileIdFromTilemap();
         LoadTileTexturesFromTileset();
         m_gsPlay->ChangeLevel(LevelID::Level2);
+        m_player->ResetInput();
     }
 }
 #pragma endregion

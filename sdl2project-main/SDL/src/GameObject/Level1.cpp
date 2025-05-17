@@ -38,7 +38,6 @@ Level1::Level1(std::shared_ptr<PlayerController> player)
         int decorWidth = 6592;
         int decorHeight = 3072;
 
-
         decor->SetSize(decorWidth, decorHeight);
         decor->Set2DPosition(0, 0);
         m_decorList.push_back(decor);

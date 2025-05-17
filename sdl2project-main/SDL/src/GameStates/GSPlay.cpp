@@ -360,10 +360,14 @@ void GSPlay::ChangeLevel(LevelID newLevel)
     // Tạo level mới
     m_currentLevel = newLevel;
 
-    if (newLevel == LevelID::Level1)
+    if (newLevel == LevelID::Level1) {
         m_level1 = std::make_shared<Level1>(m_playerController);
-    else if (newLevel == LevelID::Level2)
+        //m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output1.bin", "Map/map1_tileset/", 32, timeScale);
+    }
+    else if (newLevel == LevelID::Level2) {
         m_level2 = std::make_shared<Level2>(m_playerController);
+        //m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output2.bin", "Map/map2_tileset/", 32, timeScale);
+    }
 
     // Cập nhật lại thông tin cho player
     if (newLevel == LevelID::Level1)

@@ -54,6 +54,12 @@ public:
 	int m_KeyPress;
 	void ChangeLevel(LevelID newLevel);
 
+	Vector2 GetGateSize() { return m_ChangeLevelGate->GetGateSize(); };
+	Vector2 GetGatePos() { return m_ChangeLevelGate->GetGatePos(); };
+
+	Vector2 GetShopSize() { return m_shop->GetShopSize(); };
+	Vector2 GetShopPos() { return m_shop->GetShopPos(); };
+
 private:
 	std::shared_ptr<int> timeScale;
 
