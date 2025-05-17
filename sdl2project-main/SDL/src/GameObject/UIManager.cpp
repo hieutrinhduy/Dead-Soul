@@ -108,7 +108,6 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	loadingBackground = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("bg_loading.png"), SDL_FLIP_NONE);
 	loadingBackground->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	loadingBackground->Set2DPosition(0, 0);
-	loadingBackground->Draw(m_renderer);
 
 	// LOADING TEXT:
 	txtLoading = std::make_shared<Text>("LOADING", font, hpTextColor);
@@ -123,7 +122,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
 	float musicVolume = saveData.musicVolume / 128.0f, sfxVolume = saveData.sfxVolume / 128.0f;
 	mousewheelSensitivity = saveData.mousewheelSensitivity;
-	hp = 100; sp = 100; mp = 100; exp = 100; gold = 0;
+	hp = 100; sp = 100; mp = 100; exp = 100; gold = 1200;
 	maxHP = 100; maxSP = 100; maxMP = 100; maxEXP = 100;
 
 
@@ -400,6 +399,7 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 				if (m_tileMap->atShop) {
 					shopping = true;
 					*m_timeScale = 0;
+					m_playerController->ResetInput();
 				}
 		}
 
@@ -592,6 +592,7 @@ void UIManager::Update(float deltaTime) {
 			mapTransitionFlag = false;
 			mapTransitionNextRow = false;
 			m_playerController->ResetInput();
+			m_tileMap->completeLoading = false;
 			m_tileMap->LoadNewMap();
 			Camera::GetInstance()->Update(deltaTime);
 			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_2.png"), 1, 9, 6, 0.02f);
@@ -612,7 +613,7 @@ void UIManager::Update(float deltaTime) {
 		
 		std::string loadingText = "LOADING";
 		int dotCount = timer / 0.2f;
-		if (dotCount == 4) {
+		if (dotCount >= 4) {
 			dotCount = 0;
 			timer = 0;
 		}
@@ -725,6 +726,7 @@ void UIManager::UpdateStats() {
 					if (hpLoss >= hp) {
 						hpLoss = hp;
 						statusCode = -1;
+						m_playerController->SetDeadStatus(true);
 					}
 					hpChangePerFrame = hpLoss / FRAGMENT_COUNT;
 				}

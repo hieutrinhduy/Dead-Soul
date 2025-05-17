@@ -43,6 +43,7 @@ public:
 
     void ExportFullMapImage(SDL_Renderer* renderer);
 
+    bool completeLoading = false;
     bool atShop = false;
 
 
