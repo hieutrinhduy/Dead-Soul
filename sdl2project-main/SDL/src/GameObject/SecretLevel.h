@@ -12,6 +12,7 @@
 #include "Sprite2D.h"
 #include "ChangeLevelGate.h"
 #include "Shop.h"
+#include "SecretLevel.h"
 
 class SecretLevel {
 public:

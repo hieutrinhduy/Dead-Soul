@@ -1,5 +1,6 @@
 #include "ChangeLevelGate.h"
 #include "ResourceManagers.h"
+#include "iostream"
 
 ChangeLevelGate::ChangeLevelGate() {}
 
@@ -15,6 +16,7 @@ void ChangeLevelGate::Init(float posX, float posY)
 
 void ChangeLevelGate::Update(float deltaTime)
 {
+    std::cout << m_animation->Get2DPosition().x << std::endl;
     if (m_animation)
         m_animation->Update(deltaTime);
 }
@@ -36,3 +38,7 @@ Vector2 ChangeLevelGate::GetGatePos() const
     return m_animation ? m_animation->Get2DPosition() : Vector2(0, 0);
 }
 
+void ChangeLevelGate::SetGatePos(Vector2 pos)
+{
+    m_animation->Set2DPosition(pos.x, pos.y);
+}
