@@ -147,22 +147,18 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
                     //Cac don danh cach nhau 1s
                     if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
                         SetSpLose(10);
-                        SetMpLose(-m_mpStolen);
                         ChangeAnimation(attack2Texture, 4, 0.1f);
                         m_justDidAttack2 = true;
                         m_justDidAttack3 = false;
                     }
                     else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
                         SetSpLose(10);
-                        SetMpLose(-m_mpStolen);
                         ChangeAnimation(attack3Texture, 4, 0.1f);
                         m_justDidAttack3 = true;
                         m_justDidAttack2 = false;
                     }
                     else {
                         SetSpLose(10);
-                        SetMpLose(-m_mpStolen);
-                        SetHpLose(-m_hpStolen);
                         ChangeAnimation(attackTexture, 4, 0.1f);
                         m_justDidAttack2 = false;
                         m_justDidAttack3 = false;
@@ -554,6 +550,10 @@ void PlayerController::Draw(SDL_Renderer* renderer)
                 if (i < m_onHitEnemyList.size()) {
                     if (m_onHitEnemyList[i]) {
                         m_onHitEnemyList[i](damageAmount);
+                        SetMpLose(-m_mpStolen);
+                        if (m_justDidAttack3) {
+                            SetHpLose(-m_hpStolen);
+                        }
                     }
                 }
 
