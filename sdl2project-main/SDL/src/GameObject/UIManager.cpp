@@ -119,7 +119,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
 	float musicVolume = saveData.musicVolume / 128.0f, sfxVolume = saveData.sfxVolume / 128.0f;
 	mousewheelSensitivity = saveData.mousewheelSensitivity;
-	hp = 100; sp = 100; mp = 100; exp = 100;
+	hp = 100; sp = 100; mp = 100; exp = 100; gold = 0;
 	maxHP = 100; maxSP = 100; maxMP = 100; maxEXP = 100;
 
 
@@ -127,9 +127,11 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	spStat = "SP: " + std::to_string((int)sp) + "/" + std::to_string((int)maxSP);
 	mpStat = "MP: " + std::to_string((int)mp) + "/" + std::to_string((int)maxMP);
 	expStat = "EXP: " + std::to_string((int)exp) + "/" + std::to_string((int)maxEXP);
+	goldAmount = std::to_string((int)gold);
 
-	hpLoss = 0; spLoss = 0; mpLoss = 0; expGained = 0;
-	hpChangePerFrame = 0; spChangePerFrame = 0; mpChangePerFrame = 0; expChangePerFrame = 0;
+	hpLoss = 0; spLoss = 0; mpLoss = 0; expGained = 0, goldGained = 0;
+	hpChangePerFrame = 0; spChangePerFrame = 0; mpChangePerFrame = 0;
+	expChangePerFrame = 0; goldChangePerFrame = 0;
 
 
 	fullHpBarWidth = SCREEN_WIDTH / 3.0f;
@@ -215,6 +217,13 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	uiWhenRunGame.push_back(txtEXP);
 
 
+	// GOLD:
+	txtCoin = std::make_shared<Text>(goldAmount, font, hpTextColor);
+	txtCoin->SetSize(STAT_TEXT_WIDTH + 10, txtEXP->GetHeight());
+	txtCoin->Set2DPosition(SCREEN_WIDTH - txtCoin->GetWidth() - 20, 10);
+	uiWhenRunGame.push_back(txtCoin);
+
+
 	// INVENTORY:
 	texture = ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\slot_greatsword.png");
 	auto slot = std::make_shared<MouseButton>(texture, SDL_FLIP_NONE);
@@ -246,6 +255,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	btnPause->SetSize(50, 50);
 	btnPause->Set2DPosition((SCREEN_WIDTH - 50) / 2.0f, HP_BACKGROUND_BAR_POSITION_Y);
 	btnPause->SetOnClick([this]() {
+		m_playerController->ResetInput();
 		*m_timeScale = 0;
 	});
 	#pragma endregion
@@ -492,6 +502,34 @@ void UIManager::Update(float deltaTime) {
 		txtMP->SetText(mpStat);
 		// set the MP bar
 		mpBar->SetSize(mp / maxMP * fullMpBarWidth, mpBar->GetHeight());
+
+
+		// UPDATE EXP:
+		if (!FloatEquals(expChangePerFrame, 0.0f) && !FloatEquals(expGained, 0.0f)) {
+			exp += expChangePerFrame;
+			expGained -= expChangePerFrame;
+
+			// get rid of accumulated error
+			if (FloatEquals(expGained, 0.0f)) expGained = 0;
+		}
+		// set the text displaying the MP amount:
+		expStat = "EXP: " + std::to_string((int)std::round(exp)) + "/" + std::to_string((int)maxEXP);
+		txtEXP->SetText(expStat);
+		// set the MP bar
+		expBar->SetSize(exp / maxEXP * SCREEN_WIDTH, expBar->GetHeight());
+
+
+		// UPDATE GOLD:
+		if (!FloatEquals(goldChangePerFrame, 0.0f) && !FloatEquals(goldGained, 0.0f)) {
+			gold += goldChangePerFrame;
+			goldGained -= goldChangePerFrame;
+
+			// get rid of accumulated error
+			if (FloatEquals(goldGained, 0.0f)) goldGained = 0;
+		}
+		// set the text displaying the MP amount:
+		goldAmount = std::to_string((int)std::round(gold));
+		txtCoin->SetText(goldAmount);
 		#pragma endregion
 	}
 
@@ -508,6 +546,7 @@ void UIManager::Update(float deltaTime) {
 		if (mapTransitionFlag && animationMapTransition->GetCurrentFrame() == 6 && animationMapTransition->GetCurrentAction() == 6) {
 			mapTransitionFlag = false;
 			mapTransitionNextRow = false;
+			m_playerController->ResetInput();
 			m_tileMap->LoadNewMap();
 			Camera::GetInstance()->Update(deltaTime);
 			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_2.png"), 1, 9, 6, 0.02f);
@@ -583,9 +622,8 @@ void UIManager::UpdateStats() {
 		float refillSpTime = 0.1f, spRefilled = 1.0f, refillMpTime = 1.0f, mpRefilled = 30;
 		while (m_isPlaying) {
 			if (*m_timeScale == 1) {
-				if (exp == maxEXP) {
+				if (std::round(exp) == (int)maxEXP) {
 					Camera::GetInstance()->Update(0);
-					exp = 0;
 					pressButtonWhenLevelUp = false;
 					selection = 0;
 					*m_timeScale = 2;
@@ -669,6 +707,24 @@ void UIManager::UpdateStats() {
 					mpLoss += lossAmount;
 					mpChangePerFrame = mpLoss / FRAGMENT_COUNT;
 				}
+
+
+				// check EXP:
+				int gainedAmount = m_playerController->GetExpGained();
+				if (gainedAmount) {
+					expGained += gainedAmount;
+					if (expGained > maxEXP - exp) expGained = maxEXP - exp;
+					expChangePerFrame = expGained / FRAGMENT_COUNT;
+				}
+
+
+				// check GOLD:
+				gainedAmount = m_playerController->GetGoldGained();
+				if (gainedAmount) {
+					goldGained += gainedAmount;
+					goldChangePerFrame = goldGained / FRAGMENT_COUNT;
+				}
+
 
 				mpTimer += 0.01f;
 				if (mpTimer >= refillMpTime) {
@@ -836,26 +892,27 @@ void UIManager::UpdateStats() {
 							maxHP = std::round(maxHP * 1.1f);
 							hpLoss -= 0.15f * maxHP;
 							hpChangePerFrame = hpLoss / FRAGMENT_COUNT;
+							exp = 0;
+							maxEXP += 10;
 						}
 						if (selection == 2) {
 							maxSP += 5;
 							spRefilled += 0.1f;
 							maxMP += 10;
 							mpRefilled += 5;
+							exp = 0;
+							maxEXP += 10;
 						}
 						if (selection == 3) {
 							m_playerController->SetPlayerDamage(m_playerController->GetPlayerDamage() + 5);
+							exp = 0;
+							maxEXP += 10;
 						}
 						*m_timeScale = 1;
 					}
 				}
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(20));
-			}
-
-			
-
-			else if (*m_timeScale == -1) {
 			}
 		}
 		m_finishThread = true;

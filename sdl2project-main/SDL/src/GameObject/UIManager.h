@@ -86,10 +86,10 @@ private:
 	#pragma endregion
 
 	// Player's Stats:
-	float hp, maxHP, sp, maxSP, mp, maxMP, exp, maxEXP;
-	float hpLoss, spLoss, mpLoss, expGained;
-	float hpChangePerFrame, spChangePerFrame, mpChangePerFrame, expChangePerFrame;
-	std::string hpStat, spStat, mpStat, expStat;
+	float hp, maxHP, sp, maxSP, mp, maxMP, exp, maxEXP, gold;
+	float hpLoss, spLoss, mpLoss, expGained, goldGained;
+	float hpChangePerFrame, spChangePerFrame, mpChangePerFrame, expChangePerFrame, goldChangePerFrame;
+	std::string hpStat, spStat, mpStat, expStat, goldAmount;
 
 
 	int mousewheelSensitivity, changeInWheelValue;

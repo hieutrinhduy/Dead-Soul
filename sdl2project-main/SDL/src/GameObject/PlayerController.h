@@ -117,6 +117,8 @@ public:
         m_HpLose = 0;
         m_SpLose = 0;
         m_MpLose = 0;
+        m_ExpGained = 0;
+        m_GoldGained = 0;
     };
 
     void SetPlayerDamage(int damage) {
