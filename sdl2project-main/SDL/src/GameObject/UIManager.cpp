@@ -121,7 +121,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	// get data from save file:
 	SaveData saveData = DataSaver::GetInstance()->LoadGame("save.dat");
 	float musicVolume = saveData.musicVolume / 128.0f, sfxVolume = saveData.sfxVolume / 128.0f;
-	mousewheelSensitivity = saveData.mousewheelSensitivity;
+	mousewheelSensitivity = 9 - 2 * saveData.mousewheelSensitivity;
 	hp = 100; sp = 100; mp = 100; exp = 100; gold = 1200;
 	maxHP = 100; maxSP = 100; maxMP = 100; maxEXP = 100;
 
@@ -316,9 +316,9 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 
 	iconSensitivitySettings = std::make_shared<SliderIcon>(ResourceManagers::GetInstance()->GetTexture("btn_settings.png"), SDL_FLIP_NONE);
 	iconSensitivitySettings->SetSize(SCREEN_WIDTH * SETTINGS_ICON_WIDTH_RATIO, SCREEN_HEIDHT * SETTINGS_ICON_HEIGHT_RATIO);
-	iconSensitivitySettings->Set2DPosition(SCREEN_WIDTH * (SETTINGS_SENSITIVITY_START_X + (9 - mousewheelSensitivity) * (SETTINGS_SENSITIVITY_END_X - SETTINGS_SENSITIVITY_START_X) / 8),
-											SCREEN_HEIDHT* SETTINGS_ICON_3_Y);
-	iconSensitivitySettings->SetRange(SCREEN_WIDTH * SETTINGS_SENSITIVITY_START_X, SCREEN_WIDTH* SETTINGS_SENSITIVITY_END_X);
+	iconSensitivitySettings->Set2DPosition(SCREEN_WIDTH * (SETTINGS_SENSITIVITY_START_X + saveData.mousewheelSensitivity * (SETTINGS_SENSITIVITY_END_X - SETTINGS_SENSITIVITY_START_X) / 4),
+											SCREEN_HEIDHT * SETTINGS_ICON_3_Y);
+	iconSensitivitySettings->SetRange(SCREEN_WIDTH * SETTINGS_SENSITIVITY_START_X, SCREEN_WIDTH * SETTINGS_SENSITIVITY_END_X);
 	uiWhenPause.push_back(iconSensitivitySettings);
 	sliderIcons.push_back(iconSensitivitySettings);
 	#pragma endregion
@@ -593,6 +593,7 @@ void UIManager::Update(float deltaTime) {
 			mapTransitionNextRow = false;
 			m_playerController->ResetInput();
 			m_tileMap->completeLoading = false;
+			txtCoin->SetColor(hpTextColor);
 			m_tileMap->LoadNewMap();
 			Camera::GetInstance()->Update(deltaTime);
 			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_2.png"), 1, 9, 6, 0.02f);
@@ -801,10 +802,9 @@ void UIManager::UpdateStats() {
 					}
 				}
 				else {
-					int maxSlotNumber = mousewheelSensitivity;
 					m_inventorySlot += changeInWheelValue;
 					changeInWheelValue = 0;
-					if (m_inventorySlot > maxSlotNumber) m_inventorySlot = maxSlotNumber;
+					if (m_inventorySlot > mousewheelSensitivity) m_inventorySlot = mousewheelSensitivity;
 					else if (m_inventorySlot < 0) m_inventorySlot = 0;
 
 					int slot = std::round((float)m_inventorySlot / mousewheelSensitivity);
@@ -884,7 +884,7 @@ void UIManager::UpdateStats() {
 					int a = std::round((iconSensitivitySettings->Get2DPosition().x - SCREEN_WIDTH * SETTINGS_SENSITIVITY_START_X) /
 									   (SCREEN_WIDTH * (SETTINGS_SENSITIVITY_END_X - SETTINGS_SENSITIVITY_START_X)) * 4);
 					mousewheelSensitivity = 9 - 2 * a;
-					saveData.mousewheelSensitivity = mousewheelSensitivity;
+					saveData.mousewheelSensitivity = a;
 					iconSensitivitySettings->Set2DPosition(
 						SCREEN_WIDTH * (SETTINGS_SENSITIVITY_START_X + a * (SETTINGS_SENSITIVITY_END_X -
 																			 SETTINGS_SENSITIVITY_START_X) / 4),

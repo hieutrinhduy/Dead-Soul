@@ -33,7 +33,7 @@ private:
 	//Uint32 callback(Uint32 interval, void*param);
 	std::list<std::shared_ptr<Sprite2D>> elements;
 	std::shared_ptr<Sprite2D> musicForegroundBar, sfxForegroundBar;
-	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings;
+	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings, iconMouseSettings;
 
 	std::list<std::shared_ptr<MouseButton>>	m_listButton;
 	std::list< std::shared_ptr<SliderIcon>> m_listSliderIcon;
@@ -43,7 +43,8 @@ private:
 	// 'milestone' is y-coordinate of vertical grid line of settings panel:
 	int milestone, bar1Top, bar2Top;
 
-	int musicVolume, sfxVolume;
+	int musicVolume, sfxVolume, mousewheelSensitivity;
+	bool releaseMouseButton = false;
 	int fullVolumeBarWidth;
 
 	// limit the movement of the icons along the X-axis

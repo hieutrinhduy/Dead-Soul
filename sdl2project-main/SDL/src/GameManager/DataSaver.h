@@ -15,7 +15,7 @@ typedef struct SaveData {
 		level = 1;
 		musicVolume = 128;
 		sfxVolume = 128;
-		mousewheelSensitivity = 3;
+		mousewheelSensitivity = 2;
 	}
 } SaveData;
 
