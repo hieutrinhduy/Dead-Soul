@@ -746,8 +746,11 @@ void UIManager::UpdateStats() {
 					sp += 1;
 					if (sp >= maxSP) sp = maxSP;
 				}
-				if (sp - lossAmount < 30 ) m_playerController->SetSpStatus(false);
-				else m_playerController->SetSpStatus(true);
+				if (sp - lossAmount < 30 ) m_playerController->SetCanRollState(false);
+				else m_playerController->SetCanRollState(true);
+
+				if (sp - lossAmount < 10) m_playerController->SetCanAttackState(false);
+				else m_playerController->SetCanAttackState(true);
 
 
 				// check MP_STATUS:

@@ -162,7 +162,7 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
                     else {
                         SetSpLose(10);
                         SetMpLose(-m_mpStolen);
-                        SetHpStolen(m_hpStolen);
+                        SetHpLose(-m_hpStolen);
                         ChangeAnimation(attackTexture, 4, 0.1f);
                         m_justDidAttack2 = false;
                         m_justDidAttack3 = false;
