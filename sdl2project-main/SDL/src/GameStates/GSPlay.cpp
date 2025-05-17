@@ -73,6 +73,7 @@ void GSPlay::Init()
     enemyColliders = m_level1->GetEnemyColliders();
     m_hitEnemyCallbacks = m_level1->GetHitEnemyCallbacks();
     m_ChangeLevelGate = m_level1->GetChangeLevelGate();
+    m_shop = m_level1->GetShop();
 
     // Rung màn hình khi đánh trúng enemy
     m_playerController->SetOnScreenShakeCallback([]() {
@@ -82,7 +83,7 @@ void GSPlay::Init()
 
     DisplayLoadingView();
 
-    //m_tileMap->ExportFullMapImage(Renderer::GetInstance()->GetRenderer());
+    m_tileMap->ExportFullMapImage(Renderer::GetInstance()->GetRenderer());
 }
 
 void GSPlay::Exit() {

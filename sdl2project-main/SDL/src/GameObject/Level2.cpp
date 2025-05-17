@@ -18,11 +18,27 @@ Level2::Level2(std::shared_ptr<PlayerController> player)
         bg->Set2DPosition(0, 0);
     }
 
+    auto level2Decor = ResourceManagers::GetInstance()->GetTexture("decorations/Level2Decor.png");
+    if (level2Decor != nullptr)
+    {
+        auto decor = std::make_shared<SpriteAnimation>(level2Decor, 1, 1, 1, 10);
+        int decorWidth = 6592;
+        int decorHeight = 3072;
+
+        decor->SetSize(decorWidth, decorHeight);
+        decor->Set2DPosition(0, 0);
+        m_decorList.push_back(decor);
+    }
+    else
+    {
+        std::cout << "Lỗi: Không tải được texture Level1Decor.png\n";
+    }
+
     m_gate = std::make_shared<ChangeLevelGate>();
     m_gate->Init(1000, 800);
 
     m_shop = std::make_shared<Shop>();
-    m_shop->Init(300, 0);
+    m_shop->Init(500, 35);
 
     // Khởi tạo enemy
     m_enemyController = std::make_shared<EnemyController>();
@@ -97,6 +113,10 @@ void Level2::Draw(SDL_Renderer* renderer)
 {
     m_gate->Draw(renderer);
     m_shop->Draw(renderer);
+    for (auto& decor : m_decorList)
+    {
+        decor->Draw(renderer);
+    }
     m_enemyController->Draw(renderer);
     m_enemyController2->Draw(renderer);
     //m_evilCreature->Draw(renderer);

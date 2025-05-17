@@ -38,8 +38,11 @@ private:
     std::shared_ptr<Boss1> m_boss1;
     std::shared_ptr<ScecretBoss> m_boss2;
 
+    std::vector<std::shared_ptr<SpriteAnimation>> m_decorList;
+
     std::shared_ptr<ChangeLevelGate> m_gate;
     std::shared_ptr<Shop> m_shop;
+
 
     std::vector<SDL_Rect*> m_enemyColliders;
     std::vector<std::function<void(int)>> m_hitCallbacks;
