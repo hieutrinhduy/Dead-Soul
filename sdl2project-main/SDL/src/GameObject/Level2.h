@@ -29,14 +29,26 @@ public:
     std::shared_ptr<Shop> GetShop() const { return m_shop; }
 
 private:
-    std::shared_ptr<EnemyController> m_enemyController;
-    std::shared_ptr<EnemyController> m_enemyController2;
     std::shared_ptr<EvilCreature> m_evilCreature;
+    std::shared_ptr<EvilCreature> m_evilCreature2;
+    std::shared_ptr<EvilCreature> m_evilCreature3;
+    std::shared_ptr<EvilCreature> m_evilCreature4;
+    std::shared_ptr<EvilCreature> m_evilCreature5;
+
     std::shared_ptr<GhostWarrior> m_ghostWarrior;
+    std::shared_ptr<GhostWarrior> m_ghostWarrior2;
+    std::shared_ptr<GhostWarrior> m_ghostWarrior3;
+    std::shared_ptr<GhostWarrior> m_ghostWarrior4;
+    std::shared_ptr<GhostWarrior> m_ghostWarrior5;
+
     std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed;
+    std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed2;
+    std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed3;
+    std::shared_ptr<GhostWarriorRed> m_ghostWarriorRed4;
+
     std::shared_ptr<RangedEnemy> m_rangedEnemy;
-    std::shared_ptr<Boss1> m_boss1;
-    std::shared_ptr<ScecretBoss> m_boss2;
+    std::shared_ptr<RangedEnemy> m_rangedEnemy2;
+    std::shared_ptr<RangedEnemy> m_rangedEnemy3;
 
     std::vector<std::shared_ptr<SpriteAnimation>> m_decorList;
 
