@@ -16,7 +16,6 @@ void ChangeLevelGate::Init(float posX, float posY)
 
 void ChangeLevelGate::Update(float deltaTime)
 {
-    std::cout << m_animation->Get2DPosition().x << std::endl;
     if (m_animation)
         m_animation->Update(deltaTime);
 }

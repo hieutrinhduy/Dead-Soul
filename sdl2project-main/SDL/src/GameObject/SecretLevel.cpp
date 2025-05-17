@@ -35,7 +35,7 @@ SecretLevel::SecretLevel(std::shared_ptr<PlayerController> player)
     m_boss1->SetPlayerCollider(&player->GetCollider());
 
     m_boss2 = std::make_shared<ScecretBoss>();
-    m_boss2->Init(-300, 3700, 385);
+    m_boss2->Init(-300, 3700, 455);
     m_boss2->SetPlayerCollider(&player->GetCollider());
 
     // Thiết lập các callback

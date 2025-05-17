@@ -48,7 +48,7 @@ GSPlay::GSPlay()
 
     m_uiManager = std::make_shared<UIManager>(timeScale);
 
-    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/output1.bin", "Map/map1_tileset/", 32, timeScale);
+    m_tileMap = std::make_shared<TileMap>("Data/Textures/Map/hidden_boss_map.bin", "Map/map2_tileset/", 32, timeScale);
 
     m_playerController = std::make_shared<PlayerController>();
     m_playerController->Init();
@@ -69,14 +69,14 @@ void GSPlay::Init()
     m_playerController = std::make_shared<PlayerController>();
     m_playerController->Init();
 
-    m_currentLevel = LevelID::Level1;
-    m_level1 = std::make_shared<Level1>(m_playerController);
-    m_playerController->SetEnemyColliders(m_level1->GetEnemyColliders());
-    m_playerController->SetOnHitEnemyCallbacks(m_level1->GetHitEnemyCallbacks());
-    enemyColliders = m_level1->GetEnemyColliders();
-    m_hitEnemyCallbacks = m_level1->GetHitEnemyCallbacks();
-    m_ChangeLevelGate = m_level1->GetChangeLevelGate();
-    m_shop = m_level1->GetShop();
+    m_currentLevel = LevelID::SecretLevel;
+    m_secretLevel = std::make_shared<SecretLevel>(m_playerController);
+    m_playerController->SetEnemyColliders(m_secretLevel->GetEnemyColliders());
+    m_playerController->SetOnHitEnemyCallbacks(m_secretLevel->GetHitEnemyCallbacks());
+    enemyColliders = m_secretLevel->GetEnemyColliders();
+    m_hitEnemyCallbacks = m_secretLevel->GetHitEnemyCallbacks();
+    m_ChangeLevelGate = m_secretLevel->GetChangeLevelGate();
+    m_shop = m_secretLevel->GetShop();
 
     // Rung màn hình khi đánh trúng enemy
     m_playerController->SetOnScreenShakeCallback([]() {
