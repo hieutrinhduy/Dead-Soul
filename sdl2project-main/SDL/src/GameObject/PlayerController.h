@@ -32,7 +32,8 @@ public:
     bool CanGoRight() const { return m_canGoRight; };
     bool BumpTheHead() const { return m_bumpTheHead; };
     bool OnTheGround() const { return m_isGrounded; };
-    Vector2 GetPlayerPosition() const { return m_player->Get2DPosition(); }
+    Vector2 GetPlayerPosition() const { return m_player->Get2DPosition(); };
+    bool GetVictorState() const { return m_isVictory; };
 
     // get player's stats data:
     int GetHpLose() {
@@ -79,10 +80,6 @@ public:
     };
 
     // set player status:
-    void SetSpStatus(bool enoughSp) {
-        std::lock_guard<std::mutex> lock(mtx);
-        m_enoughSP = enoughSp;
-    };
     void SetMpStatus(bool enoughMp) {
         std::lock_guard<std::mutex> lock(mtx);
         m_enoughMP = enoughMp;
@@ -101,15 +98,33 @@ public:
     };
 
     void SetExpGained(int amount) {
-        std::cout << "Amount Exp Gained" << amount << std::endl;
         std::lock_guard<std::mutex> lock(mtx);
         m_ExpGained += amount;
     }
 
     void SetGoldGained(int amount) {
-        std::cout << "Amount Gold Gained" << amount << std::endl;
         std::lock_guard<std::mutex> lock(mtx);
         m_GoldGained += amount;
+    }
+
+    void SetCanAttackState(bool canSwordAttack) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_canSwordAttack = canSwordAttack;
+    }
+
+    void SetCanRollState(bool canRoll) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_canRoll = canRoll;
+    }
+
+    void SetMpStolen(int amount) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_mpStolen = amount;
+    }
+
+    void SetHpStolen(int amount) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_hpStolen = amount;
     }
 
     void ResetChangeInValue() {
@@ -152,6 +167,10 @@ public:
 
     void SetDeadStatus(bool isDead) {
         m_isDead = isDead;
+    }
+    
+    void SetVictoryState(bool isVitory) {
+        m_isVictory = isVitory;
     }
 
     void ResetPlayerPosition();
@@ -233,8 +252,14 @@ private:
     bool m_canDealDamage;
     int m_damage = 10;
 
+    //
+    int m_hpStolen = 10;
+    int m_mpStolen = 10;
+
+    bool m_canSwordAttack;
+    bool m_canRoll;
+
     //MP and SP
-    bool m_enoughSP;
     bool m_enoughMP;
 
     //Ingame HP lose, SP, MP
@@ -278,6 +303,9 @@ private:
 
     //Kiem tra xem co nhan vao UI hay khong?
     bool m_isCLickingOnUI = false;
+
+    //Check Victory
+    bool m_isVictory = false;
 
     void ShootProjectile();
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);

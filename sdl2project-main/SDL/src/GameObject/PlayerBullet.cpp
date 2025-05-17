@@ -23,6 +23,12 @@ void PlayerBullet::Update(float dt)
 {
     if (m_destroyed) return;
 
+    m_lifeTime += dt;
+    if (m_lifeTime >= 2.0f) {
+        m_destroyed = true;
+        return;
+    }
+
     Vector2 pos = m_sprite->Get2DPosition();
 
     pos.x += m_speed * m_direction * dt;

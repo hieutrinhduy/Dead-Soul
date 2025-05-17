@@ -27,4 +27,5 @@ private:
     int m_direction;
     int m_damage = 10;
     bool m_destroyed;
+    float m_lifeTime = 0.0f;
 };

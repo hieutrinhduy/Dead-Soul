@@ -23,6 +23,7 @@ private:
     float m_speed;
     int m_damage;
     bool m_destroyed;
+    float m_lifeTime = 0.0f;
 
     std::function<void(int)> m_onHitPlayer;
 };

@@ -19,6 +19,12 @@ void Bullet::Update(float dt)
 {
     if (m_destroyed) return;
 
+    m_lifeTime += dt;
+    if (m_lifeTime >= 2) {
+        m_destroyed = true;
+        return;
+    }
+
     Vector2 pos = m_sprite->Get2DPosition();
     pos.x += m_speed * m_direction * dt;
     m_sprite->Set2DPosition(pos.x, pos.y);
@@ -27,6 +33,7 @@ void Bullet::Update(float dt)
 
     m_sprite->Update(dt);
 }
+
 
 void Bullet::Draw(SDL_Renderer* renderer)
 {

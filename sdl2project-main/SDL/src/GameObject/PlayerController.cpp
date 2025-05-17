@@ -75,7 +75,6 @@ void PlayerController::Init()
     };
 
     m_enoughMP = true;
-    m_enoughSP = true;
 
     // set CAMERA'S TARGET:
     Camera::GetInstance()->SetTarget(m_player);
@@ -105,7 +104,7 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
             }
             break;
         case SDLK_LSHIFT:
-            if (!m_isAttacking && !m_isRolling && m_isGrounded && !m_isHit && m_enoughSP) {
+            if (!m_isAttacking && !m_isRolling && m_isGrounded && !m_isHit && m_canRoll) {
                 //Giả sử lộn mất 30Sp
                 SetSpLose(30);
                 ChangeAnimation(rollTexture, 7, 0.05f);
@@ -143,23 +142,27 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
             switch (m_currentWeaponIndex)
             {
             case 0:
-                if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit && m_enoughMP) {
+                if (!m_isAttacking && m_isGrounded && !m_isRolling && !m_isHit && m_canSwordAttack) {
                     float now = SDL_GetTicks() / 1000.0f;
                     //Cac don danh cach nhau 1s
                     if (!m_justDidAttack2 && !m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
-                        SetMpLose(15);
+                        SetSpLose(10);
+                        SetMpLose(-m_mpStolen);
                         ChangeAnimation(attack2Texture, 4, 0.1f);
                         m_justDidAttack2 = true;
                         m_justDidAttack3 = false;
                     }
                     else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
-                        SetMpLose(15);
+                        SetSpLose(10);
+                        SetMpLose(-m_mpStolen);
                         ChangeAnimation(attack3Texture, 4, 0.1f);
                         m_justDidAttack3 = true;
                         m_justDidAttack2 = false;
                     }
                     else {
-                        SetMpLose(15);
+                        SetSpLose(10);
+                        SetMpLose(-m_mpStolen);
+                        SetHpStolen(m_hpStolen);
                         ChangeAnimation(attackTexture, 4, 0.1f);
                         m_justDidAttack2 = false;
                         m_justDidAttack3 = false;

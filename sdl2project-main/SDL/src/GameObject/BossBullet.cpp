@@ -21,6 +21,12 @@ void BossBullet::Update(float dt)
 {
     if (m_destroyed) return;
 
+    m_lifeTime += dt;
+    if (m_lifeTime >= 2.0f) {
+        m_destroyed = true;
+        return;
+    }
+
     Vector2 pos = m_sprite->Get2DPosition();
     pos.x += m_direction.x * m_speed * dt;
     pos.y += m_direction.y * m_speed * dt;
