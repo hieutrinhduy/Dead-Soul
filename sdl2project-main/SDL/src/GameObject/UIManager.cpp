@@ -96,7 +96,7 @@ constexpr float UP_BUTTON_LEFT_RATIO = 138.0f / 256, UP_BUTTON_RIGHT_RATIO = 160
 #pragma region Constructor && Deconstructor
 UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	m_renderer(Renderer::GetInstance()->GetRenderer()), m_timeScale(timeScale),
-	hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 }),
+	hpTextColor({ 0, 0, 0 }), expTextColor({ 255,255,255 }), coinTextColor({ 255, 215, 0 }),
 	timer(0), spTimer(0), mpTimer(0),
 	changeInWheelValue(0)
 {
@@ -226,7 +226,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	iconCoin->Set2DPosition(SCREEN_WIDTH - 80, 10);
 	uiWhenRunGame.push_back(iconCoin);
 
-	txtCoin = std::make_shared<Text>(goldAmount, font, expTextColor);
+	txtCoin = std::make_shared<Text>(goldAmount, font, coinTextColor);
 	txtCoin->SetSize(20, 50);
 	txtCoin->Set2DPosition(SCREEN_WIDTH - 110, 12);
 	uiWhenRunGame.push_back(txtCoin);

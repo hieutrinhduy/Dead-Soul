@@ -83,7 +83,7 @@ private:
 
 	
 
-	SDL_Color hpTextColor, expTextColor;
+	SDL_Color hpTextColor, expTextColor, coinTextColor;
 	#pragma endregion
 
 	// Player's Stats:
