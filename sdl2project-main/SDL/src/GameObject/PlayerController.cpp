@@ -572,7 +572,7 @@ void PlayerController::Draw(SDL_Renderer* renderer)
             {
                 if (i < m_onHitEnemyList.size()) {
                     if (m_onHitEnemyList[i]) {
-                        m_onHitEnemyList[i](200);
+                        m_onHitEnemyList[i](damageAmount);
                         SetMpLose(-m_mpStolen);
                         if (m_justDidAttack3) {
                             SetHpLose(-m_hpStolen);
