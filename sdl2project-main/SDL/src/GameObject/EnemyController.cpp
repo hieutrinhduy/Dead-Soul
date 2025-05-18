@@ -254,7 +254,6 @@ void EnemyController::Update(float deltaTime)
                 ChangeAnimation(runTexture, 10, 0.05f);
                 m_recentlyReturnedFromChase = true;
 
-                // ✅ THÊM ĐOẠN NÀY
                 if (posX < m_pointA + 10) {
                     m_direction = 1;
                     m_enemyFlip = SDL_FLIP_NONE;

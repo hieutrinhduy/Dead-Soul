@@ -557,7 +557,7 @@ void ScecretBoss::ShootInAngle(float angleRad)
         m_enemy->GetPosition().y + m_enemy->GetHeight() / 2
     };
 
-    auto bullet = std::make_shared<BossBullet>(spawnPos, dir, speed, m_damage);
+    auto bullet = std::make_shared<BossBullet>(spawnPos, dir, speed, m_damage/2);
     bullet->SetOnHitCallback(m_onHitPlayer); // nếu có
     g_bossBullets.push_back(bullet);         // vector bạn quản lý boss bullets
 }

@@ -68,7 +68,7 @@ private:
 
     int m_maxHP = 100;
     int m_currentHP = 100;
-    int m_damage = 1;
+    int m_damage = 10;
     std::function<void(int damage)> m_onHitPlayer;
 
     std::shared_ptr<TextureManager> idleTexture;

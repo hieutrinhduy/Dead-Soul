@@ -14,7 +14,7 @@ EvilCreature::EvilCreature()
     m_direction(1), m_isAttacking(false), m_attackTimer(0.0f), m_attackCooldown(0.0f),
     m_isHit(false), m_hitTimer(0.0f), m_isDead(false), m_groundCollider(nullptr),
     m_playerCollider(nullptr), m_lostPlayerTimer(0.0f), m_state(EvilCreatureState::Patrol),
-    m_maxHP(100), m_currentHP(100), m_damage(1), m_flip(SDL_FLIP_NONE) {
+    m_maxHP(100), m_currentHP(100), m_damage(30), m_flip(SDL_FLIP_NONE) {
 }
 
 EvilCreature::~EvilCreature() {}
