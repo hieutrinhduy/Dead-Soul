@@ -160,22 +160,18 @@ void Boss1::Update(float deltaTime)
     case BossState::Patrol:
         if (posX < m_pointA) {
             m_direction = 1;
-            m_enemyFlip = SDL_FLIP_HORIZONTAL;
         }
         else if (posX > m_pointB) {
             m_direction = -1;
-            m_enemyFlip = SDL_FLIP_NONE;
         }
 
         posX += m_direction * m_speed * deltaTime;
 
         if (m_direction == 1 && posX > m_pointB) {
             m_direction = -1;
-            m_enemyFlip = SDL_FLIP_NONE;
         }
         else if (m_direction == -1 && posX < m_pointA) {
             m_direction = 1;
-            m_enemyFlip = SDL_FLIP_HORIZONTAL;
         }
 
         if (!m_recentlyReturnedFromChase && DetectPlayer()) {
@@ -367,7 +363,9 @@ void Boss1::Update(float deltaTime)
             m_recentlyReturnedTimer = 0.0f;
         }
     }
-
+    if (!m_isAttacking) {
+        m_enemyFlip = (m_direction == 1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+    }
     m_enemy->Update(deltaTime);
 }
 
@@ -411,41 +409,41 @@ void Boss1::Draw(SDL_Renderer* renderer)
     SDL_RenderFillRect(renderer, &drawFill);
 
         //Draw Movement
-    int markerSize = 6;
-    SDL_Color lineColor = { 0, 255, 0, 255 }; // Xanh lá
+    //int markerSize = 6;
+    //SDL_Color lineColor = { 0, 255, 0, 255 }; // Xanh lá
 
-    // Vị trí Y dưới chân enemy
-    int drawY = static_cast<int>(m_enemy->Get2DPosition().y + m_enemy->GetHeight()) + 5 - static_cast<int>(camPos.y);
+    //// Vị trí Y dưới chân enemy
+    //int drawY = static_cast<int>(m_enemy->Get2DPosition().y + m_enemy->GetHeight()) + 5 - static_cast<int>(camPos.y);
 
-    // ✅ Điều chỉnh thêm offset X = nửa chiều rộng sprite
-    int offsetX = m_enemy->GetWidth() / 2;
+    //// ✅ Điều chỉnh thêm offset X = nửa chiều rộng sprite
+    //int offsetX = m_enemy->GetWidth() / 2;
 
-    // Vẽ đường từ A đến B (có offset để canh giữa enemy)
-    SDL_SetRenderDrawColor(renderer, lineColor.r, lineColor.g, lineColor.b, lineColor.a);
-    SDL_RenderDrawLine(renderer,
-        static_cast<int>(m_pointA + offsetX - camPos.x),
-        drawY,
-        static_cast<int>(m_pointB + offsetX - camPos.x),
-        drawY
-    );
+    //// Vẽ đường từ A đến B (có offset để canh giữa enemy)
+    //SDL_SetRenderDrawColor(renderer, lineColor.r, lineColor.g, lineColor.b, lineColor.a);
+    //SDL_RenderDrawLine(renderer,
+    //    static_cast<int>(m_pointA + offsetX - camPos.x),
+    //    drawY,
+    //    static_cast<int>(m_pointB + offsetX - camPos.x),
+    //    drawY
+    //);
 
-    // Vẽ chấm tại pointA
-    SDL_Rect pointAmarker = {
-        static_cast<int>(m_pointA + offsetX - camPos.x - markerSize / 2),
-        drawY - markerSize / 2,
-        markerSize,
-        markerSize
-    };
-    SDL_RenderFillRect(renderer, &pointAmarker);
+    //// Vẽ chấm tại pointA
+    //SDL_Rect pointAmarker = {
+    //    static_cast<int>(m_pointA + offsetX - camPos.x - markerSize / 2),
+    //    drawY - markerSize / 2,
+    //    markerSize,
+    //    markerSize
+    //};
+    //SDL_RenderFillRect(renderer, &pointAmarker);
 
-    // Vẽ chấm tại pointB
-    SDL_Rect pointBmarker = {
-        static_cast<int>(m_pointB + offsetX - camPos.x - markerSize / 2),
-        drawY - markerSize / 2,
-        markerSize,
-        markerSize
-    };
-    SDL_RenderFillRect(renderer, &pointBmarker);
+    //// Vẽ chấm tại pointB
+    //SDL_Rect pointBmarker = {
+    //    static_cast<int>(m_pointB + offsetX - camPos.x - markerSize / 2),
+    //    drawY - markerSize / 2,
+    //    markerSize,
+    //    markerSize
+    //};
+    //SDL_RenderFillRect(renderer, &pointBmarker);
 }
 
 bool Boss1::DetectPlayer()

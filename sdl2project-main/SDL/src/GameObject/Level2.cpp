@@ -10,8 +10,12 @@ Level2::Level2(std::shared_ptr<PlayerController> player)
 {
     m_backgroundList.clear();
     auto tex1 = ResourceManagers::GetInstance()->GetTexture("background_layer_1(Map2).png");
+    auto tex2 = ResourceManagers::GetInstance()->GetTexture("/Paralax background Pack/Green mountain/Clouds.png");
+    auto tex3 = ResourceManagers::GetInstance()->GetTexture("/Paralax background Pack/Green mountain/Green_mountain.png");
 
     m_backgroundList.push_back(std::make_shared<Sprite2D>(tex1, SDL_FLIP_NONE));
+    m_backgroundList.push_back(std::make_shared<Sprite2D>(tex2, SDL_FLIP_NONE));
+    m_backgroundList.push_back(std::make_shared<Sprite2D>(tex3, SDL_FLIP_NONE));
 
     for (auto& bg : m_backgroundList) {
         bg->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);

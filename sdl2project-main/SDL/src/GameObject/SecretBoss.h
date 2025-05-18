@@ -54,7 +54,7 @@ private:
     std::function<void()> m_onDeathCallback;
     std::function<void(Vector2)> m_spawnExpCallback;
 
-    float m_exp_orb_number = 15;
+    float m_exp_orb_number = 5;
 
     float m_pointA;
     float m_pointB;

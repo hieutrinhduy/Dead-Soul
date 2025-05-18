@@ -17,6 +17,7 @@
 #include "Level3.h"
 #include "SecretLevel.h"
 #include "ChangeLevelGate.h"
+#include "SecretGate.h"
 #include "Shop.h"
 
 class Sprite2D;
@@ -59,6 +60,26 @@ public:
 	Vector2 GetGateSize() { return m_ChangeLevelGate->GetGateSize(); };
 	Vector2 GetGatePos() { return m_ChangeLevelGate->GetGatePos(); };
 
+
+	Vector2 GetSecretGateSize() 
+	{ 
+		if(m_ChangeLevelGate)
+			return m_ChangeLevelGate->GetGateSize(); 
+		else
+		{
+			std::cout << "This Level Doesnt have Secret Gate" << std::endl;
+		}
+	}
+	Vector2 GetSecretGatePos() { 
+		if (m_ChangeLevelGate) {
+			return m_ChangeLevelGate->GetGatePos(); 
+		}
+		else
+		{
+			std::cout << "This Level Doesnt have Secret Gate" << std::endl;
+		}
+	}
+
 	Vector2 GetShopSize() { return m_shop->GetShopSize(); };
 	Vector2 GetShopPos() { return m_shop->GetShopPos(); };
 
@@ -79,6 +100,7 @@ private:
 	std::shared_ptr<RangedEnemy> m_rangedEnemy;
 
 	std::shared_ptr<ChangeLevelGate> m_ChangeLevelGate;
+	std::shared_ptr<SecretGate> m_SecretGate;
 	std::shared_ptr<Shop> m_shop;
 
 	std::shared_ptr<Sprite2D>	m_background;

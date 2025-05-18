@@ -30,6 +30,7 @@ public:
     std::shared_ptr<Shop> GetShop() const { return m_shop; }
 
 private:
+    std::shared_ptr<PlayerController> m_playerController;
     std::shared_ptr<EnemyController> m_enemyController;
     std::shared_ptr<EnemyController> m_enemyController2;
     std::shared_ptr<EvilCreature> m_evilCreature;
@@ -45,8 +46,19 @@ private:
     std::vector<SDL_Rect*> m_enemyColliders;
     std::vector<std::function<void(int)>> m_hitCallbacks;
 
+    bool m_boss1_isDead = false;
+    bool m_boss2_isDead = false;
+    bool m_finishGame = false;
+
+    bool m_isCameraMovingToGate = false;
+    float m_cameraWaitTimer = 0.0f;
+    float m_waitDurationAtGate = 2.0f;
+    bool m_isReturningToPlayer = false;
+    bool m_isWaitingAtGate = false;
+
     //Background
     std::vector<std::shared_ptr<Sprite2D>> m_backgroundList;
+    std::vector<std::shared_ptr<SpriteAnimation>> m_decorList;
 
     void SetupCallbacks(std::shared_ptr<PlayerController> player);
     void SetupSpawnExp(std::shared_ptr<PlayerController> player);
