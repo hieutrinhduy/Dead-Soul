@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Renderer.h"
 #include <iostream>
+#include "Sound.h"
 
 Bullet::Bullet(Vector2 position, float speed, int direction, int damage)
     : m_speed(speed), m_direction(direction), m_damage(damage), m_destroyed(false)
@@ -13,6 +14,7 @@ Bullet::Bullet(Vector2 position, float speed, int direction, int damage)
     m_sprite->Set2DPosition(position.x, position.y);
     m_sprite->SetFlip((direction == 1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
     m_collider = { (int)position.x, (int)position.y, 64, 64 };
+    Sound::GetInstance()->LoadSfx("sfx_fireball.wav");
 }
 
 void Bullet::Update(float dt)
@@ -59,6 +61,7 @@ bool Bullet::HasHitPlayer(const SDL_Rect* playerCollider)
         if (m_onHitPlayer) {
             m_onHitPlayer(m_damage);
         }
+        Sound::GetInstance()->PlaySfx("sfx_fireball.wav");
         m_destroyed = true;
 
         return true;

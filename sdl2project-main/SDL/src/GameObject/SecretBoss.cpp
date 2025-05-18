@@ -6,6 +6,7 @@
 #include <iostream>
 #include <algorithm> 
 #include "BossBullet.h"
+#include "Sound.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -61,6 +62,8 @@ void ScecretBoss::Init(float pointA, float pointB, float posY)
 
     m_hpBarBg = { 0, 0, m_barWidth, m_barHeight };
     m_hpBarFill = m_hpBarBg;
+    Sound::GetInstance()->LoadSfx("/Enemy/sfx_enemy_hit.wav");
+    Sound::GetInstance()->LoadSfx("/Enemy/sfx_enemy_die.wav");
 }
 
 void ScecretBoss::SetGroundCollider(SDL_Rect* ground)
@@ -88,6 +91,7 @@ void ScecretBoss::TakeDamage(int damage)
 
     if (m_currentHP <= 0) {
         m_currentHP = 0;
+        Sound::GetInstance()->PlaySfx("/Enemy/sfx_enemy_die.wav");
         Die();
     }
     else {
@@ -98,6 +102,7 @@ void ScecretBoss::TakeDamage(int damage)
             m_isHit = true;
             m_hitTimer = 0.24f;
             ChangeAnimation(hitTexture, 5, 0.05f);
+            Sound::GetInstance()->PlaySfx("/Enemy/sfx_enemy_hit.wav");
         }
     }
 }

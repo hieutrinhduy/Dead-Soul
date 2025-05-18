@@ -86,6 +86,7 @@ void PlayerController::Init()
     Sound::GetInstance()->LoadSfx("sfx_jump.wav");
     Sound::GetInstance()->LoadSfx("sfx_is_hit.wav");
     Sound::GetInstance()->LoadSfx("sfx_die.wav");
+    Sound::GetInstance()->LoadSfx("sfx_arrow.wav");
 }
 
 
@@ -205,6 +206,7 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
                     //if (now - m_lastAttackTime <= 1.0f) {
                     //}
                     // Giá sử mất 30 SP khi tấn công
+                    Sound::GetInstance()->PlaySfx("sfx_arrow.wav");
                     SetMpLose(30);
                     ChangeAnimation(arrowAttackTexture, 6, 0.1f);
                     m_isAttacking = true;
@@ -570,7 +572,7 @@ void PlayerController::Draw(SDL_Renderer* renderer)
             {
                 if (i < m_onHitEnemyList.size()) {
                     if (m_onHitEnemyList[i]) {
-                        m_onHitEnemyList[i](damageAmount);
+                        m_onHitEnemyList[i](200);
                         SetMpLose(-m_mpStolen);
                         if (m_justDidAttack3) {
                             SetHpLose(-m_hpStolen);

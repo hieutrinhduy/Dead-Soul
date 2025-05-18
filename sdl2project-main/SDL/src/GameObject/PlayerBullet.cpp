@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Renderer.h"
 #include <iostream>
+#include "Sound.h"
 
 PlayerBullet::PlayerBullet(Vector2 position, float speed, int direction, int damage)
     : m_speed(speed), m_direction(direction), m_damage(damage), m_destroyed(false)
@@ -16,6 +17,7 @@ PlayerBullet::PlayerBullet(Vector2 position, float speed, int direction, int dam
     m_collider = { (int)position.x, (int)position.y, 128, 128 };
 
     m_damage = damage;
+    Sound::GetInstance()->LoadSfx("sfx_bow_hit.wav");
 }
 
 void PlayerBullet::Update(float dt)
@@ -76,7 +78,7 @@ bool PlayerBullet::HasHitEnemy(const SDL_Rect* enemyCollider)
 
     if (SDL_HasIntersection(&m_collider, enemyCollider)) {
         m_destroyed = true;
-
+        Sound::GetInstance()->PlaySfx("sfx_bow_hit.wav");
         if (m_onScreenShake)
             m_onScreenShake();
 

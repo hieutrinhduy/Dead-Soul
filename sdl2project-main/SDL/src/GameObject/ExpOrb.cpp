@@ -2,7 +2,8 @@
 #include "ResourceManagers.h"
 #include "Camera.h"
 #include "SpriteAnimation.h"
-#include <cmath> // cho sqrt
+#include <cmath>
+#include "Sound.h"
 
 ExpOrb::ExpOrb(Vector2 pos)
     : m_isCollected(false), m_speed(300.0f)

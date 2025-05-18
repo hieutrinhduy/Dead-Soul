@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <algorithm> 
+#include "Sound.h"
 
 int attackIndex = 0;
 
@@ -60,6 +61,9 @@ void EnemyController::Init(float pointA, float pointB, float posY)
 
     m_hpBarBg = { 0, 0, m_barWidth, m_barHeight };
     m_hpBarFill = m_hpBarBg;
+
+    Sound::GetInstance()->LoadSfx("/Enemy/sfx_enemy_hit.wav");
+    Sound::GetInstance()->LoadSfx("/Enemy/sfx_enemy_die.wav");
 }
 
 void EnemyController::SetGroundCollider(SDL_Rect* ground)
@@ -80,8 +84,6 @@ void EnemyController::TakeDamage(int damage, int knockbackDir)
 {
     if (m_isDead) return;
 
-    std::cout << "[EnemyController] Bị trúng đòn: -" << damage << " HP\n";
-
     m_currentHP -= damage;
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
     m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
@@ -89,14 +91,14 @@ void EnemyController::TakeDamage(int damage, int knockbackDir)
     m_currentState = EnemyState::Patrol;
     if (m_currentHP <= 0) {
         m_currentHP = 0;
-        std::cout << "[EnemyController] ĐÃ CHẾT\n";
+        Sound::GetInstance()->PlaySfx("/Enemy/sfx_enemy_die.wav");
         Die();
     }
     else {
         m_isHit = true;
         m_hitTimer = 0.2f;
         ChangeAnimation(hitTexture, 5, 0.05f);
-
+        Sound::GetInstance()->PlaySfx("/Enemy/sfx_enemy_hit.wav");
         // Knockback setup
         m_isKnockback = true;
         m_knockbackTimer = m_knockbackDuration;

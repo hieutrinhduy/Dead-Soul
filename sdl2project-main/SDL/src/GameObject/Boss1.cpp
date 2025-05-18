@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <algorithm> 
+#include "Sound.h"
 
 int bossAttackIndex = 0;
 
@@ -52,6 +53,8 @@ void Boss1::Init(float pointA, float pointB, float posY)
 
     m_hpBarBg = { 0, 0, m_barWidth, m_barHeight };
     m_hpBarFill = m_hpBarBg;
+    Sound::GetInstance()->LoadSfx("/Enemy/sfx_enemy_hit.wav");
+    Sound::GetInstance()->LoadSfx("/Enemy/sfx_enemy_die.wav");
 }
 
 void Boss1::SetGroundCollider(SDL_Rect* ground)
@@ -79,6 +82,7 @@ void Boss1::TakeDamage(int damage)
 
     if (m_currentHP <= 0) {
         m_currentHP = 0;
+        Sound::GetInstance()->PlaySfx("/Enemy/sfx_enemy_die.wav");
         Die();
     }
     else {
@@ -89,6 +93,7 @@ void Boss1::TakeDamage(int damage)
             m_isHit = true;
             m_hitTimer = 0.3f;
             ChangeAnimation(hitTexture, 7, 0.05f);
+            Sound::GetInstance()->PlaySfx("/Enemy/sfx_enemy_hit.wav");
         }
     }
 }
