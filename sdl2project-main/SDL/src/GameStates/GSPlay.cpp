@@ -334,7 +334,7 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
 void GSPlay::DisplayLoadingView() {
     std::thread t([this]() {
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5400));
 
         // SOUNDS:
         Sound::GetInstance()->LoadSound("gameplay_music.mp3");

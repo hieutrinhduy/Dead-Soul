@@ -18,7 +18,7 @@ bool Game::Init()
 {
 	bool success = Renderer::GetInstance()->Init();
 	if (DataSaver::GetInstance()->LoadGame("save.dat").isWatchedStory) {
-		GameStateMachine::GetInstance()->PushState(StateType::STATE_MENU);
+		GameStateMachine::GetInstance()->PushState(StateType::STATE_INTRO);
 	}
 	else {
 		GameStateMachine::GetInstance()->PushState(StateType::STATE_LOGO);
