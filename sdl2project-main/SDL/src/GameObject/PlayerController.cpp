@@ -113,6 +113,7 @@ void PlayerController::HandleKeyEvents(SDL_Event& e)
                 }
                 m_jumpCount++;
                 m_isGrounded = false;
+                Sound::GetInstance()->PlaySfx("sfx_jump.wav");
             }
             break;
         case SDLK_LSHIFT:
@@ -167,18 +168,21 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
                         ChangeAnimation(attack2Texture, 4, 0.1f);
                         m_justDidAttack2 = true;
                         m_justDidAttack3 = false;
+                        Sound::GetInstance()->PlaySfx("sfx_sword_attack_2.wav");
                     }
                     else if (!m_justDidAttack3 && (now - m_lastAttackTime <= 1.0f)) {
                         SetSpLose(10);
                         ChangeAnimation(attack3Texture, 4, 0.1f);
                         m_justDidAttack3 = true;
                         m_justDidAttack2 = false;
+                        Sound::GetInstance()->PlaySfx("sfx_sword_attack_3.wav");
                     }
                     else {
                         SetSpLose(10);
                         ChangeAnimation(attackTexture, 4, 0.1f);
                         m_justDidAttack2 = false;
                         m_justDidAttack3 = false;
+                        Sound::GetInstance()->PlaySfx("sfx_sword_attack_1.wav");
                     }
                     m_isAttacking = true;
                     m_attackTimer = m_attackDuration;
@@ -607,6 +611,7 @@ void PlayerController::TakeDamage(int damage, int knockbackDir)
     m_hitTimer = 0.20f;
     ChangeAnimation(hurtTexture, 3, 0.07f);
 
+    Sound::GetInstance()->PlaySfx("sfx_is_hit.wav");
     m_isKnockback = true;
     m_knockbackTimer = m_knockbackDuration;
     m_knockbackDir = knockbackDir;
@@ -617,6 +622,7 @@ void PlayerController::Die()
     m_deadTimer = 0.59f;
     m_finishDead = false;
     ChangeAnimation(deadTexture, 6, 0.1f);
+    Sound::GetInstance()->PlaySfx("sfx_die.wav");
     m_hasDied = true;
 }
 

@@ -79,7 +79,7 @@ public:
 		}
 	}
 
-	Vector2 GetFinalGatePos(){ return m_SecretGate->GetFinalGatePos(); }
+	Vector2 GetFinalGatePos(){ return m_ChangeLevelGate->GetFinalGatePos(); }
 	Vector2 GetFinalSecretGatePos() { return m_SecretGate->GetFinalGatePos(); }
 
 	Vector2 GetShopSize() { return m_shop->GetShopSize(); };
