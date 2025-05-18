@@ -168,7 +168,6 @@ void TileMap::LoadNewMap() {
 
     completeLoading = true;
     playerIsAppear = true;
-    if (playerIsAppear) printf("OKE\t");
 }
 #pragma endregion
 

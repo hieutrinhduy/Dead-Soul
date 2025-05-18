@@ -98,6 +98,8 @@ private:
 
 	int mousewheelSensitivity, changeInWheelValue;
 
+	bool playDefeatSound = false, playVictorySound = true;
+
 
 	SDL_Renderer* m_renderer;
 	std::shared_ptr<int> m_timeScale;

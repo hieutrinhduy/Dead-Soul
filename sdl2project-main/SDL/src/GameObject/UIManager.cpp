@@ -391,6 +391,13 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	defeatScene->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	defeatScene->Set2DPosition(0, 0);
 	#pragma endregion
+
+	#pragma region Sound
+	Sound::GetInstance()->LoadSfx("book_open_sound.wav");
+	Sound::GetInstance()->LoadSfx("book_close_sound.wav");
+	Sound::GetInstance()->LoadSfx("sfx_level_up.wav");
+	Sound::GetInstance()->LoadSfx("sfx_coin.wav");
+	#pragma endregion
 }
 
 
@@ -416,6 +423,7 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 
 			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_x)
 				if (m_tileMap->atShop && !m_playerController->IsJumping() && !m_playerController->IsFalling()) {
+					Sound::GetInstance()->PlaySfx("book_open_sound.wav");
 					shopping = true;
 					*m_timeScale = 0;
 					m_playerController->ResetInput();
@@ -438,6 +446,7 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 		}
 		if (shopping) {
 			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_x) {
+				Sound::GetInstance()->PlaySfx("book_close_sound.wav");
 				shopping = false;
 				*m_timeScale = 1;
 			}
@@ -487,6 +496,10 @@ void UIManager::Update(float deltaTime) {
 	if (*m_timeScale >= 0) {
 		if (*m_timeScale == 1) {
 			if (statusCode == 1) {
+				if (!playVictorySound) {
+					playVictorySound = true;
+					Mix_HaltMusic();
+				}
 				victory1Scene->Update(deltaTime);
 				victory1Scene->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
 				if (endAnimationNextRow && victory1Scene->GetCurrentFrame() == 0) {
@@ -496,6 +509,10 @@ void UIManager::Update(float deltaTime) {
 				else if (victory1Scene->GetCurrentFrame() == 1) endAnimationNextRow = true;
 			}
 			else if (statusCode == 2) {
+				if (!playVictorySound) {
+					playVictorySound = true;
+					Mix_HaltMusic();
+				}
 				victory2Scene->Update(deltaTime);
 				victory2Scene->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
 				if (endAnimationNextRow && victory2Scene->GetCurrentFrame() == 0) {
@@ -505,6 +522,10 @@ void UIManager::Update(float deltaTime) {
 				else if (victory2Scene->GetCurrentFrame() == 1) endAnimationNextRow = true;
 			}
 			else if (statusCode == -1) {
+				if (!playDefeatSound) {
+					playDefeatSound = true;
+					Mix_HaltMusic();
+				}
 				defeatScene->Update(deltaTime);
 				defeatScene->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
 				if (endAnimationNextRow && defeatScene->GetCurrentFrame() == 0) {
@@ -685,7 +706,9 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 			btnPause->Draw(renderer);
 		}
 		else if (*m_timeScale == 0) {
-			if (shopping) shop->Draw(renderer);
+			if (shopping) {
+				shop->Draw(renderer);
+			}
 			else for (auto& it : uiWhenPause) it->Draw(renderer);
 		}
 		else if (*m_timeScale == 2) {
@@ -715,12 +738,14 @@ void UIManager::UpdateStats() {
 		int sleepTime = 8;
 		int refillSpTime = 100, spRefilled = 1, refillMpTime = 1500, mpRefilled = 5;
 		int hpStolenTimer = 0, mpStolenTimer = 0;
+		int hoverSelection = 0;
 
 		while (m_isPlaying) {
 			if (*m_timeScale == 1) {
 				shopIndicator->Set2DPosition(m_tileMap->GetShopIndicatorPosition().x, m_tileMap->GetShopIndicatorPosition().y);
 
 				if (std::round(exp) == (int)maxEXP) {
+					Sound::GetInstance()->PlaySfx("book_open_sound.wav");
 					Camera::GetInstance()->Update(0);
 					m_playerController->ResetInput();
 					pressButtonWhenLevelUp = false;
@@ -860,6 +885,7 @@ void UIManager::UpdateStats() {
 				// check GOLD:
 				gainedAmount = m_playerController->GetGoldGained();
 				if (gainedAmount) {
+					Sound::GetInstance()->PlaySfx("sfx_coin.wav");
 					goldGained += gainedAmount;
 					goldChangePerFrame = goldGained / FRAGMENT_COUNT;
 				}
@@ -940,6 +966,7 @@ void UIManager::UpdateStats() {
 						if (y >= SCREEN_HEIDHT * ITEM_TOP_RATIO && y <= SCREEN_HEIDHT * ITEM_BOTTOM_RATIO) {
 							if (x >= SCREEN_WIDTH * ITEM_1_LEFT_RATIO && x <= SCREEN_WIDTH * ITEM_1_RIGHT_RATIO) {
 								if (gold > 1200 || FloatEquals(gold, 1200.0f)) {
+									Sound::GetInstance()->PlaySfx("sfx_coin.wav");
 									maxHP += 10;
 									m_playerController->SetHpStolen(5);
 									goldGained -= 1200;
@@ -948,6 +975,7 @@ void UIManager::UpdateStats() {
 							}
 							else if (x >= SCREEN_WIDTH * ITEM_2_LEFT_RATIO && x <= SCREEN_WIDTH * ITEM_2_RIGHT_RATIO && gold >= 1200) {
 								if (gold > 1200 || FloatEquals(gold, 1200.0f) ) {
+									Sound::GetInstance()->PlaySfx("sfx_coin.wav");
 									maxMP += 5;
 									m_playerController->SetMpStolen(2);
 									goldGained -= 1200;
@@ -999,6 +1027,10 @@ void UIManager::UpdateStats() {
 					y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y <= SELECTION_BOTTOM_RATIO * SCREEN_HEIDHT)
 				{
 					hoverBorder->Set2DPosition(SELECTION_1_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
+					if (hoverSelection != 1) {
+						Sound::GetInstance()->PlaySfx("ui_pop.wav");
+						hoverSelection = 1;
+					}
 					if (pressButtonWhenLevelUp) {
 						selection = 1;
 						selectionBorder->Set2DPosition(hoverBorder->Get2DPosition().x, hoverBorder->Get2DPosition().y);
@@ -1010,7 +1042,11 @@ void UIManager::UpdateStats() {
 						 y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y <= SELECTION_BOTTOM_RATIO * SCREEN_HEIDHT)
 				{
 					hoverBorder->Set2DPosition(SELECTION_2_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
-					if (pressButtonWhenLevelUp) {
+					if (hoverSelection != 2) {
+						Sound::GetInstance()->PlaySfx("ui_pop.wav");
+						hoverSelection = 2;
+					}
+					if(pressButtonWhenLevelUp) {
 						selection = 2;
 						selectionBorder->Set2DPosition(hoverBorder->Get2DPosition().x, hoverBorder->Get2DPosition().y);
 					}
@@ -1021,6 +1057,10 @@ void UIManager::UpdateStats() {
 						 y >= SELECTION_TOP_RATIO * SCREEN_HEIDHT && y <= SELECTION_BOTTOM_RATIO * SCREEN_HEIDHT)
 				{
 					hoverBorder->Set2DPosition(SELECTION_3_LEFT_RATIO * SCREEN_WIDTH, SELECTION_TOP_RATIO * SCREEN_HEIDHT);
+					if (hoverSelection != 3) {
+						Sound::GetInstance()->PlaySfx("ui_pop.wav");
+						hoverSelection = 3;
+					}
 					if (pressButtonWhenLevelUp) {
 						selection = 3;
 						selectionBorder->Set2DPosition(hoverBorder->Get2DPosition().x, hoverBorder->Get2DPosition().y);
@@ -1030,6 +1070,7 @@ void UIManager::UpdateStats() {
 				// if not hovering any selection:
 				else {
 					hoverBorder->Set2DPosition(SCREEN_WIDTH, 0);
+					hoverSelection = 0;
 					if (x >= UP_BUTTON_LEFT_RATIO * SCREEN_WIDTH && x <= UP_BUTTON_RIGHT_RATIO * SCREEN_WIDTH &&
 						y >= UP_BUTTON_TOP_RATIO * SCREEN_HEIDHT && y <= UP_BUTTON_BOTTOM_RATIO * SCREEN_HEIDHT && selection != 0)
 						underline->Set2DPosition(0, 0);
@@ -1071,6 +1112,7 @@ void UIManager::UpdateStats() {
 							underline->Set2DPosition(SCREEN_WIDTH, 0);
 							confirmButton->Set2DPosition(SCREEN_WIDTH, 0);
 							*m_timeScale = 1;
+							Sound::GetInstance()->PlaySfx("sfx_level_up.wav");
 						}
 					}
 				}

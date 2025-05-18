@@ -83,6 +83,7 @@ void PlayerController::Init()
     Sound::GetInstance()->LoadSfx("sfx_sword_attack_1.wav");
     Sound::GetInstance()->LoadSfx("sfx_sword_attack_2.wav");
     Sound::GetInstance()->LoadSfx("sfx_sword_attack_3.wav");
+    Sound::GetInstance()->LoadSfx("sfx_bow_attack.wav");
     Sound::GetInstance()->LoadSfx("sfx_jump.wav");
     Sound::GetInstance()->LoadSfx("sfx_is_hit.wav");
     Sound::GetInstance()->LoadSfx("sfx_die.wav");
