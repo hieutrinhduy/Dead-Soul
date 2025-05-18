@@ -15,7 +15,7 @@ PlayerBullet::PlayerBullet(Vector2 position, float speed, int direction, int dam
 
     m_collider = { (int)position.x, (int)position.y, 128, 128 };
 
-    m_damage = 10;
+    m_damage = damage;
 }
 
 void PlayerBullet::Update(float dt)
