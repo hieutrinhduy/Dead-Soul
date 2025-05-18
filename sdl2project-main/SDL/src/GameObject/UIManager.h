@@ -98,7 +98,7 @@ private:
 
 	int mousewheelSensitivity, changeInWheelValue;
 
-	bool playDefeatSound = false, playVictorySound = true;
+	bool playDefeatSound = false, playVictorySound = false;
 
 
 	SDL_Renderer* m_renderer;

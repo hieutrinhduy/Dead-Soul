@@ -1,0 +1,4 @@
+Map 1 : 		output1.bin (map1_tileset)
+Map 2 : 		output2.bin (map2_tileset)
+Hidden Boss Map : 	hidden_boss_map.bin(map2_tileset)
+Map 3 : 		output3.bin (map1_tileset)

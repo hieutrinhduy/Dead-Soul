@@ -645,7 +645,7 @@ void UIManager::Update(float deltaTime) {
 		}
 		else if (animationMapTransition->GetCurrentFrame() == 1) mapTransitionNextRow = true;
 
-		if (mapTransitionFlag && animationMapTransition->GetCurrentFrame() == 6 && animationMapTransition->GetCurrentAction() == 6) {
+		if (mapTransitionFlag && animationMapTransition->GetCurrentFrame() == 7 && animationMapTransition->GetCurrentAction() == 6) {
 			mapTransitionFlag = false;
 			mapTransitionNextRow = false;
 			m_playerController->ResetInput();
