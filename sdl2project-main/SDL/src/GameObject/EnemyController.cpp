@@ -139,7 +139,6 @@ void EnemyController::Die()
 void EnemyController::DestroyEnemy()
 {
     m_enemy = nullptr;
-    std::cout << "Enemy destroyed!\n";
 }
 
 void EnemyController::Update(float deltaTime)
