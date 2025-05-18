@@ -190,6 +190,7 @@
     <ClCompile Include="src\GameObject\PlayerController.cpp" />
     <ClCompile Include="src\GameObject\Renderer.cpp" />
     <ClCompile Include="src\GameObject\SecretBoss.cpp" />
+    <ClCompile Include="src\GameObject\SecretGate.cpp" />
     <ClCompile Include="src\GameObject\SecretLevel.cpp" />
     <ClCompile Include="src\GameObject\Shop.cpp" />
     <ClCompile Include="src\GameObject\SliderIcon.cpp" />
@@ -239,6 +240,7 @@
     <ClInclude Include="src\GameObject\RangedEnemy.h" />
     <ClInclude Include="src\GameObject\Renderer.h" />
     <ClInclude Include="src\GameObject\SecretBoss.h" />
+    <ClInclude Include="src\GameObject\SecretGate.h" />
     <ClInclude Include="src\GameObject\SecretLevel.h" />
     <ClInclude Include="src\GameObject\Shop.h" />
     <ClInclude Include="src\GameObject\SliderIcon.h" />

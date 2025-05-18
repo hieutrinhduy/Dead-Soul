@@ -8,6 +8,7 @@ extern std::vector<std::shared_ptr<ExpOrb>> g_expOrbs;
 
 Level3::Level3(std::shared_ptr<PlayerController> player)
 {
+    m_playerController = player;
     m_backgroundList.clear();
     auto tex1 = ResourceManagers::GetInstance()->GetTexture("/Level3BG/7.png");
     auto tex2 = ResourceManagers::GetInstance()->GetTexture("/Level3BG/6.png");
@@ -21,10 +22,26 @@ Level3::Level3(std::shared_ptr<PlayerController> player)
     for (auto& bg : m_backgroundList) {
         bg->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
         bg->Set2DPosition(0, 0);
+
+    }
+
+    auto level3Decor = ResourceManagers::GetInstance()->GetTexture("decorations/Level3Decor.png");
+    if (level3Decor != nullptr)
+    {
+        auto decor = std::make_shared<SpriteAnimation>(level3Decor, 1, 1, 1, 10);
+        int decorWidth = 6592;
+        int decorHeight = 3072;
+
+        decor->SetSize(decorWidth, decorHeight);
+        decor->Set2DPosition(0, -625);
+        m_decorList.push_back(decor);
     }
 
     m_gate = std::make_shared<ChangeLevelGate>();
     m_gate->Init(INT_MAX, INT_MAX);
+
+    m_secretGate = std::make_shared<SecretGate>();
+    m_secretGate->Init(INT_MAX, INT_MAX);
 
     m_shop = std::make_shared<Shop>();
     m_shop->Init(INT_MAX, INT_MAX);
@@ -44,17 +61,62 @@ Level3::Level3(std::shared_ptr<PlayerController> player)
 
     m_boss1->SetOnDeathCallback([this](Vector2 deathPos) {
         if (m_gate) {
-            m_gate->SetGatePos(deathPos);
+            Vector2 pos = Vector2(3000, 400);
+            m_gate->SetGatePos(pos);
         }
-        });
+        if (m_secretGate) {
+            Vector2 pos = Vector2(100, 400);
+            m_secretGate->SetGatePos(pos);
+        }
+        Camera::GetInstance()->SetTarget(nullptr);
+        Camera::GetInstance()->LerpToPosition(3000 - SCREEN_WIDTH / 2, 600 - SCREEN_HEIDHT / 2, 1.0f);
 
+        m_isCameraMovingToGate = true;
+        m_isWaitingAtGate = false;
+        m_isReturningToPlayer = false;
+        m_cameraWaitTimer = 0.0f;
+        });
 }
 
 Level3::~Level3() {}
 
 void Level3::Update(float dt)
 {
+    if (m_isCameraMovingToGate && !Camera::GetInstance()->IsLerping() && !m_isReturningToPlayer && !m_isWaitingAtGate)
+    {
+        m_isWaitingAtGate = true;
+        m_cameraWaitTimer = 0.0f;
+    }
+
+    // === 3. Đang chờ tại gate trong 2s ===
+    if (m_isWaitingAtGate)
+    {
+        m_cameraWaitTimer += dt;
+
+        if (m_cameraWaitTimer >= m_waitDurationAtGate)
+        {
+            float px = m_playerController->GetPlayerPosition().x;
+            float py = m_playerController->GetPlayerPosition().y;
+
+            Camera::GetInstance()->LerpToPosition(px - SCREEN_WIDTH / 2, py - SCREEN_HEIDHT / 2, 1.0f);
+
+            m_isWaitingAtGate = false;
+            m_isReturningToPlayer = true;
+        }
+    }
+
+    // === 4. Sau khi Lerp xong về player thì SetTarget lại ===
+    if (m_isReturningToPlayer && !Camera::GetInstance()->IsLerping())
+    {
+        Camera::GetInstance()->SetTarget(m_playerController->GetPlayer());
+
+        m_isCameraMovingToGate = false;
+        m_isReturningToPlayer = false;
+        m_isWaitingAtGate = false;
+        Camera::GetInstance()->SetLerpingRoutineState(false);
+    }
     m_gate->Update(dt);
+    m_secretGate->Update(dt);
     m_shop->Update(dt);
     m_boss1->Update(dt);
 }
@@ -62,7 +124,12 @@ void Level3::Update(float dt)
 void Level3::Draw(SDL_Renderer* renderer)
 {
     m_gate->Draw(renderer);
+    m_secretGate->Draw(renderer);
     m_shop->Draw(renderer);
+    for (auto& decor : m_decorList)
+    {
+        decor->Draw(renderer);
+    }
     m_boss1->Draw(renderer);
 }
 

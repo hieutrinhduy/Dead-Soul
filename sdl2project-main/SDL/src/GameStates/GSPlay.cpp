@@ -86,7 +86,7 @@ void GSPlay::Init()
 
     DisplayLoadingView();
 
-    m_tileMap->ExportFullMapImage(Renderer::GetInstance()->GetRenderer());
+    //m_tileMap->ExportFullMapImage(Renderer::GetInstance()->GetRenderer());
 }
 
 void GSPlay::Exit() {
@@ -396,6 +396,7 @@ void GSPlay::ChangeLevel(LevelID newLevel)
         enemyColliders = m_level1->GetEnemyColliders();
         m_hitEnemyCallbacks = m_level1->GetHitEnemyCallbacks();
         m_ChangeLevelGate = m_level1->GetChangeLevelGate();
+        m_SecretGate = nullptr;
         m_shop = m_level1->GetShop();
     }
     else if (newLevel == LevelID::Level2)
@@ -406,6 +407,7 @@ void GSPlay::ChangeLevel(LevelID newLevel)
         enemyColliders = m_level2->GetEnemyColliders();
         m_hitEnemyCallbacks = m_level2->GetHitEnemyCallbacks();
         m_ChangeLevelGate = m_level2->GetChangeLevelGate();
+        m_SecretGate = nullptr;
         m_shop = m_level2->GetShop();
     }
     else if (newLevel == LevelID::Level3)
@@ -416,6 +418,8 @@ void GSPlay::ChangeLevel(LevelID newLevel)
         enemyColliders = m_level3->GetEnemyColliders();
         m_hitEnemyCallbacks = m_level3->GetHitEnemyCallbacks();
         m_ChangeLevelGate = m_level3->GetChangeLevelGate();
+        m_SecretGate = nullptr;
+        m_SecretGate = m_level3->GetSecretGate();
         m_shop = m_level3->GetShop();
     }
     else if (newLevel == LevelID::SecretLevel)
@@ -426,6 +430,7 @@ void GSPlay::ChangeLevel(LevelID newLevel)
         enemyColliders = m_secretLevel->GetEnemyColliders();
         m_hitEnemyCallbacks = m_secretLevel->GetHitEnemyCallbacks();
         m_ChangeLevelGate = m_secretLevel->GetChangeLevelGate();
+        m_SecretGate = nullptr;
         m_shop = m_secretLevel->GetShop();
     }
 }

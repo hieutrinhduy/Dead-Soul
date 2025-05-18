@@ -12,7 +12,7 @@ Bullet::Bullet(Vector2 position, float speed, int direction, int damage)
     m_sprite->SetSize(128, 128);
     m_sprite->Set2DPosition(position.x, position.y);
     m_sprite->SetFlip((direction == 1) ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
-    m_collider = { (int)position.x, (int)position.y, 128, 128 };
+    m_collider = { (int)position.x, (int)position.y, 64, 64 };
 }
 
 void Bullet::Update(float dt)

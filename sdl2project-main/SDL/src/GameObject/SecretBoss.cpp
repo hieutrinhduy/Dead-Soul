@@ -169,22 +169,18 @@ void ScecretBoss::Update(float deltaTime)
     case SecretBossState::Patrol:
         if (posX < m_pointA) {
             m_direction = 1;
-            m_enemyFlip = SDL_FLIP_NONE;
         }
         else if (posX > m_pointB) {
             m_direction = -1;
-            m_enemyFlip = SDL_FLIP_HORIZONTAL;
         }
 
         posX += m_direction * m_speed * deltaTime;
 
         if (m_direction == 1 && posX > m_pointB) {
             m_direction = -1;
-            m_enemyFlip = SDL_FLIP_HORIZONTAL;
         }
         else if (m_direction == -1 && posX < m_pointA) {
             m_direction = 1;
-            m_enemyFlip = SDL_FLIP_NONE;
         }
 
         if (!m_recentlyReturnedFromChase && DetectPlayer()) {
@@ -465,7 +461,9 @@ void ScecretBoss::Update(float deltaTime)
             m_recentlyReturnedTimer = 0.0f;
         }
     }
-
+    if (!m_isAttacking) {
+        m_enemyFlip = (m_direction == 1) ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+    }
     m_enemy->Update(deltaTime);
 }
 
@@ -559,7 +557,7 @@ void ScecretBoss::ShootInAngle(float angleRad)
         m_enemy->GetPosition().y + m_enemy->GetHeight() / 2
     };
 
-    auto bullet = std::make_shared<BossBullet>(spawnPos, dir, speed, m_damage);
+    auto bullet = std::make_shared<BossBullet>(spawnPos, dir, speed, m_damage/2);
     bullet->SetOnHitCallback(m_onHitPlayer); // nếu có
     g_bossBullets.push_back(bullet);         // vector bạn quản lý boss bullets
 }

@@ -24,8 +24,32 @@ void Camera::Shake(float duration, float magnitude)
 
 void Camera::Update(float deltaTime)
 {
-	if (m_target != nullptr)
+	if (m_isLerpingToGate)
 	{
+		SetLerpingRoutineState(true);
+		m_lerpTime += deltaTime;
+		float t = m_lerpTime / m_lerpDuration;
+		if (t >= 1.0f)
+		{
+			t = 1.0f;
+			m_isLerpingToGate = false;
+		}
+
+		m_Position.x = m_lerpStartX * (1 - t) + m_lerpTargetX * t;
+		m_Position.y = m_lerpStartY * (1 - t) + m_lerpTargetY * t;
+
+		m_ViewBox.x = static_cast<int>(m_Position.x);
+		m_ViewBox.y = static_cast<int>(m_Position.y);
+		return;
+	}
+
+	if (m_isLerpingRoutine) { 
+		m_shakeTimer = INT_MIN;
+		return;
+	}
+
+	if (m_target != nullptr)
+	{ 
 		//Center the camera over the dot
 		m_ViewBox.x = (m_target->GetPosition().x - SCREEN_WIDTH / 2);
 		m_ViewBox.y = (m_target->GetPosition().y  - SCREEN_HEIDHT / 2) ;
@@ -112,3 +136,29 @@ int Camera::GetLevelHeight()
 {
 	return m_levelHeight;
 }
+
+void Camera::LerpToPosition(float targetX, float targetY, float duration)
+{
+	m_isLerpingToGate = true;
+	m_lerpStartX = m_Position.x;
+	m_lerpStartY = m_Position.y;
+	m_lerpTargetX = targetX;
+	m_lerpTargetY = GetPosition().y;
+	m_lerpTime = 0.0f;
+	m_lerpDuration = duration;
+	SetTarget(nullptr);
+}
+
+void Camera::SetManualPosition(float centerX, float centerY)
+{
+	m_ViewBox.x = static_cast<int>(centerX - SCREEN_WIDTH / 2);
+	m_ViewBox.y = static_cast<int>(centerY - SCREEN_HEIDHT / 2);
+	m_Position.x = static_cast<float>(m_ViewBox.x);
+	m_Position.y = static_cast<float>(m_ViewBox.y);
+}
+
+bool Camera::IsLerping() const
+{
+	return m_isLerpingToGate;
+}
+

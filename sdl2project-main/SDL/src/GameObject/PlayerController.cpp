@@ -86,6 +86,11 @@ void PlayerController::Init()
 void PlayerController::HandleKeyEvents(SDL_Event& e)
 {
     if (m_isDead) return;
+    if (Camera::GetInstance()->GetLerpingRoutineState())
+    {
+        ResetInput();
+        return;
+    }
     if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
         case SDLK_a: m_KeyPress |= 1; break;
@@ -137,6 +142,11 @@ void PlayerController::HandleMouseEvents(SDL_Event& e)
 {
     if (m_isDead) return;
     if (m_isCLickingOnUI) return;
+    if (Camera::GetInstance()->GetLerpingRoutineState()) 
+    {
+        ResetInput();
+        return;
+    }
     if (e.type == SDL_MOUSEBUTTONDOWN) {
         if (e.button.button == SDL_BUTTON_LEFT) {
             switch (m_currentWeaponIndex)

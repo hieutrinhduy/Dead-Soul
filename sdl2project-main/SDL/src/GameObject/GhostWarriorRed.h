@@ -69,7 +69,7 @@ private:
     // === Combat ===
     int m_maxHP = 100;
     int m_currentHP = 100;
-    int m_damage = 1;
+    int m_damage = 30;
     std::function<void(int damage)> m_onHitPlayer;
 
     // === Animation Resources ===

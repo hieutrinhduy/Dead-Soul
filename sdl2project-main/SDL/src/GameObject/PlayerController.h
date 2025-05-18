@@ -68,6 +68,11 @@ public:
         return m_damage;
     }
 
+    std::shared_ptr<SpriteAnimation> GetPlayer() const {
+        return m_player;
+    }
+
+
     /* -------- SETTER: -------- */
     // set movement ability data:
     void SetMovementState(bool canGoLeft, bool canGoRight, bool bumpTheHead, bool isGrounded) {
