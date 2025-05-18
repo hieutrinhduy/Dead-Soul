@@ -15,11 +15,13 @@ constexpr int CHECK_SCOPE = 2; // scope of the object-terrain collision check
 #pragma region CONSTRUCTOR & DECONSTRUCTOR
 TileMap::TileMap(const char* tilemapFile, const char* tilesFolder, int tileSize, std::shared_ptr<int> timeScale) :
     m_tileSize(tileSize), m_tilemapFile(tilemapFile), m_tilesFolder(tilesFolder), m_timeScale(timeScale),
+    completeLoading(false),
     m_mapHeight(0), m_mapWidth(0), m_mapNumber(1),
     m_isPlaying(true)
 {
     GetTileIdFromTilemap();
     LoadTileTexturesFromTileset();
+
     completeLoading = true;
 }
 
@@ -132,6 +134,23 @@ void TileMap::LoadNewMap() {
         m_player->ResetInput();
         Camera::GetInstance()->SetLevelDimension(GetWidth() * 32, GetHeight() * 32);
     }
+
+
+    portalLeft = m_gsPlay->GetGatePos().x;
+    portalRight = portalLeft + m_gsPlay->GetGateSize().x;
+    portalTop = m_gsPlay->GetGatePos().y;
+    portalBottom = portalTop + m_gsPlay->GetGateSize().y;
+
+
+    shopLeft = m_gsPlay->GetShopPos().x;
+    shopRight = shopLeft + m_gsPlay->GetShopSize().x;
+    shopTop = m_gsPlay->GetShopPos().y;
+    shopBottom = shopTop + m_gsPlay->GetShopSize().y;
+
+    shopIndicatorPositionX = shopLeft + m_gsPlay->GetShopSize().x * 24 / 59;
+    shopIndicatorPositionY = shopTop + m_gsPlay->GetShopSize().y * 11 / 18;
+
+
     completeLoading = true;
 }
 #pragma endregion
@@ -141,6 +160,9 @@ void TileMap::LoadNewMap() {
 int TileMap::GetWidth() { return m_tileIds.empty() ? 0 : m_tileIds[0].size(); }
 int TileMap::GetHeight() { return m_tileIds.size(); }
 int TileMap::GetTileSize() { return m_tileSize; }
+Vector2 TileMap::GetShopIndicatorPosition() {
+    return shopIndicatorPosition;
+}
 #pragma endregion
 
 
@@ -156,28 +178,34 @@ void TileMap::StartCheckingPlayerMovementAbility() {
         m_finishThread = false;
         bool canGoLeft = true, canGoRight = true, bumpTheHead = true, isGrounded = true;
         float leftLimit = 200, rightLimit = 200, topLimit = 200, bottomLimit = 200;
-        int portalLeft, portalRight, portalTop, portalBottom;
-        int shopLeft, shopRight, shopTop, shopBottom;
+
+        portalLeft = m_gsPlay->GetGatePos().x;
+        portalRight = portalLeft + m_gsPlay->GetGateSize().x;
+        portalTop = m_gsPlay->GetGatePos().y;
+        portalBottom = portalTop + m_gsPlay->GetGateSize().y;
+
+        shopLeft = m_gsPlay->GetShopPos().x;
+        shopRight = shopLeft + m_gsPlay->GetShopSize().x;
+        shopTop = m_gsPlay->GetShopPos().y;
+        shopBottom = shopTop + m_gsPlay->GetShopSize().y;
+
+        shopIndicatorPositionX = shopLeft + m_gsPlay->GetShopSize().x * 24 / 59;
+        shopIndicatorPositionY = shopTop + m_gsPlay->GetShopSize().y * 11 / 18;
 
 
         while (m_isPlaying) {
+            shopIndicatorPosition.x = shopIndicatorPositionX - Camera::GetInstance()->GetPosition().x;
+            shopIndicatorPosition.y = shopIndicatorPositionY - Camera::GetInstance()->GetPosition().y;
+
             SDL_Rect player = m_player->GetCollider();
             float playerRight = player.x + player.w;
             float playerBottom = player.y + player.h;
 
             // check if player REACHES PORTAL:
-            portalLeft = m_gsPlay->GetGatePos().x;
-            portalRight = portalLeft + m_gsPlay->GetGateSize().x;
-            portalTop = m_gsPlay->GetGatePos().y;
-            portalBottom = portalTop + m_gsPlay->GetGateSize().y;
             if (playerRight >= portalLeft + 10 && player.x <= portalRight && player.y <= portalBottom && playerBottom >= portalTop)
                 *m_timeScale = -1;
 
             // check if player REACHES SHOP:
-            shopLeft = m_gsPlay->GetShopPos().x;
-            shopRight = shopLeft + m_gsPlay->GetShopSize().x;
-            shopTop = m_gsPlay->GetShopPos().y;
-            shopBottom = shopTop + m_gsPlay->GetShopSize().y;
             if (playerRight >= shopLeft && player.x <= shopRight && player.y <= shopBottom && playerBottom >= shopTop)
                 atShop = true;
             else atShop = false;
@@ -297,7 +325,7 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             }
             #pragma endregion
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(12));
         }
         m_finishThread = true;
     });

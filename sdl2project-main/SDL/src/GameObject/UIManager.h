@@ -53,13 +53,15 @@ private:
 	std::shared_ptr<Sprite2D> selectedSlot;
 	int m_inventorySlot;
 	std::shared_ptr<Text> txtHP, txtSP, txtMP, txtEXP, txtCoin;
+	std::shared_ptr<Sprite2D> hpStolenText, mpStolenText;
+	bool stoleHP, stoleMP;
 	std::shared_ptr<MouseButton> btnPause;
 	std::shared_ptr<SpriteAnimation> victoryScene, defeatScene;
 	int statusCode = 0;
 	bool endAnimationNextRow = false;
 
 	// UI WHEN PAUSE GAME:
-	std::shared_ptr<Sprite2D> shop;
+	std::shared_ptr<Sprite2D> shopIndicator, shop;
 	std::shared_ptr<Sprite2D> musicForegroundBar, sfxForegroundBar;
 	std::shared_ptr<SliderIcon> iconMusicSettings, iconSfxSettings, iconSensitivitySettings;
 	bool pressButtonWhenPause, releaseButtonWhenPause;

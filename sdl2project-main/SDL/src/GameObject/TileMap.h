@@ -31,6 +31,7 @@ public:
     int GetWidth();
     int GetHeight();
     int GetTileSize();
+    Vector2 GetShopIndicatorPosition();
 
     // SETTER:
     void SetReferenceToGSPlay(GSPlay* gsPlay);
@@ -43,7 +44,7 @@ public:
 
     void ExportFullMapImage(SDL_Renderer* renderer);
 
-    bool completeLoading = false;
+    bool completeLoading;
     bool atShop = false;
 
 
@@ -59,6 +60,10 @@ private:
     std::map<int, std::shared_ptr<TextureManager>> m_tileTextures;
     int m_tileSize;
 
+    int shopLeft = 0, shopRight = 0, shopTop = -1000, shopBottom = 0;
+    int portalLeft, portalRight, portalTop, portalBottom;
+    Vector2 shopIndicatorPosition;
+    float shopIndicatorPositionX, shopIndicatorPositionY;
 
     bool m_isPlaying;
     GSPlay* m_gsPlay;

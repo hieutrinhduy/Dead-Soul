@@ -266,6 +266,16 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 		m_playerController->ResetInput();
 		*m_timeScale = 0;
 	});
+
+
+	// STOLEN TEXT:
+	stoleHP = false; stoleMP = false;
+
+	hpStolenText = std::make_shared<MouseButton>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\hp_stolen.png"), SDL_FLIP_NONE);
+	hpStolenText->SetSize(60, 20);
+
+	mpStolenText = std::make_shared<MouseButton>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\mp_stolen.png"), SDL_FLIP_NONE);
+	mpStolenText->SetSize(60, 20);
 	#pragma endregion
 
 	#pragma	region UI WHEN PAUSE GAME
@@ -273,6 +283,9 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	releaseButtonWhenPause = false;
 
 	// SHOP UI:
+	shopIndicator = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\x_button.png"), SDL_FLIP_NONE);
+	shopIndicator->SetSize(115, 60);
+
 	shop = std::make_shared<Sprite2D>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\shop.png"), SDL_FLIP_NONE);
 	shop->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
 	shop->Set2DPosition(0, 0);
@@ -396,7 +409,7 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 			btnPause->HandleTouchEvent(&e);
 
 			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_x)
-				if (m_tileMap->atShop) {
+				if (m_tileMap->atShop && !m_playerController->IsJumping() && !m_playerController->IsFalling()) {
 					shopping = true;
 					*m_timeScale = 0;
 					m_playerController->ResetInput();
@@ -634,6 +647,13 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 	if (*m_timeScale >= 0) {
 		for (auto& it : buttons) it->Draw(renderer);
 		for (auto& it : uiWhenRunGame) it->Draw(renderer);
+
+		if (m_tileMap->atShop && !m_playerController->IsJumping() && !m_playerController->IsFalling())
+			shopIndicator->Draw(renderer);
+
+		if (stoleHP) hpStolenText->Draw(renderer);
+		if (stoleMP) mpStolenText->Draw(renderer);
+
 		victoryScene->Draw(renderer);
 		defeatScene->Draw(renderer);
 
@@ -669,10 +689,15 @@ void UIManager::UpdateStats() {
 		int x, y; // mouse coordination
 		int musicVolume, sfxVolume;
 		float refillSpTime = 0.1f, spRefilled = 1.0f, refillMpTime = 1.5f, mpRefilled = 5;
+		int hpStolenTimer = 0, mpStolenTimer = 0;
+
 		while (m_isPlaying) {
 			if (*m_timeScale == 1) {
+				shopIndicator->Set2DPosition(m_tileMap->GetShopIndicatorPosition().x, m_tileMap->GetShopIndicatorPosition().y);
+
 				if (std::round(exp) == (int)maxEXP) {
 					Camera::GetInstance()->Update(0);
+					m_playerController->ResetInput();
 					pressButtonWhenLevelUp = false;
 					selection = 0;
 					*m_timeScale = 2;
@@ -724,6 +749,12 @@ void UIManager::UpdateStats() {
 				// check HP_STATUS:
 				int lossAmount = m_playerController->GetHpLose();
 				if (lossAmount) {
+					if (lossAmount < 0) {
+						stoleHP = true;
+						hpStolenTimer = 200;
+						hpStolenText->Set2DPosition(m_playerController->GetCollider().x - Camera::GetInstance()->GetPosition().x,
+													m_playerController->GetCollider().y - Camera::GetInstance()->GetPosition().y - 40);
+					}
 					hpLoss += lossAmount;
 					if (hpLoss >= hp) {
 						hpLoss = hp;
@@ -757,6 +788,12 @@ void UIManager::UpdateStats() {
 				// check MP_STATUS:
 				lossAmount = m_playerController->GetMpLose();
 				if (lossAmount) {
+					if (lossAmount < 0) {
+						stoleMP = true;
+						mpStolenTimer = 200;
+						mpStolenText->Set2DPosition(m_playerController->GetCollider().x - Camera::GetInstance()->GetPosition().x,
+													m_playerController->GetCollider().y - Camera::GetInstance()->GetPosition().y - 20);
+					}
 					mpLoss += lossAmount;
 					mpChangePerFrame = mpLoss / FRAGMENT_COUNT;
 				}
@@ -824,6 +861,15 @@ void UIManager::UpdateStats() {
 				}
 				#pragma endregion
 
+				if (hpStolenTimer > 0) {
+					hpStolenTimer -= 10;
+					if (hpStolenTimer <= 0) stoleHP = false;
+				}
+				if (mpStolenTimer > 0) {
+					mpStolenTimer -= 10;
+					if (mpStolenTimer <= 0) stoleMP = false;
+				}
+
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}
 
@@ -855,6 +901,7 @@ void UIManager::UpdateStats() {
 							if (x >= SCREEN_WIDTH * ITEM_1_LEFT_RATIO && x <= SCREEN_WIDTH * ITEM_1_RIGHT_RATIO) {
 								if (gold > 1200 || FloatEquals(gold, 1200.0f)) {
 									maxHP += 10;
+									m_playerController->SetHpStolen(5);
 									goldGained -= 1200;
 									goldChangePerFrame = goldGained / FRAGMENT_COUNT;
 								}
@@ -862,6 +909,7 @@ void UIManager::UpdateStats() {
 							else if (x >= SCREEN_WIDTH * ITEM_2_LEFT_RATIO && x <= SCREEN_WIDTH * ITEM_2_RIGHT_RATIO && gold >= 1200) {
 								if (gold > 1200 || FloatEquals(gold, 1200.0f) ) {
 									maxMP += 5;
+									m_playerController->SetMpStolen(2);
 									goldGained -= 1200;
 									goldChangePerFrame = goldGained / FRAGMENT_COUNT;
 								}

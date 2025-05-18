@@ -119,12 +119,12 @@ public:
 
     void SetMpStolen(int amount) {
         std::lock_guard<std::mutex> lock(mtx);
-        m_mpStolen = amount;
+        m_mpStolen += amount;
     }
 
     void SetHpStolen(int amount) {
         std::lock_guard<std::mutex> lock(mtx);
-        m_hpStolen = amount;
+        m_hpStolen += amount;
     }
 
     void ResetChangeInValue() {
@@ -253,7 +253,7 @@ private:
     int m_damage = 10;
 
     //
-    int m_hpStolen = 10;
+    int m_hpStolen = 0;
     int m_mpStolen = 10;
 
     bool m_canSwordAttack;
