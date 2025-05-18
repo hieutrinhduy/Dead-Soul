@@ -16,6 +16,15 @@ public:
 
     Vector2 GetGateSize() const;
     Vector2 GetGatePos() const;
+
+    Vector2 GetFinalGatePos()
+    {
+        Vector2 pos = Vector2(finalPosX, finalPosY);
+        return pos;
+    }
 private:
     std::shared_ptr<SpriteAnimation> m_animation;
+
+    float finalPosX = 100;
+    float finalPosY = 400;
 };

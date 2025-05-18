@@ -60,25 +60,27 @@ public:
 	Vector2 GetGateSize() { return m_ChangeLevelGate->GetGateSize(); };
 	Vector2 GetGatePos() { return m_ChangeLevelGate->GetGatePos(); };
 
-
 	Vector2 GetSecretGateSize() 
 	{ 
-		if(m_ChangeLevelGate)
-			return m_ChangeLevelGate->GetGateSize(); 
+		if(m_SecretGate)
+			return m_SecretGate->GetGateSize();
 		else
 		{
 			std::cout << "This Level Doesnt have Secret Gate" << std::endl;
 		}
 	}
 	Vector2 GetSecretGatePos() { 
-		if (m_ChangeLevelGate) {
-			return m_ChangeLevelGate->GetGatePos(); 
+		if (m_SecretGate) {
+			return m_SecretGate->GetGatePos();
 		}
 		else
 		{
 			std::cout << "This Level Doesnt have Secret Gate" << std::endl;
 		}
 	}
+
+	Vector2 GetFinalGatePos(){ return m_SecretGate->GetFinalGatePos(); }
+	Vector2 GetFinalSecretGatePos() { return m_SecretGate->GetFinalGatePos(); }
 
 	Vector2 GetShopSize() { return m_shop->GetShopSize(); };
 	Vector2 GetShopPos() { return m_shop->GetShopPos(); };

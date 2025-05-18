@@ -61,15 +61,13 @@ Level3::Level3(std::shared_ptr<PlayerController> player)
 
     m_boss1->SetOnDeathCallback([this](Vector2 deathPos) {
         if (m_gate) {
-            Vector2 pos = Vector2(3000, 400);
-            m_gate->SetGatePos(pos);
+            m_gate->SetGatePos(m_gate->GetFinalGatePos());
         }
         if (m_secretGate) {
-            Vector2 pos = Vector2(100, 400);
-            m_secretGate->SetGatePos(pos);
+            m_secretGate->SetGatePos(m_secretGate->GetFinalGatePos());
         }
         Camera::GetInstance()->SetTarget(nullptr);
-        Camera::GetInstance()->LerpToPosition(3000 - SCREEN_WIDTH / 2, 600 - SCREEN_HEIDHT / 2, 1.0f);
+        Camera::GetInstance()->LerpToPosition(m_gate->GetFinalGatePos().x - SCREEN_WIDTH / 2, m_gate->GetFinalGatePos().y - SCREEN_HEIDHT / 2, 1.0f);
 
         m_isCameraMovingToGate = true;
         m_isWaitingAtGate = false;

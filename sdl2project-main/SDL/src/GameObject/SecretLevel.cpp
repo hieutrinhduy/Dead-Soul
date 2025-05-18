@@ -82,8 +82,8 @@ void SecretLevel::Update(float dt)
     {
         m_finishGame = true;
 
-        float gateX = 3000, gateY = 400;
-        m_gate->SetGatePos({ 3000, 400 });
+        float gateX = m_gate->GetFinalGatePos().x, gateY = m_gate->GetFinalGatePos().y;
+        m_gate->SetGatePos({ gateX, gateY });
 
         Camera::GetInstance()->SetTarget(nullptr);
         Camera::GetInstance()->LerpToPosition(gateX - SCREEN_WIDTH / 2, gateY - SCREEN_HEIDHT / 2, 1.0f);
