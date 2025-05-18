@@ -8,7 +8,8 @@
 // ----------------------------------------------------------------------
 /*
 	statusCode ==  0  =>  player is ALIVE
-	statuscode ==  1  =>  VICTORY
+	statuscode ==  1  =>  VICTORY 1
+	statusCode ==  2  =>  VICTORY 2
 	statusCode == -1  =>  DEFEAT
 */
 // ----------------------------------------------------------------------
@@ -427,6 +428,9 @@ void UIManager::HandleTouchEvents(SDL_Event& e)
 
 	// when pause game:
 	if (*m_timeScale == 0) {
+		if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_p) {
+			m_playerController->SetPlayerDamage(1000);
+		}
 		if (shopping) {
 			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_x) {
 				shopping = false;
@@ -703,6 +707,9 @@ void UIManager::UpdateStats() {
 					*m_timeScale = 2;
 				}
 
+				if (m_tileMap->victoryCode == 1) statusCode = 1;
+				else if (m_tileMap->victoryCode == 2) statusCode = 2;
+				printf("%d\n", m_tileMap->victoryCode);
 				// check if player is hovering an UI element:
 				SDL_GetMouseState(&x, &y);
 				if (statusCode == 0) {
@@ -1011,23 +1018,26 @@ void UIManager::UpdateStats() {
 							maxHP = std::round(maxHP * 1.1f);
 							hpLoss -= 0.15f * maxHP;
 							hpChangePerFrame = hpLoss / FRAGMENT_COUNT;
-							exp = 0;
-							maxEXP += 10;
 						}
-						if (selection == 2) {
+						else if (selection == 2) {
 							maxSP += 5;
 							spRefilled += 0.1f;
 							maxMP += 10;
 							mpRefilled += 5;
-							exp = 0;
-							maxEXP += 10;
 						}
-						if (selection == 3) {
+						else if (selection == 3) {
 							m_playerController->SetPlayerDamage(m_playerController->GetPlayerDamage() + 5);
+						}
+
+						if (selection != 0) {
 							exp = 0;
 							maxEXP += 10;
+							selection = 0;
+							hoverBorder->Set2DPosition(SCREEN_WIDTH, 0);
+							selectionBorder->Set2DPosition(SCREEN_WIDTH, 0);
+							confirmButton->Set2DPosition(SCREEN_WIDTH, 0);
+							*m_timeScale = 1;
 						}
-						*m_timeScale = 1;
 					}
 				}
 

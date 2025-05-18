@@ -46,6 +46,7 @@ public:
 
     bool completeLoading;
     bool atShop = false;
+    int victoryCode = 0;
 
 
 private:

@@ -202,8 +202,10 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             float playerBottom = player.y + player.h;
 
             // check if player REACHES PORTAL:
-            if (playerRight >= portalLeft + 10 && player.x <= portalRight && player.y <= portalBottom && playerBottom >= portalTop)
-                *m_timeScale = -1;
+            if (playerRight >= portalLeft + 10 && player.x <= portalRight && player.y <= portalBottom && playerBottom >= portalTop) {
+                if (m_mapNumber == 3) victoryCode = 1;
+                else *m_timeScale = -1;
+            }
 
             // check if player REACHES SHOP:
             if (playerRight >= shopLeft && player.x <= shopRight && player.y <= shopBottom && playerBottom >= shopTop)
