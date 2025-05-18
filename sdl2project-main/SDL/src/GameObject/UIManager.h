@@ -56,7 +56,7 @@ private:
 	std::shared_ptr<Sprite2D> hpStolenText, mpStolenText;
 	bool stoleHP, stoleMP;
 	std::shared_ptr<MouseButton> btnPause;
-	std::shared_ptr<SpriteAnimation> victoryScene, defeatScene;
+	std::shared_ptr<SpriteAnimation> victory1Scene, victory2Scene, defeatScene;
 	int statusCode = 0;
 	bool endAnimationNextRow = false;
 

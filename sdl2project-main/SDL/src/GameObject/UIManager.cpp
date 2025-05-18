@@ -379,9 +379,13 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	#pragma endregion
 
 	#pragma region UI WHEN DEFEAT/VICTORY
-	victoryScene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\victory_scene.png"), 1, 8, 11, 0.05f);
-	victoryScene->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
-	victoryScene->Set2DPosition(0, 0);
+	victory1Scene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\victory_1_scene.png"), 1, 8, 11, 0.05f);
+	victory1Scene->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	victory1Scene->Set2DPosition(0, 0);
+
+	victory2Scene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\victory_2_scene.png"), 1, 8, 11, 0.05f);
+	victory2Scene->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+	victory2Scene->Set2DPosition(0, 0);
 
 	defeatScene = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\defeat_scene.png"), 1, 7, 10, 0.1f);
 	defeatScene->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
@@ -483,13 +487,22 @@ void UIManager::Update(float deltaTime) {
 	if (*m_timeScale >= 0) {
 		if (*m_timeScale == 1) {
 			if (statusCode == 1) {
-				victoryScene->Update(deltaTime);
-				victoryScene->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
-				if (endAnimationNextRow && victoryScene->GetCurrentFrame() == 0) {
+				victory1Scene->Update(deltaTime);
+				victory1Scene->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
+				if (endAnimationNextRow && victory1Scene->GetCurrentFrame() == 0) {
 					endAnimationNextRow = false;
-					victoryScene->SetCurrentAction(victoryScene->GetCurrentAction() + 1);
+					victory1Scene->SetCurrentAction(victory1Scene->GetCurrentAction() + 1);
 				}
-				else if (victoryScene->GetCurrentFrame() == 1) endAnimationNextRow = true;
+				else if (victory1Scene->GetCurrentFrame() == 1) endAnimationNextRow = true;
+			}
+			else if (statusCode == 2) {
+				victory2Scene->Update(deltaTime);
+				victory2Scene->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
+				if (endAnimationNextRow && victory2Scene->GetCurrentFrame() == 0) {
+					endAnimationNextRow = false;
+					victory2Scene->SetCurrentAction(victory2Scene->GetCurrentAction() + 1);
+				}
+				else if (victory2Scene->GetCurrentFrame() == 1) endAnimationNextRow = true;
 			}
 			else if (statusCode == -1) {
 				defeatScene->Update(deltaTime);
@@ -599,6 +612,10 @@ void UIManager::Update(float deltaTime) {
 
 	if (*m_timeScale == -1) {
 		animationMapTransition->Set2DPosition(Camera::GetInstance()->GetPosition().x, Camera::GetInstance()->GetPosition().y);
+		if (m_tileMap->isStartChangingMap) {
+			m_tileMap->isStartChangingMap = false;
+			m_tileMap->playerIsAppear = false;
+		}
 		m_playerController->ResetPlayerPosition();
 		animationMapTransition->Update(deltaTime);
 		if (mapTransitionNextRow && animationMapTransition->GetCurrentFrame() == 0) {
@@ -624,6 +641,7 @@ void UIManager::Update(float deltaTime) {
 			mapTransitionNextRow = false;
 			animationMapTransition = std::make_shared<SpriteAnimation>(ResourceManagers::GetInstance()->GetTexture("GSPlay_UI\\map_transition_1.png"), 1, 9, 6, 0.02f);
 			animationMapTransition->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
+			m_tileMap->isStartChangingMap = true;
 			*m_timeScale = 1;
 		}
 	}
@@ -659,7 +677,8 @@ void UIManager::Draw(SDL_Renderer* renderer) {
 		if (stoleHP) hpStolenText->Draw(renderer);
 		if (stoleMP) mpStolenText->Draw(renderer);
 
-		victoryScene->Draw(renderer);
+		victory1Scene->Draw(renderer);
+		victory2Scene->Draw(renderer);
 		defeatScene->Draw(renderer);
 
 		if (*m_timeScale == 1 && statusCode == 0) {
@@ -711,7 +730,6 @@ void UIManager::UpdateStats() {
 
 				if (m_tileMap->victoryCode == 1) statusCode = 1;
 				else if (m_tileMap->victoryCode == 2) statusCode = 2;
-				//printf("%d\n", m_tileMap->victoryCode);
 				// check if player is hovering an UI element:
 				SDL_GetMouseState(&x, &y);
 				if (statusCode == 0) {
@@ -725,7 +743,7 @@ void UIManager::UpdateStats() {
 				}
 
 				else if (statusCode == 1) {
-					if (victoryScene->GetCurrentFrame() == 7 && victoryScene->GetCurrentAction() == 11) {
+					if (victory1Scene->GetCurrentFrame() == 7 && victory1Scene->GetCurrentAction() == 11) {
 						if (pressButtonWhenPause) {
 							if (x >= DEFEAT_BUTTON_LEFT_RATIO * SCREEN_WIDTH && x <= DEFEAT_BUTTON_RIGHT_RATIO * SCREEN_WIDTH &&
 								y >= DEFEAT_BUTTON_TOP_RATIO * SCREEN_HEIDHT && y <= DEFEAT_BUTTON_BOTTOM_RATIO * SCREEN_HEIDHT)
@@ -733,7 +751,20 @@ void UIManager::UpdateStats() {
 								ClearThread();
 							}
 						}
-						victoryScene->SetCurrentFrame(7);
+						victory1Scene->SetCurrentFrame(7);
+					}
+				}
+
+				else if (statusCode == 2) {
+					if (victory2Scene->GetCurrentFrame() == 7 && victory2Scene->GetCurrentAction() == 11) {
+						if (pressButtonWhenPause) {
+							if (x >= DEFEAT_BUTTON_LEFT_RATIO * SCREEN_WIDTH && x <= DEFEAT_BUTTON_RIGHT_RATIO * SCREEN_WIDTH &&
+								y >= DEFEAT_BUTTON_TOP_RATIO * SCREEN_HEIDHT && y <= DEFEAT_BUTTON_BOTTOM_RATIO * SCREEN_HEIDHT)
+							{
+								ClearThread();
+							}
+						}
+						victory2Scene->SetCurrentFrame(7);
 					}
 				}
 

@@ -55,6 +55,7 @@ public:
 	void DisplayLoadingView();
 
 	int m_KeyPress;
+	bool playerIsAppear = true;
 	void ChangeLevel(LevelID newLevel);
 
 	Vector2 GetGateSize() { return m_ChangeLevelGate->GetGateSize(); };

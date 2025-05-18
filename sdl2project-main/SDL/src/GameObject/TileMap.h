@@ -48,6 +48,8 @@ public:
     bool atShop = false;
     int victoryCode = 0;
 
+    bool isStartChangingMap = true, playerIsAppear = true;
+
 
 private:
     const char* m_tilemapFile;
@@ -63,6 +65,7 @@ private:
 
     int shopLeft = 0, shopRight = 0, shopTop = -1000, shopBottom = 0;
     int portalLeft, portalRight, portalTop, portalBottom;
+    int secretPortalLeft, secretPortalRight, secretPortalTop, secretPortalBottom;
     Vector2 shopIndicatorPosition;
     float shopIndicatorPositionX, shopIndicatorPositionY;
 

@@ -135,11 +135,26 @@ void TileMap::LoadNewMap() {
         Camera::GetInstance()->SetLevelDimension(GetWidth() * 32, GetHeight() * 32);
     }
 
+    if (m_mapNumber >= 3) {
+        portalLeft = m_gsPlay->GetFinalGatePos().x;
+        portalRight = portalLeft + m_gsPlay->GetGateSize().x;
+        portalTop = m_gsPlay->GetFinalGatePos().y;
+        portalBottom = portalTop + m_gsPlay->GetGateSize().y;
 
-    portalLeft = m_gsPlay->GetGatePos().x;
-    portalRight = portalLeft + m_gsPlay->GetGateSize().x;
-    portalTop = m_gsPlay->GetGatePos().y;
-    portalBottom = portalTop + m_gsPlay->GetGateSize().y;
+        if (m_mapNumber == 3) {
+            secretPortalLeft = m_gsPlay->GetFinalSecretGatePos().x;
+            secretPortalRight = secretPortalLeft + m_gsPlay->GetSecretGateSize().x;
+            secretPortalTop = m_gsPlay->GetFinalSecretGatePos().y;
+            secretPortalBottom = secretPortalTop + m_gsPlay->GetSecretGateSize().y;
+        }
+    }
+
+    else {
+        portalLeft = m_gsPlay->GetGatePos().x;
+        portalRight = portalLeft + m_gsPlay->GetGateSize().x;
+        portalTop = m_gsPlay->GetGatePos().y;
+        portalBottom = portalTop + m_gsPlay->GetGateSize().y;
+    }
 
 
     shopLeft = m_gsPlay->GetShopPos().x;
@@ -152,6 +167,8 @@ void TileMap::LoadNewMap() {
 
 
     completeLoading = true;
+    playerIsAppear = true;
+    if (playerIsAppear) printf("OKE\t");
 }
 #pragma endregion
 
@@ -194,6 +211,7 @@ void TileMap::StartCheckingPlayerMovementAbility() {
 
 
         while (m_isPlaying) {
+            m_gsPlay->playerIsAppear = playerIsAppear;
             shopIndicatorPosition.x = shopIndicatorPositionX - Camera::GetInstance()->GetPosition().x;
             shopIndicatorPosition.y = shopIndicatorPositionY - Camera::GetInstance()->GetPosition().y;
 
@@ -204,10 +222,19 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             // check if player REACHES PORTAL:
             if (playerRight >= portalLeft + 10 && player.x <= portalRight && player.y <= portalBottom && playerBottom >= portalTop) {
                 if (m_mapNumber == 3) {
-                    //if (m_gsPlay->GetLevel)
-                    victoryCode = 1;
+                    if (m_player->GetLevel3State()) victoryCode = 1;
                 }
-                else *m_timeScale = -1;
+                else {
+                    if (m_mapNumber == 4) { if (m_player->GetSecretLevelState()) victoryCode = 2; }
+                    else *m_timeScale = -1;
+                }
+            }
+
+            if (m_mapNumber == 3 && m_player->GetLevel3State()) {
+                if (playerRight >= secretPortalLeft + 10 && player.x <= secretPortalRight &&
+                    player.y <= secretPortalBottom && playerBottom >= secretPortalTop) {
+                    *m_timeScale = -1;
+                }
             }
 
             // check if player REACHES SHOP:

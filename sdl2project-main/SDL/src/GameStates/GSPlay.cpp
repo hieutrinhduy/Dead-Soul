@@ -327,7 +327,7 @@ void GSPlay::Draw(SDL_Renderer* renderer)
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-    m_playerController->Draw(renderer);
+    if (playerIsAppear) m_playerController->Draw(renderer);
     // draw UI:
     m_uiManager->Draw(renderer);
 }
