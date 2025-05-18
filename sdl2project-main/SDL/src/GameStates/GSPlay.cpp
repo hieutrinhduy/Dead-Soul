@@ -214,7 +214,6 @@ void GSPlay::Update(float deltaTime)
         bullet->Update(deltaTime);
 
         bool hit = false;
-        std::cout << enemyColliders.size() << std::endl;
         for (size_t j = 0; j < enemyColliders.size(); ++j)
         {
             if (bullet->HasHitEnemy(enemyColliders[j]))

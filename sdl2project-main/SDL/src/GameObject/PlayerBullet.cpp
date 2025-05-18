@@ -15,7 +15,6 @@ PlayerBullet::PlayerBullet(Vector2 position, float speed, int direction, int dam
 
     m_collider = { (int)position.x, (int)position.y, 128, 128 };
 
-    std::cout << "New Bullet" << std::endl; 
     m_damage = 10;
 }
 
@@ -72,7 +71,6 @@ bool PlayerBullet::HasHitEnemy(const SDL_Rect* enemyCollider)
 {
 
     if (!enemyCollider || m_destroyed) {
-        std::cout << "dont have enemyCollider" << std::endl;
         return false;
     } 
 

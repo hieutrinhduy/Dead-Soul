@@ -42,8 +42,6 @@ void RangedEnemy::TakeDamage(int damage, int knockbackDir)
 {
     if (m_isDead) return;
 
-    std::cout << "[EnemyController] Bị trúng đòn: -" << damage << " HP\n";
-
     m_currentHP -= damage;
     float hpPercent = std::clamp((float)m_currentHP / m_maxHP, 0.0f, 1.0f);
     m_hpBarFill.w = static_cast<int>(m_barWidth * hpPercent);
@@ -51,7 +49,6 @@ void RangedEnemy::TakeDamage(int damage, int knockbackDir)
     m_state = RangedEnemyState::Patrol;
     if (m_currentHP <= 0) {
         m_currentHP = 0;
-        std::cout << "[EnemyController] ĐÃ CHẾT\n";
         Die();
     }
     else {
