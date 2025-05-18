@@ -7,6 +7,7 @@
 #include "GhostWarriorRed.h"
 #include "RangedEnemy.h"
 #include "PlayerBullet.h"
+#include "Sound.h"
 
 constexpr int PLAYER_SIZE = 150, PLAYER_STARTING_POSITION_X = 200, PLAYER_STARTING_POSITION_Y = 100; // sprite size, measure unit: screen pixel
 constexpr float COLLIDER_X = 0.35f, COLLIDER_Y = 0.1f, COLLIDER_W = 0.24f, COLLIDER_H = 0.9f;      // collider : sprite_size ratio
@@ -79,6 +80,12 @@ void PlayerController::Init()
     // set CAMERA'S TARGET:
     Camera::GetInstance()->SetTarget(m_player);
 
+    Sound::GetInstance()->LoadSfx("sfx_sword_attack_1.wav");
+    Sound::GetInstance()->LoadSfx("sfx_sword_attack_2.wav");
+    Sound::GetInstance()->LoadSfx("sfx_sword_attack_3.wav");
+    Sound::GetInstance()->LoadSfx("sfx_jump.wav");
+    Sound::GetInstance()->LoadSfx("sfx_is_hit.wav");
+    Sound::GetInstance()->LoadSfx("sfx_die.wav");
 }
 
 

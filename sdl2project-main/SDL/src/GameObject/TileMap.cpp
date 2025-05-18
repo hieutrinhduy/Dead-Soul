@@ -203,7 +203,10 @@ void TileMap::StartCheckingPlayerMovementAbility() {
 
             // check if player REACHES PORTAL:
             if (playerRight >= portalLeft + 10 && player.x <= portalRight && player.y <= portalBottom && playerBottom >= portalTop) {
-                if (m_mapNumber == 3) victoryCode = 1;
+                if (m_mapNumber == 3) {
+                    //if (m_gsPlay->GetLevel)
+                    victoryCode = 1;
+                }
                 else *m_timeScale = -1;
             }
 
@@ -327,7 +330,7 @@ void TileMap::StartCheckingPlayerMovementAbility() {
             }
             #pragma endregion
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(12));
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
         m_finishThread = true;
     });

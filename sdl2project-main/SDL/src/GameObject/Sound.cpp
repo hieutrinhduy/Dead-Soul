@@ -35,11 +35,11 @@ bool Sound::Init()
 
 void Sound::PlaySound(const std::string& name)
 {
-    /*auto it = m_Sounds.find(name);
+    auto it = m_Sounds.find(name);
     if (it != m_Sounds.end())
     {
         m_Music = it->second;
-    }*/
+    }
 
 
     //Play the music

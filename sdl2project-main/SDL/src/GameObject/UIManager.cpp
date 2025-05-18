@@ -115,6 +115,7 @@ UIManager::UIManager(std::shared_ptr<int> timeScale) :
 	txtLoading->SetSize(LOADING_TEXT_WIDTH, LOADING_TEXT_HEIGHT);
 	txtLoading->Set2DPosition( (SCREEN_WIDTH - LOADING_TEXT_WIDTH) / 2.0f, SCREEN_HEIDHT - LOADING_TEXT_HEIGHT - 75 );
 	#pragma endregion
+	this->Draw(m_renderer);
 
 	m_inventorySlot = 0;
 	
@@ -692,7 +693,8 @@ void UIManager::UpdateStats() {
 	std::thread t([this]() {
 		int x, y; // mouse coordination
 		int musicVolume, sfxVolume;
-		float refillSpTime = 0.1f, spRefilled = 1.0f, refillMpTime = 1.5f, mpRefilled = 5;
+		int sleepTime = 8;
+		int refillSpTime = 100, spRefilled = 1, refillMpTime = 1500, mpRefilled = 5;
 		int hpStolenTimer = 0, mpStolenTimer = 0;
 
 		while (m_isPlaying) {
@@ -709,7 +711,7 @@ void UIManager::UpdateStats() {
 
 				if (m_tileMap->victoryCode == 1) statusCode = 1;
 				else if (m_tileMap->victoryCode == 2) statusCode = 2;
-				printf("%d\n", m_tileMap->victoryCode);
+				//printf("%d\n", m_tileMap->victoryCode);
 				// check if player is hovering an UI element:
 				SDL_GetMouseState(&x, &y);
 				if (statusCode == 0) {
@@ -779,10 +781,10 @@ void UIManager::UpdateStats() {
 					spChangePerFrame = spLoss / FRAGMENT_COUNT;
 				}
 
-				spTimer += 0.01f;
+				spTimer += sleepTime;
 				if (spTimer >= refillSpTime) {
 					spTimer = 0;
-					sp += 1;
+					sp += spRefilled;
 					if (sp >= maxSP) sp = maxSP;
 				}
 				if (sp - lossAmount < 30 ) m_playerController->SetCanRollState(false);
@@ -805,7 +807,7 @@ void UIManager::UpdateStats() {
 					mpChangePerFrame = mpLoss / FRAGMENT_COUNT;
 				}
 
-				mpTimer += 0.01f;
+				mpTimer += sleepTime;
 				if (mpTimer >= refillMpTime) {
 					mpTimer = 0;
 					mp += mpRefilled;
@@ -869,15 +871,15 @@ void UIManager::UpdateStats() {
 				#pragma endregion
 
 				if (hpStolenTimer > 0) {
-					hpStolenTimer -= 10;
+					hpStolenTimer -= sleepTime;
 					if (hpStolenTimer <= 0) stoleHP = false;
 				}
 				if (mpStolenTimer > 0) {
-					mpStolenTimer -= 10;
+					mpStolenTimer -= sleepTime;
 					if (mpStolenTimer <= 0) stoleMP = false;
 				}
 
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
 			}
 
 
@@ -1021,7 +1023,7 @@ void UIManager::UpdateStats() {
 						}
 						else if (selection == 2) {
 							maxSP += 5;
-							spRefilled += 0.1f;
+							spRefilled += 1;
 							maxMP += 10;
 							mpRefilled += 5;
 						}
@@ -1035,6 +1037,7 @@ void UIManager::UpdateStats() {
 							selection = 0;
 							hoverBorder->Set2DPosition(SCREEN_WIDTH, 0);
 							selectionBorder->Set2DPosition(SCREEN_WIDTH, 0);
+							underline->Set2DPosition(SCREEN_WIDTH, 0);
 							confirmButton->Set2DPosition(SCREEN_WIDTH, 0);
 							*m_timeScale = 1;
 						}
