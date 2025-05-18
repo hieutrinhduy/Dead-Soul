@@ -42,8 +42,6 @@ public:
     void ClearThread();
     bool m_finishThread;
 
-    void ExportFullMapImage(SDL_Renderer* renderer);
-
     bool completeLoading;
     bool atShop = false;
     int victoryCode = 0;

@@ -87,8 +87,6 @@ void GSPlay::Init()
         });
 
     DisplayLoadingView();
-
-    //m_tileMap->ExportFullMapImage(Renderer::GetInstance()->GetRenderer());
 }
 
 void GSPlay::Exit() {
