@@ -68,6 +68,8 @@ void GSPlay::Init()
     );
     m_playerController = std::make_shared<PlayerController>();
     m_playerController->Init();
+    m_playerController->SetSecretLevelState(false);
+    m_playerController->SetLevel3State(false);
 
     m_currentLevel = LevelID::Level1;
     m_level1 = std::make_shared<Level1>(m_playerController);
@@ -369,6 +371,9 @@ void GSPlay::ChangeLevel(LevelID newLevel)
 
     m_hitEnemyCallbacks.clear();
     enemyColliders.clear();
+
+    m_playerController->SetSecretLevelState(false);
+    m_playerController->SetLevel3State(false);
 
     // Tạo level mới
     m_currentLevel = newLevel;

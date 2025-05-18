@@ -35,6 +35,9 @@ public:
     Vector2 GetPlayerPosition() const { return m_player->Get2DPosition(); };
     bool GetVictorState() const { return m_isVictory; };
 
+    bool GetLevel3State() const { return m_doneLevel3; };
+    bool GetSecretLevelState() const { return m_doneSecretLevel; };
+
     // get player's stats data:
     int GetHpLose() {
         std::lock_guard<std::mutex> lock(mtx);
@@ -83,6 +86,16 @@ public:
         leftLimit = left; rightLimit = right;
         topLimit = top; bottomLimit = bottom;
     };
+
+    void SetLevel3State(bool doneLevel3) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_doneLevel3 = doneLevel3;
+    }
+
+    void SetSecretLevelState(bool doneSecretLevel) {
+        std::lock_guard<std::mutex> lock(mtx);
+        m_doneSecretLevel = doneSecretLevel;
+    }
 
     // set player status:
     void SetMpStatus(bool enoughMp) {
@@ -311,6 +324,9 @@ private:
 
     //Check Victory
     bool m_isVictory = false;
+
+    bool m_doneLevel3 = false;
+    bool m_doneSecretLevel = false;
 
     void ShootProjectile();
     void ChangeAnimation(std::shared_ptr<TextureManager> texture, int frameCount, float frameTime);

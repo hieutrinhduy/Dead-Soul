@@ -92,6 +92,7 @@ void SecretLevel::Update(float dt)
         m_isWaitingAtGate = false;
         m_isReturningToPlayer = false;
         m_cameraWaitTimer = 0.0f;
+        m_playerController->SetSecretLevelState(true);
     }
 
     // === 2. Khi camera đã đến gate, bắt đầu đếm thời gian chờ 2s ===

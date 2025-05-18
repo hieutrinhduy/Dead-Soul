@@ -22,7 +22,6 @@ Level3::Level3(std::shared_ptr<PlayerController> player)
     for (auto& bg : m_backgroundList) {
         bg->SetSize(SCREEN_WIDTH, SCREEN_HEIDHT);
         bg->Set2DPosition(0, 0);
-
     }
 
     auto level3Decor = ResourceManagers::GetInstance()->GetTexture("decorations/Level3Decor.png");
@@ -73,6 +72,7 @@ Level3::Level3(std::shared_ptr<PlayerController> player)
         m_isWaitingAtGate = false;
         m_isReturningToPlayer = false;
         m_cameraWaitTimer = 0.0f;
+        m_playerController->SetLevel3State(true);
         });
 }
 
